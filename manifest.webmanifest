@@ -1,0 +1,17 @@
+{
+  "name": "Dr. Mrinal | Duty App",
+  "short_name": "Duty App",
+  "description": "Daily duty roster for Ashwin 2083 — PICU, OPD, ER, and 24-hour shift schedules.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fcfbfa",
+  "theme_color": "#f1f5f9",
+  "lang": "en",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
