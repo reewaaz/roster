@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Duty App</title>
+  <meta name="theme-color" content="#f1f5f9">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='24'%20fill='%23f1f5f9'/%3E%3Ccircle%20cx='50'%20cy='50'%20r='34'%20fill='white'/%3E%3Ctext%20x='50'%20y='58'%20font-size='46'%20text-anchor='middle'%3E%F0%9F%A9%BA%3C/text%3E%3C/svg%3E">
+  <title>Dr. Mrinal | Duty App</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@500;700;800;900&display=swap');
 
@@ -55,7 +57,7 @@
 
     /* View Container */
     .view-container { 
-      flex: 1; position: relative; overflow: hidden; padding: 16px 16px 88px; 
+      flex: 1; position: relative; overflow: hidden; padding: 16px 16px calc(84px + env(safe-area-inset-bottom)); 
       display: flex; flex-direction: column; min-height: 0;
       touch-action: manipulation;
     }
@@ -68,12 +70,17 @@
     .tab-content.active { display: flex; opacity: 1; transform: translateY(0); }
 
     /* DAILY VIEW STYLES */
-    #view-daily { display: none; flex-direction: column; justify-content: space-between; }
+    #view-daily { display: none; flex-direction: column; position: relative; }
     #view-daily.active { display: flex; }
+
+    /* Today Pill */
+    .today-pill { position: absolute; top: 16px; right: 16px; z-index: 15; background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); cursor: pointer; opacity: 0; transform: translateY(-6px) scale(0.9); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); -webkit-tap-highlight-color: transparent; }
+    .today-pill.visible { opacity: 1; transform: none; pointer-events: auto; }
+    .today-pill:active { transform: scale(0.94); }
 
     #daily-render-area {
       width: 100%; display: flex; flex-direction: column;
-      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
       scroll-padding-bottom: 16px;
     }
     #daily-render-area::-webkit-scrollbar { display: none; }
@@ -125,14 +132,9 @@
     .card-note-badge { display: inline-flex; align-items: center; gap: 5px; background: #0f172a; color: white; padding: 5px 10px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); margin-top: 4px; }
     .daily-note { padding: 12px 14px; background: rgba(254, 249, 195, 0.95); border-radius: 16px; border: 2px dashed #fde047; font-size: 14px; font-weight: 800; color: #713f12; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
 
-    /* Controls */
-    .controls { width: 100%; display: flex; justify-content: space-between; align-items: center; background: transparent; z-index: 5; padding: 14px 0; flex-shrink: 0; }
-    .btn { background: white; border: 1px solid #e2e8f0; padding: 13px 22px; border-radius: 18px; font-size: 15px; font-weight: 900; color: var(--text-main); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: 'Nunito', sans-serif; }
-    .btn:active { transform: scale(0.92); }
-    .btn-today { background: var(--accent); color: white; border: none; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3); }
-
     /* MONTH VIEW STYLES */
-    #view-month { overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; }
+    #view-month { overflow-y: auto; scrollbar-width: none; }
+    #view-month.active { display: flex; flex-direction: column; }
     #view-month::-webkit-scrollbar { display: none; }
     
     .calendar-wrapper { background: white; border-radius: 28px; padding: 16px 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; flex-direction: column; }
@@ -197,8 +199,8 @@
       .title { font-size: 20px; }
       .card.today { padding: 16px 14px; gap: 10px; border-radius: 22px; }
       .date-num { font-size: 24px; }
-      .btn { padding: 10px 16px; font-size: 14px; border-radius: 14px; }
       .duty-row { padding: 9px 12px; }
+      .today-pill { top: 14px; right: 14px; padding: 8px 14px; font-size: 12px; }
     }
     /* Responsive: narrow screens */
     @media (max-width: 350px) {
@@ -207,8 +209,7 @@
       .duty-row { font-size: 13px; padding: 8px 10px; }
       .duty-v { font-size: 13px; }
       .second-call-name { font-size: 14px; }
-      .btn { padding: 9px 12px; font-size: 13px; }
-      .controls { gap: 8px; }
+      .today-pill { right: 12px; }
     }
   </style>
 </head>
@@ -224,12 +225,8 @@
       
       <!-- DAILY VIEW -->
       <div id="view-daily" class="tab-content active">
+        <button id="today-pill" class="today-pill" onclick="goToday()"><span style="font-size:12px;">●</span> Today</button>
         <div id="daily-render-area"></div>
-        <div class="controls">
-          <button class="btn" onclick="changeDay(-1)">❮ Prev</button>
-          <button class="btn btn-today" onclick="goToday()">Today</button>
-          <button class="btn" onclick="changeDay(1)">Next ❯</button>
-        </div>
       </div>
 
       <!-- MONTH VIEW -->
@@ -519,11 +516,13 @@
     }
 
     function changeDay(step) {
-      triggerHaptic(30);
       const newIndex = currentIndex + step;
       if(newIndex >= 0 && newIndex < roster.length) {
         currentIndex = newIndex;
+        triggerHaptic(30);
         renderDailyView();
+      } else {
+        triggerHaptic(12);
       }
     }
     
@@ -539,6 +538,15 @@
       currentIndex = parseInt(index);
       switchTab('daily');
     }
+
+    function updateTodayPill() {
+      const pill = document.getElementById('today-pill');
+      if (!pill) return;
+      const show = currentIndex !== realTodayIndex;
+      if (pill.classList.contains('visible') !== show) {
+        pill.classList.toggle('visible', show);
+      }
+    }
     
     function switchTab(tabId) {
       triggerHaptic(30);
@@ -550,6 +558,7 @@
       
       if(tabId === 'daily') {
         renderDailyView();
+        updateTodayPill();
       }
       if(tabId === 'month') {
         setTimeout(() => {
@@ -597,6 +606,7 @@
     renderDailyView();
     renderMonthView();
     initSwipeGestures();
+    updateTodayPill();
   </script>
 </body>
 </html>
