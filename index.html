@@ -149,8 +149,9 @@
     .cal-header span { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
     
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-content: start; }
-    .cal-cell { min-height: 68px; padding: 6px 2px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; position: relative; user-select: none; -webkit-user-select: none; }
-    .cal-cell:active { transform: scale(0.92); }
+    .cal-cell { min-height: 68px; padding: 6px 2px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; position: relative; user-select: none; -webkit-user-select: none; }
+    .cal-cell:active { transform: scale(0.94); }
+    .cal-cell.pressed { transform: scale(0.94); box-shadow: inset 0 3px 10px rgba(0,0,0,0.12); }
     .cal-cell.empty { background: transparent; cursor: default; }
     .cal-cell .cal-date { font-size: 20px; font-weight: 900; }
     
@@ -215,11 +216,11 @@
     @keyframes slideUp  { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
 
     /* Header entrance */
-    .greeting { animation: fadeDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
-    .title    { animation: fadeDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.06s; }
+    .greeting { animation: fadeDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+    .title    { animation: fadeDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: 0.06s; }
 
     /* Card children stagger */
-    .card.today > *            { animation: fadeUp 0.48s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .card.today > *            { animation: fadeUp 0.48s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
     .card.today > *:nth-child(1) { animation-delay: 0.03s; }
     .card.today > *:nth-child(2) { animation-delay: 0.10s; }
     .card.today > *:nth-child(3) { animation-delay: 0.17s; }
@@ -244,7 +245,7 @@
     .second-call:active { transform: scale(0.985); }
 
     /* Badge pop on mount */
-    .badge { animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: 0.05s; }
+    .badge { animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: 0.05s; }
 
     /* Note badge breathe */
     .card-note-badge { animation: breathe 2.4s ease-in-out 0.6s infinite; }
@@ -253,13 +254,13 @@
     .today-pill.visible .pill-dot { animation: ringPulse 1.8s ease-out infinite; }
 
     /* Bottom nav active bounce */
-    .nav-item.active { animation: popScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    .nav-item.active { animation: popScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
 
     /* Calendar cell grid entrance */
-    #view-month.active .cal-cell { animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    #view-month.active .cal-cell { animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 
     /* Note modal */
-    .modal-card { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: 0.05s; }
+    .modal-card { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: 0.05s; }
 
     /* ---- / ANIMATIONS ---- */
 
@@ -295,11 +296,12 @@
       <div class="title">🍼 Dr. Mrinal <span style="font-size: 20px;">🩺</span></div>
     </header>
 
+    <button id="today-pill" class="today-pill" onclick="goToday()"><span class="pill-dot" style="font-size:12px;">●</span> Today</button>
+
     <div class="view-container">
       
       <!-- DAILY VIEW -->
       <div id="view-daily" class="tab-content active">
-        <button id="today-pill" class="today-pill" onclick="goToday()"><span class="pill-dot" style="font-size:12px;">●</span> Today</button>
         <div id="daily-render-area"></div>
       </div>
 
@@ -528,6 +530,7 @@
         const startPress = (e) => {
           isLongPress = false;
           if (e.type === 'contextmenu') e.preventDefault();
+          cell.classList.add('pressed');
           const touch = e.touches ? e.touches[0] : e;
           startX = touch.clientX;
           startY = touch.clientY;
@@ -545,10 +548,12 @@
           if (Math.abs(touch.clientX - startX) > 10 || Math.abs(touch.clientY - startY) > 10) {
             clearTimeout(pressTimer);
             pressTimer = null;
+            cell.classList.remove('pressed');
           }
         };
 
         const endPress = () => {
+          cell.classList.remove('pressed');
           if (pressTimer) {
             clearTimeout(pressTimer);
             pressTimer = null;
@@ -622,7 +627,8 @@
     function updateTodayPill() {
       const pill = document.getElementById('today-pill');
       if (!pill) return;
-      const show = currentIndex !== realTodayIndex;
+      const dailyActive = document.getElementById('view-daily').classList.contains('active');
+      const show = dailyActive && currentIndex !== realTodayIndex;
       if (pill.classList.contains('visible') !== show) {
         pill.classList.toggle('visible', show);
       }
@@ -641,39 +647,84 @@
         updateTodayPill();
       }
       if(tabId === 'month') {
-        setTimeout(() => {
-          const todayCell = document.querySelector('.cal-cell.is-today');
-          if (todayCell) todayCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        }, 120);
+        document.getElementById('today-pill').classList.remove('visible');
+        if (document.querySelector('.cal-cell.is-today')) {
+          setTimeout(() => {
+            const todayCell = document.querySelector('.cal-cell.is-today');
+            if (todayCell) todayCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }, 120);
+        }
       }
     }
 
     function initSwipeGestures() {
       const view = document.getElementById('view-daily');
-      let startX = 0;
-      let startY = 0;
-      let tracking = false;
+      const area = document.getElementById('daily-render-area');
+      let startX = 0, startY = 0, axisLocked = null, tracking = false;
 
-      view.addEventListener('pointerdown', (e) => {
-        tracking = true;
-        startX = e.clientX;
-        startY = e.clientY;
+      view.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        startX = t.clientX; startY = t.clientY;
+        tracking = true; axisLocked = null;
       }, { passive: true });
 
-      view.addEventListener('pointermove', (e) => {
+      view.addEventListener('touchmove', (e) => {
         if (!tracking) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        if (Math.abs(dx) > 40 && Math.abs(dy) < 70) {
-          tracking = false;
-          if (dx < 0) { changeDay(1); }
-          else { changeDay(-1); }
+        const t = e.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (!axisLocked) {
+          if (Math.abs(dx) > 12 || Math.abs(dy) > 12)
+            axisLocked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        }
+        if (axisLocked === 'x') {
+          area.style.transform = 'translateX(' + (dx * 0.45) + 'px) scale(0.98)';
+          area.style.transition = 'none';
+          area.style.opacity = 1 - Math.abs(dx) / 500;
         }
       }, { passive: true });
 
-      const endSwipe = () => { tracking = false; };
-      view.addEventListener('pointerup', endSwipe, { passive: true });
-      view.addEventListener('pointercancel', endSwipe, { passive: true });
+      const endSwipe = (e) => {
+        if (!tracking) return;
+        tracking = false;
+        area.style.transform = '';
+        area.style.transition = '';
+        area.style.opacity = '';
+        const t = e.changedTouches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        if (axisLocked === 'x' && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+          if (dx < 0) changeDay(1);
+          else changeDay(-1);
+        }
+      };
+      view.addEventListener('touchend', endSwipe, { passive: true });
+      view.addEventListener('touchcancel', endSwipe, { passive: true });
+    }
+
+    function initCardLongPress() {
+      const area = document.getElementById('daily-render-area');
+      let timer = null, sx = 0, sy = 0;
+
+      const start = (e) => {
+        const t = e.touches ? e.touches[0] : e;
+        sx = t.clientX; sy = t.clientY;
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => { timer = null; triggerHaptic(50); openNoteModal(roster[currentIndex].date); }, 400);
+      };
+      const move = (e) => {
+        if (!timer) return;
+        const t = e.touches ? e.touches[0] : e;
+        if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) { clearTimeout(timer); timer = null; }
+      };
+      const end = () => { if (timer) { clearTimeout(timer); timer = null; } };
+      area.addEventListener('touchstart', start, { passive: true });
+      area.addEventListener('touchmove', move, { passive: true });
+      area.addEventListener('touchend', end, { passive: true });
+      area.addEventListener('touchcancel', end, { passive: true });
+      area.addEventListener('mousedown', start);
+      area.addEventListener('mousemove', move);
+      area.addEventListener('mouseup', end);
     }
 
     function markPillOverflow() {
@@ -687,6 +738,7 @@
     renderDailyView();
     renderMonthView();
     initSwipeGestures();
+    initCardLongPress();
     updateTodayPill();
 
     if ('serviceWorker' in navigator) {
