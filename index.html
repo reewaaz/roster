@@ -15,7 +15,7 @@
       --nav-bg: rgba(255, 255, 255, 0.9);
       --accent: #0284c7;
       
-      /* Your Requested Color Palette */
+      /* Color Palette */
       --picu-day-bg: #f3e8ff; --picu-day-txt: #7e22ce;
       --picu-24-bg: #ffe4e6; --picu-24-txt: #e11d48;
       --opd-bg: #e0f2fe; --opd-txt: #0284c7;
@@ -43,19 +43,19 @@
 
     /* Fixed Header */
     header { 
-      padding: 55px 24px 20px; 
+      padding: 40px 20px 14px; 
       background: var(--header-bg);
-      border-bottom-left-radius: 32px;
-      border-bottom-right-radius: 32px;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
       flex-shrink: 0; 
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
     }
-    .greeting { font-family: 'Inter', sans-serif; font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-    .title { font-size: 26px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+    .greeting { font-family: 'Inter', sans-serif; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .title { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
 
     /* View Container */
     .view-container { 
-      flex: 1; position: relative; overflow: hidden; padding: 16px 20px 90px; 
+      flex: 1; position: relative; overflow: hidden; padding: 12px 16px 76px; 
       display: flex; flex-direction: column; min-height: 0;
     }
     
@@ -71,53 +71,54 @@
     #view-daily.active { display: flex; }
 
     #daily-render-area {
-      flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 12px; scrollbar-width: none;
+      flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 8px; scrollbar-width: none;
     }
     #daily-render-area::-webkit-scrollbar { display: none; }
 
-    .card { background: white; border-radius: 32px; padding: 24px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 2px solid transparent; }
-    .card.today { border-color: rgba(2, 132, 199, 0.2); box-shadow: 0 16px 40px rgba(0,0,0,0.06); }
-    .card.tomorrow { opacity: 0.85; transform: scale(0.97); margin-top: -8px; padding: 20px 24px; border-radius: 28px; }
+    .card { background: white; border-radius: 24px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); border: 2px solid transparent; }
+    .card.today { border-color: rgba(2, 132, 199, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .card.tomorrow { opacity: 0.9; transform: scale(0.99); margin-top: -2px; padding: 16px 22px; border-radius: 22px; }
     
-    .card-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-    .date-num { font-size: 26px; font-weight: 800; color: var(--text-main); display: block; line-height: 1.1; }
-    .day-name { font-size: 15px; color: var(--text-muted); font-weight: 700; }
+    .card-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .date-num { font-size: 20px; font-weight: 800; color: var(--text-main); display: block; line-height: 1.1; }
+    .day-name { font-size: 13px; color: var(--text-muted); font-weight: 700; }
     
-    .badge { padding: 8px 16px; border-radius: 16px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge { padding: 6px 12px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     
-    .team-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
-    .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill { background: #f8fafc; color: #475569; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 700; border: 1px solid #e2e8f0; }
+    .team-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; max-height: 85px; overflow-y: auto; scrollbar-width: none; }
+    .pills::-webkit-scrollbar { display: none; }
+    .pill { background: #f8fafc; color: #475569; padding: 4px 10px; border-radius: 14px; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; }
     
-    .second-call { margin-top: 16px; padding: 14px 18px; background: #f1f5f9; border-radius: 20px; display: inline-flex; align-items: center; gap: 10px; }
-    .second-call-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
-    .second-call-name { font-size: 14px; font-weight: 800; color: #334155; }
+    .second-call { margin-top: 10px; padding: 8px 12px; background: #f1f5f9; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; }
+    .second-call-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+    .second-call-name { font-size: 13px; font-weight: 800; color: #334155; }
 
-    .daily-note { margin-top: 16px; padding: 14px 18px; background: #fef9c3; border-radius: 20px; border: 2px dashed #fde047; display: flex; gap: 10px; font-size: 14px; font-weight: 700; color: #854d0e; }
+    .daily-note { margin-top: 10px; padding: 10px 14px; background: #fef9c3; border-radius: 14px; border: 2px dashed #fde047; display: flex; gap: 8px; font-size: 13px; font-weight: 700; color: #854d0e; }
 
     /* Controls permanently at the bottom */
-    .controls { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 10px 0 4px 0; background: transparent; z-index: 5; }
-    .btn { background: white; border: 1px solid #e2e8f0; padding: 14px 22px; border-radius: 20px; font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: 'Nunito', sans-serif; }
+    .controls { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 6px 0 2px 0; background: transparent; z-index: 5; }
+    .btn { background: white; border: 1px solid #e2e8f0; padding: 12px 18px; border-radius: 16px; font-size: 14px; font-weight: 800; color: var(--text-main); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: 'Nunito', sans-serif; }
     .btn:active { transform: scale(0.92); }
-    .btn-today { background: var(--accent); color: white; border: none; box-shadow: 0 6px 20px rgba(2, 132, 199, 0.3); }
+    .btn-today { background: var(--accent); color: white; border: none; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3); }
 
     /* MONTH VIEW STYLES */
     #view-month { overflow-y: auto; scrollbar-width: none; }
     #view-month::-webkit-scrollbar { display: none; }
     
-    .calendar-wrapper { background: white; border-radius: 32px; padding: 16px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
-    .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 12px; }
-    .cal-header span { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+    .calendar-wrapper { background: white; border-radius: 28px; padding: 14px 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+    .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 10px; }
+    .cal-header span { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
     
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .cal-cell { height: 64px; padding: 8px 2px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; position: relative; user-select: none; -webkit-user-select: none; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-cell { height: 58px; padding: 6px 2px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; position: relative; user-select: none; -webkit-user-select: none; }
     .cal-cell:active { transform: scale(0.9); }
     .cal-cell.empty { background: transparent; cursor: default; }
-    .cal-cell .cal-date { font-size: 16px; font-weight: 800; }
-    .cal-cell .cal-type { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 4px; text-align: center; line-height: 1; }
+    .cal-cell .cal-date { font-size: 15px; font-weight: 800; }
+    .cal-cell .cal-type { font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 800; text-transform: uppercase; margin-top: 2px; text-align: center; line-height: 1; }
     
-    .note-indicator { position: absolute; top: 4px; right: 4px; font-size: 10px; display: none; }
+    .note-indicator { position: absolute; top: 3px; right: 3px; font-size: 9px; display: none; }
     .has-note .note-indicator { display: block; }
 
     /* Duty Pastel Color Mappings */
@@ -131,20 +132,20 @@
     .cal-cell.type-off { border: 2px dashed #86efac; background: #f0fdf4; }
 
     /* BOTTOM NAV */
-    .bottom-nav { position: absolute; bottom: calc(15px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 28px; display: flex; padding: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 85%; max-width: 300px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
-    .nav-item { flex: 1; text-align: center; padding: 12px 0; border-radius: 20px; font-size: 15px; font-weight: 800; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; }
-    .nav-item.active { background: white; color: var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+    .bottom-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 24px; display: flex; padding: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 80%; max-width: 280px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
+    .nav-item { flex: 1; text-align: center; padding: 10px 0; border-radius: 16px; font-size: 14px; font-weight: 800; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 6px; font-family: 'Nunito', sans-serif; }
+    .nav-item.active { background: white; color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
     /* NOTE MODAL */
-    .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: none; opacity: 0; transition: opacity 0.3s; justify-content: center; align-items: center; padding: 24px; }
+    .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: none; opacity: 0; transition: opacity 0.3s; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.show { display: flex; opacity: 1; }
-    .modal-card { background: white; width: 100%; max-width: 340px; border-radius: 32px; padding: 24px; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+    .modal-card { background: white; width: 100%; max-width: 320px; border-radius: 28px; padding: 20px; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
     .modal-overlay.show .modal-card { transform: scale(1); }
-    .modal-header { font-size: 18px; font-weight: 800; margin-bottom: 16px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
-    .modal-textarea { width: 100%; height: 120px; border: 2px solid #e2e8f0; border-radius: 20px; padding: 16px; font-size: 15px; font-family: 'Nunito', sans-serif; resize: none; margin-bottom: 16px; outline: none; transition: border 0.2s; }
+    .modal-header { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+    .modal-textarea { width: 100%; height: 100px; border: 2px solid #e2e8f0; border-radius: 16px; padding: 12px; font-size: 14px; font-family: 'Nunito', sans-serif; resize: none; margin-bottom: 12px; outline: none; transition: border 0.2s; }
     .modal-textarea:focus { border-color: var(--accent); }
-    .modal-actions { display: flex; gap: 12px; }
-    .modal-btn { flex: 1; padding: 14px; border-radius: 16px; font-size: 15px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Nunito', sans-serif;}
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn { flex: 1; padding: 12px; border-radius: 14px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Nunito', sans-serif;}
     .modal-btn:active { transform: scale(0.95); }
     .btn-cancel { background: #f1f5f9; color: #475569; }
     .btn-save { background: var(--accent); color: white; }
@@ -158,7 +159,7 @@
   <div class="app-container">
     <header>
       <div class="greeting" id="greetingText">Good Morning,</div>
-      <div class="title">🍼 Dr. Mrinal <span style="font-size: 20px;">🩺</span></div>
+      <div class="title">🍼 Dr. Mrinal <span style="font-size: 18px;">🩺</span></div>
     </header>
 
     <div class="view-container">
@@ -176,12 +177,12 @@
       <!-- MONTH VIEW -->
       <div id="view-month" class="tab-content">
         <div class="calendar-wrapper">
-          <div style="font-weight: 800; text-align: center; margin-bottom: 16px; color: #1e293b;">Ashwin 2083</div>
+          <div style="font-weight: 800; text-align: center; margin-bottom: 12px; color: #1e293b; font-size: 15px;">Ashwin 2083</div>
           <div class="cal-header">
             <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
           </div>
           <div class="cal-grid" id="calendar-grid"></div>
-          <div style="text-align: center; margin-top: 16px; font-size: 13px; color: #64748b; font-weight: 700;">
+          <div style="text-align: center; margin-top: 12px; font-size: 12px; color: #64748b; font-weight: 700;">
             💡 Tap date to open • Hold 300ms for note
           </div>
         </div>
@@ -215,16 +216,16 @@
   </div>
 
   <script>
-    // FULL ROSTER DATA
+    // OFFICIAL KIOCH ASHWIN 2083 ROSTER
     const roster = [
-      { date: '06-01', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Krishna (NICU), Aayush (PICU), Nischal (ER), Salina (Day ER)', second: 'Prerana' },
-      { date: '06-02', day: 'Fri', type: 'opd', title: 'OPD', team: 'Kabita, Madan, Pritha, Samikshya', second: '' },
+      { date: '06-01', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Krishna (NICU), Aayoush (PICU), Nischal (ER), Salina (Day ER)', second: 'Prerana' },
+      { date: '06-02', day: 'Fri', type: 'opd', title: 'OPD', team: 'Kabita, Madan, Mrinal, Pritha, Samikshya', second: '' },
       { date: '06-03', day: 'Sat', type: 'off', title: 'Saturday OFF', team: 'Public Holiday 🌿', second: '' },
       { date: '06-04', day: 'Sun', type: 'picu-24', title: '24hr PICU', team: 'Kshitiz (NICU), Pritha (ER), Samikshya (Day ER)', second: 'Saurav Stha' },
       { date: '06-05', day: 'Mon', type: 'post-off', title: 'Post Duty', team: 'Enjoy your rest!', second: '' },
-      { date: '06-06', day: 'Tue', type: 'opd', title: 'OPD', team: 'Devaki, Kshitiz, Shikha, Pritha', second: '' },
+      { date: '06-06', day: 'Tue', type: 'opd', title: 'OPD', team: 'Devaki, Kshitiz, Shikha, Pritha, Mrinal', second: '' },
       { date: '06-07', day: 'Wed', type: 'picu-day', title: 'PICU Day', team: 'Shikha (NICU), Srijana (PICU), Salina (ER), Sinda (Day ER)', second: 'Dilip' },
-      { date: '06-08', day: 'Thu', type: 'opd', title: 'OPD', team: 'Saurav Singh, Subas, Pritha, Kabita', second: '' },
+      { date: '06-08', day: 'Thu', type: 'opd', title: 'OPD', team: 'Saurav Singh, Subas, Pritha, Kabita, Mrinal', second: '' },
       { date: '06-09', day: 'Fri', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Aayoush (PICU), Samikshya (ER), Pritha (Day ER)', second: 'Saurav Singh' },
       { date: '06-10', day: 'Sat', type: 'picu-24', title: '24hr PICU', team: 'Subas (NICU), Nischal (ER)', second: 'Krishna' },
       { date: '06-11', day: 'Sun', type: 'post-off', title: 'Post Duty', team: 'Enjoy your rest!', second: '' },
@@ -232,11 +233,11 @@
       { date: '06-13', day: 'Tue', type: 'picu-24', title: '24hr PICU', team: 'Krishna (NICU), Samikshya (ER), Devaki (Day ER)', second: 'Pusp Raj' },
       { date: '06-14', day: 'Wed', type: 'post-off', title: 'Post Duty', team: 'Relax and unwind!', second: '' },
       { date: '06-15', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Devaki (PICU), Nischal (ER), Pritha (Day ER)', second: 'Prerana' },
-      { date: '06-16', day: 'Fri', type: 'opd', title: 'OPD', team: 'Subas, Aayoush, Deepmala, Kshitiz', second: '' },
+      { date: '06-16', day: 'Fri', type: 'opd', title: 'OPD', team: 'Subas, Mrinal, Aayoush, Deepmala, Kshitiz', second: '' },
       { date: '06-17', day: 'Sat', type: 'off', title: 'Saturday OFF', team: 'Public Holiday 🌿', second: '' },
       { date: '06-18', day: 'Sun', type: 'picu-day', title: 'PICU Day', team: 'Kshitiz (NICU), Srijana (PICU), Salina (ER), Subas (Day ER)', second: 'Saurav Stha' },
       { date: '06-19', day: 'Mon', type: 'er-day', title: 'Day ER', team: 'Saurav Stha (NICU), Aayoush (PICU), Deepmala (ER)', second: 'Krishna' },
-      { date: '06-20', day: 'Tue', type: 'opd', title: 'OPD', team: 'Salina, Subas, Kshitiz, Devaki', second: '' },
+      { date: '06-20', day: 'Tue', type: 'opd', title: 'OPD', team: 'Salina, Subas, Kshitiz, Devaki, Mrinal', second: '' },
       { date: '06-21', day: 'Wed', type: 'picu-day', title: 'PICU Day', team: 'Subas (NICU), Kabita (PICU), Samikshya (ER), Kshitiz (Day ER)', second: 'Dilip' },
       { date: '06-22', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Prerana (PICU), Sinda (ER), Srijana (Day ER)', second: 'Prerana' },
       { date: '06-23', day: 'Fri', type: 'picu-day', title: 'PICU Day', team: 'Subas (NICU), Devaki (PICU), Nischal (ER), Shikha (Day ER)', second: 'Saurav Singh' },
