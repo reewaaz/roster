@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Dr. Mrinal | Duty App</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Inter:wght@500;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@500;700;800;900&display=swap');
 
     :root {
       --bg: #fcfbfa;
@@ -21,7 +21,7 @@
       --opd-bg: #e0f2fe; --opd-txt: #0284c7;
       --er-day-bg: #ffedd5; --er-day-txt: #c2410c;
       --off-bg: #dcfce7; --off-txt: #15803d;
-      --post-off-bg: #f8fafc; --post-off-txt: #475569;
+      --post-off-bg: #f1f5f9; --post-off-txt: #475569;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -43,83 +43,110 @@
 
     /* Fixed Header */
     header { 
-      padding: 40px 20px 14px; 
+      padding: 36px 20px 16px; 
       background: var(--header-bg);
       border-bottom-left-radius: 28px;
       border-bottom-right-radius: 28px;
       flex-shrink: 0; 
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
     }
-    .greeting { font-family: 'Inter', sans-serif; font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-    .title { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+    .greeting { font-family: 'Inter', sans-serif; font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .title { font-size: 24px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
 
     /* View Container */
     .view-container { 
-      flex: 1; position: relative; overflow: hidden; padding: 12px 16px 76px; 
+      flex: 1; position: relative; overflow: hidden; padding: 16px 16px 88px; 
       display: flex; flex-direction: column; min-height: 0;
+      touch-action: manipulation;
     }
     
     .tab-content { 
       display: none; opacity: 0; transform: translateY(15px); 
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+      transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
       flex: 1; flex-direction: column; min-height: 0; 
     }
     .tab-content.active { display: flex; opacity: 1; transform: translateY(0); }
 
     /* DAILY VIEW STYLES */
-    #view-daily { display: none; flex-direction: column; }
+    #view-daily { display: none; flex-direction: column; justify-content: space-between; }
     #view-daily.active { display: flex; }
 
     #daily-render-area {
-      flex: 1; overflow-y: auto; min-height: 0; padding-bottom: 8px; scrollbar-width: none;
+      width: 100%; display: flex; flex-direction: column;
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      scroll-padding-bottom: 16px;
     }
     #daily-render-area::-webkit-scrollbar { display: none; }
 
-    .card { background: white; border-radius: 24px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); border: 2px solid transparent; }
-    .card.today { border-color: rgba(2, 132, 199, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-    .card.tomorrow { opacity: 0.9; transform: scale(0.99); margin-top: -2px; padding: 16px 22px; border-radius: 22px; }
+    /* Natural Card Layout */
+    .card.today { 
+      border-radius: 28px; 
+      padding: 22px 20px; 
+      width: 100%;
+      display: flex; 
+      flex-direction: column; 
+      gap: 14px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.06); 
+      transition: background 0.3s ease, border 0.3s ease;
+      user-select: none;
+    }
     
-    .card-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .date-num { font-size: 20px; font-weight: 800; color: var(--text-main); display: block; line-height: 1.1; }
-    .day-name { font-size: 13px; color: var(--text-muted); font-weight: 700; }
+    /* Card Background Color Variants */
+    .card.today.type-picu-day { background: var(--picu-day-bg); border: 2px solid rgba(126, 34, 206, 0.18); }
+    .card.today.type-picu-24 { background: var(--picu-24-bg); border: 2px solid rgba(225, 29, 72, 0.18); }
+    .card.today.type-opd { background: var(--opd-bg); border: 2px solid rgba(2, 132, 199, 0.18); }
+    .card.today.type-er-day { background: var(--er-day-bg); border: 2px solid rgba(194, 65, 12, 0.18); }
+    .card.today.type-off { background: var(--off-bg); border: 2px dashed #86efac; }
+    .card.today.type-post-off { background: var(--post-off-bg); border: 2px solid rgba(71, 85, 105, 0.18); }
+
+    .card-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; }
+    .date-num { font-size: 30px; font-weight: 900; color: var(--text-main); display: block; line-height: 1.1; }
+    .day-name { font-size: 15px; color: var(--text-muted); font-weight: 800; }
     
-    .badge { padding: 6px 12px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge { padding: 9px 15px; border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
     
-    .team-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-    .pills { display: flex; flex-wrap: wrap; gap: 6px; max-height: 85px; overflow-y: auto; scrollbar-width: none; }
+    .card-body-content { display: flex; flex-direction: column; gap: 10px; }
+    .team-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+    
+    .duty-list { display: flex; flex-direction: column; gap: 8px; }
+    .duty-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.92); padding: 11px 16px; border-radius: 16px; font-size: 15px; border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .duty-k { font-family: 'Inter', sans-serif; font-weight: 900; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+    .duty-v { font-weight: 800; color: var(--text-main); font-size: 15px; }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; scrollbar-width: none; padding: 2px 0; }
     .pills::-webkit-scrollbar { display: none; }
-    .pill { background: #f8fafc; color: #475569; padding: 4px 10px; border-radius: 14px; font-size: 12px; font-weight: 700; border: 1px solid #e2e8f0; }
+    .pill { background: rgba(255, 255, 255, 0.95); color: #1e293b; padding: 9px 14px; border-radius: 14px; font-size: 14px; font-weight: 800; border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
     
-    .second-call { margin-top: 10px; padding: 8px 12px; background: #f1f5f9; border-radius: 14px; display: inline-flex; align-items: center; gap: 8px; }
-    .second-call-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; }
-    .second-call-name { font-size: 13px; font-weight: 800; color: #334155; }
+    .second-call { padding: 11px 16px; background: rgba(0, 0, 0, 0.05); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.06); box-shadow: inset 0 1px 3px rgba(255,255,255,0.4); }
+    .second-call-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; }
+    .second-call-name { font-size: 16px; font-weight: 900; color: #0f172a; }
 
-    .daily-note { margin-top: 10px; padding: 10px 14px; background: #fef9c3; border-radius: 14px; border: 2px dashed #fde047; display: flex; gap: 8px; font-size: 13px; font-weight: 700; color: #854d0e; }
+    .card-note-badge { display: inline-flex; align-items: center; gap: 5px; background: #0f172a; color: white; padding: 5px 10px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); margin-top: 4px; }
+    .daily-note { padding: 12px 14px; background: rgba(254, 249, 195, 0.95); border-radius: 16px; border: 2px dashed #fde047; font-size: 14px; font-weight: 800; color: #713f12; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
 
-    /* Controls permanently at the bottom */
-    .controls { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 6px 0 2px 0; background: transparent; z-index: 5; }
-    .btn { background: white; border: 1px solid #e2e8f0; padding: 12px 18px; border-radius: 16px; font-size: 14px; font-weight: 800; color: var(--text-main); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: 'Nunito', sans-serif; }
+    /* Controls */
+    .controls { width: 100%; display: flex; justify-content: space-between; align-items: center; background: transparent; z-index: 5; padding: 14px 0; flex-shrink: 0; }
+    .btn { background: white; border: 1px solid #e2e8f0; padding: 13px 22px; border-radius: 18px; font-size: 15px; font-weight: 900; color: var(--text-main); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); font-family: 'Nunito', sans-serif; }
     .btn:active { transform: scale(0.92); }
     .btn-today { background: var(--accent); color: white; border: none; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3); }
 
     /* MONTH VIEW STYLES */
-    #view-month { overflow-y: auto; scrollbar-width: none; }
+    #view-month { overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; }
     #view-month::-webkit-scrollbar { display: none; }
     
-    .calendar-wrapper { background: white; border-radius: 28px; padding: 14px 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+    .calendar-wrapper { background: white; border-radius: 28px; padding: 16px 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; flex-direction: column; }
     .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 10px; }
-    .cal-header span { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+    .cal-header span { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
     
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-    .cal-cell { height: 58px; padding: 6px 2px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; position: relative; user-select: none; -webkit-user-select: none; }
-    .cal-cell:active { transform: scale(0.9); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-content: start; }
+    .cal-cell { min-height: 68px; padding: 6px 2px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; position: relative; user-select: none; -webkit-user-select: none; }
+    .cal-cell:active { transform: scale(0.92); }
     .cal-cell.empty { background: transparent; cursor: default; }
-    .cal-cell .cal-date { font-size: 15px; font-weight: 800; }
-    .cal-cell .cal-type { font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 800; text-transform: uppercase; margin-top: 2px; text-align: center; line-height: 1; }
+    .cal-cell .cal-date { font-size: 20px; font-weight: 900; }
     
-    .note-indicator { position: absolute; top: 3px; right: 3px; font-size: 9px; display: none; }
-    .has-note .note-indicator { display: block; }
+    .note-tag { position: absolute; bottom: 4px; background: #1e293b; color: white; font-size: 8px; font-family: 'Inter', sans-serif; font-weight: 900; padding: 1px 5px; border-radius: 4px; display: none; text-transform: uppercase; }
+    .has-note .note-tag { display: block; }
 
     /* Duty Pastel Color Mappings */
     .type-picu-day { background: var(--picu-day-bg); color: var(--picu-day-txt); }
@@ -130,28 +157,59 @@
     .type-post-off { background: var(--post-off-bg); color: var(--post-off-txt); }
 
     .cal-cell.type-off { border: 2px dashed #86efac; background: #f0fdf4; }
+    .cal-cell.type-post-off { border: 1px solid #cbd5e1; background: #f1f5f9; }
 
     /* BOTTOM NAV */
-    .bottom-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 24px; display: flex; padding: 6px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 80%; max-width: 280px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
-    .nav-item { flex: 1; text-align: center; padding: 10px 0; border-radius: 16px; font-size: 14px; font-weight: 800; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 6px; font-family: 'Nunito', sans-serif; }
+    .bottom-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 26px; display: flex; padding: 7px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 84%; max-width: 300px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
+    .nav-item { flex: 1; text-align: center; padding: 12px 0; border-radius: 18px; font-size: 16px; font-weight: 900; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; }
     .nav-item.active { background: white; color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
     /* NOTE MODAL */
-    .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: none; opacity: 0; transition: opacity 0.3s; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: none; opacity: 0; transition: opacity 0.3s; justify-content: center; align-items: center; padding: 20px; }
     .modal-overlay.show { display: flex; opacity: 1; }
-    .modal-card { background: white; width: 100%; max-width: 320px; border-radius: 28px; padding: 20px; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+    .modal-card { background: white; width: 100%; max-width: 320px; border-radius: 28px; padding: 22px; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
     .modal-overlay.show .modal-card { transform: scale(1); }
-    .modal-header { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
-    .modal-textarea { width: 100%; height: 100px; border: 2px solid #e2e8f0; border-radius: 16px; padding: 12px; font-size: 14px; font-family: 'Nunito', sans-serif; resize: none; margin-bottom: 12px; outline: none; transition: border 0.2s; }
+    .modal-header { font-size: 18px; font-weight: 900; margin-bottom: 12px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+    .modal-textarea { width: 100%; height: 110px; border: 2px solid #e2e8f0; border-radius: 16px; padding: 14px; font-size: 15px; font-family: 'Nunito', sans-serif; resize: none; margin-bottom: 14px; outline: none; transition: border 0.2s; font-weight: 700; color: #1e293b; }
     .modal-textarea:focus { border-color: var(--accent); }
     .modal-actions { display: flex; gap: 10px; }
-    .modal-btn { flex: 1; padding: 12px; border-radius: 14px; font-size: 14px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Nunito', sans-serif;}
+    .modal-btn { flex: 1; padding: 12px; border-radius: 14px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Nunito', sans-serif;}
     .modal-btn:active { transform: scale(0.95); }
     .btn-cancel { background: #f1f5f9; color: #475569; }
     .btn-save { background: var(--accent); color: white; }
 
     #daily-render-area { transition: opacity 0.2s ease, transform 0.2s ease; }
     .fade-out { opacity: 0; transform: scale(0.96) translateY(10px); }
+
+    /* Today Highlight */
+    .cal-cell.is-today .cal-date { background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35); }
+
+    /* Note Preview */
+    .note-preview { display: block; font-size: 8px; font-family: 'Inter', sans-serif; font-weight: 800; color: var(--text-muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; background: rgba(255,255,255,0.75); border-radius: 5px; padding: 1px 4px; }
+    .has-note .note-preview { display: block; }
+
+    /* Pill Overflow Indicator */
+    .pills.has-overflow { -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) calc(100% - 22px), rgba(0,0,0,0)); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) calc(100% - 22px), rgba(0,0,0,0)); }
+
+    /* Responsive: short screens */
+    @media (max-height: 700px) {
+      header { padding: 24px 16px 12px; }
+      .title { font-size: 20px; }
+      .card.today { padding: 16px 14px; gap: 10px; border-radius: 22px; }
+      .date-num { font-size: 24px; }
+      .btn { padding: 10px 16px; font-size: 14px; border-radius: 14px; }
+      .duty-row { padding: 9px 12px; }
+    }
+    /* Responsive: narrow screens */
+    @media (max-width: 350px) {
+      .badge { padding: 7px 11px; font-size: 10px; border-radius: 12px; }
+      .card.today { padding: 14px 12px; border-radius: 20px; }
+      .duty-row { font-size: 13px; padding: 8px 10px; }
+      .duty-v { font-size: 13px; }
+      .second-call-name { font-size: 14px; }
+      .btn { padding: 9px 12px; font-size: 13px; }
+      .controls { gap: 8px; }
+    }
   </style>
 </head>
 <body>
@@ -159,7 +217,7 @@
   <div class="app-container">
     <header>
       <div class="greeting" id="greetingText">Good Morning,</div>
-      <div class="title">🍼 Dr. Mrinal <span style="font-size: 18px;">🩺</span></div>
+      <div class="title">🍼 Dr. Mrinal <span style="font-size: 20px;">🩺</span></div>
     </header>
 
     <div class="view-container">
@@ -177,14 +235,11 @@
       <!-- MONTH VIEW -->
       <div id="view-month" class="tab-content">
         <div class="calendar-wrapper">
-          <div style="font-weight: 800; text-align: center; margin-bottom: 12px; color: #1e293b; font-size: 15px;">Ashwin 2083</div>
+          <div style="font-weight: 900; text-align: center; margin-bottom: 12px; color: #1e293b; font-size: 17px;">Ashwin 2083</div>
           <div class="cal-header">
             <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
           </div>
           <div class="cal-grid" id="calendar-grid"></div>
-          <div style="text-align: center; margin-top: 12px; font-size: 12px; color: #64748b; font-weight: 700;">
-            💡 Tap date to open • Hold 300ms for note
-          </div>
         </div>
       </div>
 
@@ -204,51 +259,51 @@
       <div class="modal-card">
         <div class="modal-header">
           <span id="modal-title">Add Note</span>
-          <span>📝</span>
+          <span style="font-size: 14px; font-weight: 800; color: var(--text-muted);">Note</span>
         </div>
         <textarea class="modal-textarea" id="modal-input" placeholder="e.g. Bring stethoscope..."></textarea>
         <div class="modal-actions">
           <button class="modal-btn btn-cancel" onclick="closeNoteModal()">Cancel</button>
-          <button class="modal-btn btn-save" onclick="saveNote()">Save</button>
+          <button class="modal-btn btn-save" onclick="saveNote()">Save Note</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // OFFICIAL KIOCH ASHWIN 2083 ROSTER
+    // STRUCTURED KIOCH ASHWIN 2083 ROSTER
     const roster = [
-      { date: '06-01', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Krishna (NICU), Aayoush (PICU), Nischal (ER), Salina (Day ER)', second: 'Prerana' },
-      { date: '06-02', day: 'Fri', type: 'opd', title: 'OPD', team: 'Kabita, Madan, Mrinal, Pritha, Samikshya', second: '' },
-      { date: '06-03', day: 'Sat', type: 'off', title: 'Saturday OFF', team: 'Public Holiday 🌿', second: '' },
-      { date: '06-04', day: 'Sun', type: 'picu-24', title: '24hr PICU', team: 'Kshitiz (NICU), Pritha (ER), Samikshya (Day ER)', second: 'Saurav Stha' },
-      { date: '06-05', day: 'Mon', type: 'post-off', title: 'Post Duty', team: 'Enjoy your rest!', second: '' },
-      { date: '06-06', day: 'Tue', type: 'opd', title: 'OPD', team: 'Devaki, Kshitiz, Shikha, Pritha, Mrinal', second: '' },
-      { date: '06-07', day: 'Wed', type: 'picu-day', title: 'PICU Day', team: 'Shikha (NICU), Srijana (PICU), Salina (ER), Sinda (Day ER)', second: 'Dilip' },
-      { date: '06-08', day: 'Thu', type: 'opd', title: 'OPD', team: 'Saurav Singh, Subas, Pritha, Kabita, Mrinal', second: '' },
-      { date: '06-09', day: 'Fri', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Aayoush (PICU), Samikshya (ER), Pritha (Day ER)', second: 'Saurav Singh' },
-      { date: '06-10', day: 'Sat', type: 'picu-24', title: '24hr PICU', team: 'Subas (NICU), Nischal (ER)', second: 'Krishna' },
-      { date: '06-11', day: 'Sun', type: 'post-off', title: 'Post Duty', team: 'Enjoy your rest!', second: '' },
-      { date: '06-12', day: 'Mon', type: 'picu-day', title: 'PICU Day', team: 'Sinda (NICU), Srijana (PICU), Salina (ER), Deepmala (Day ER)', second: 'Krishna' },
-      { date: '06-13', day: 'Tue', type: 'picu-24', title: '24hr PICU', team: 'Krishna (NICU), Samikshya (ER), Devaki (Day ER)', second: 'Pusp Raj' },
-      { date: '06-14', day: 'Wed', type: 'post-off', title: 'Post Duty', team: 'Relax and unwind!', second: '' },
-      { date: '06-15', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Devaki (PICU), Nischal (ER), Pritha (Day ER)', second: 'Prerana' },
-      { date: '06-16', day: 'Fri', type: 'opd', title: 'OPD', team: 'Subas, Mrinal, Aayoush, Deepmala, Kshitiz', second: '' },
-      { date: '06-17', day: 'Sat', type: 'off', title: 'Saturday OFF', team: 'Public Holiday 🌿', second: '' },
-      { date: '06-18', day: 'Sun', type: 'picu-day', title: 'PICU Day', team: 'Kshitiz (NICU), Srijana (PICU), Salina (ER), Subas (Day ER)', second: 'Saurav Stha' },
-      { date: '06-19', day: 'Mon', type: 'er-day', title: 'Day ER', team: 'Saurav Stha (NICU), Aayoush (PICU), Deepmala (ER)', second: 'Krishna' },
-      { date: '06-20', day: 'Tue', type: 'opd', title: 'OPD', team: 'Salina, Subas, Kshitiz, Devaki, Mrinal', second: '' },
-      { date: '06-21', day: 'Wed', type: 'picu-day', title: 'PICU Day', team: 'Subas (NICU), Kabita (PICU), Samikshya (ER), Kshitiz (Day ER)', second: 'Dilip' },
-      { date: '06-22', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Prerana (PICU), Sinda (ER), Srijana (Day ER)', second: 'Prerana' },
-      { date: '06-23', day: 'Fri', type: 'picu-day', title: 'PICU Day', team: 'Subas (NICU), Devaki (PICU), Nischal (ER), Shikha (Day ER)', second: 'Saurav Singh' },
-      { date: '06-24', day: 'Sat', type: 'off', title: 'Saturday OFF', team: 'Public Holiday 🌿', second: '' },
-      { date: '06-25', day: 'Sun', type: 'off', title: 'Ghatasthapana', team: 'Public Holiday 🪔', second: '' },
-      { date: '06-26', day: 'Mon', type: 'picu-day', title: 'PICU Day', team: 'Krishna (NICU), Kabita (PICU), Pritha (ER), Madan (Day ER)', second: 'Krishna' },
-      { date: '06-27', day: 'Tue', type: 'picu-day', title: 'PICU Day', team: 'Madan (NICU), Kabita (PICU), Samikshya (ER), Sinda (Day ER)', second: 'Pusp Raj' },
-      { date: '06-28', day: 'Wed', type: 'opd', title: 'OPD', team: 'Prerana, Sinda, Shikha, Subas', second: '' },
-      { date: '06-29', day: 'Thu', type: 'picu-day', title: 'PICU Day', team: 'Subas (NICU), Prerana (PICU), Salina (ER), Srijana (Day ER)', second: 'Prerana' },
-      { date: '06-30', day: 'Fri', type: 'picu-24', title: '24hr PICU', team: 'Sinda (NICU), Deepmala (ER), Pritha (Day ER)', second: 'Saurav Singh' },
-      { date: '06-31', day: 'Sat', type: 'post-off', title: 'Post Duty', team: 'Weekend recovery ☕', second: '' }
+      { date: '06-01', day: 'Thu', type: 'picu-day', title: 'PICU Day', ward: 'Nischal', nicu: 'Krishna', picu: 'Aayoush', er: 'Salina', second: 'Prerana', opd: 'Saurav Singh, Prerana, Sinda, Pritha, Devaki' },
+      { date: '06-02', day: 'Fri', type: 'opd', title: 'OPD', ward: 'Salina', nicu: 'Sinda', picu: 'Srijana', er: 'Kshitiz', second: 'Saurav Singh', opd: 'Kabita, Madan, Mrinal, Pritha, Samikshya' },
+      { date: '06-03', day: 'Sat', type: 'off', title: 'Saturday OFF', ward: 'Deepmala', nicu: 'Subas', picu: 'Devaki', er: '', second: 'Dilip', opd: '' },
+      { date: '06-04', day: 'Sun', type: 'picu-24', title: '24hr PICU', ward: 'Pritha', nicu: 'Kshitiz', picu: 'Mrinal', er: 'Samichhhya', second: 'Saurav Stha', opd: 'Prerana, Shikha, Sinda, Nischal, Srijana' },
+      { date: '06-05', day: 'Mon', type: 'post-off', title: 'Post 24h OFF', ward: '', nicu: '', picu: '', er: '', second: '', opd: '' },
+      { date: '06-06', day: 'Tue', type: 'opd', title: 'OPD', ward: 'Nischal', nicu: 'Subas', picu: 'Kabita', er: 'Deepmala', second: 'Pusp Raj', opd: 'Devaki, Kshitiz, Shikha, Pritha, Mrinal' },
+      { date: '06-07', day: 'Wed', type: 'picu-day', title: 'PICU Day', ward: 'Salina', nicu: 'Shikha', picu: 'Srijana', er: 'Sinda', second: 'Dilip', opd: 'Madan, Kshitiz, Samichhhya, Prerana, Aayoush' },
+      { date: '06-08', day: 'Thu', type: 'opd', title: 'OPD', ward: 'Deepmala', nicu: 'Sinda', picu: 'Devaki', er: 'Nischal', second: 'Prerana', opd: 'Saurav Singh, Subas, Pritha, Kabita, Mrinal' },
+      { date: '06-09', day: 'Fri', type: 'picu-day', title: 'PICU Day', ward: 'Samichhhya', nicu: 'Madan', picu: 'Aayoush', er: 'Pritha', second: 'Saurav Singh', opd: 'Salina, Shikha, Kabita, Srijana, Nischal' },
+      { date: '06-10', day: 'Sat', type: 'picu-24', title: '24hr PICU', ward: 'Nischal', nicu: 'Subas', picu: 'Mrinal', er: '', second: 'Krishna', opd: '' },
+      { date: '06-11', day: 'Sun', type: 'post-off', title: 'Post 24h OFF', ward: '', nicu: '', picu: '', er: '', second: '', opd: '' },
+      { date: '06-12', day: 'Mon', type: 'picu-day', title: 'PICU Day', ward: 'Salina', nicu: 'Saurav Stha', picu: 'Srijana', er: 'Deepmala', second: 'Krishna', opd: 'Kabita, Madan, Aayoush, Nischal, Samichhhya' },
+      { date: '06-13', day: 'Tue', type: 'picu-24', title: '24hr PICU', ward: 'Samichhhya', nicu: 'Kshitiz', picu: 'Mrinal', er: 'Devaki', second: 'Pusp Raj', opd: 'Pritha, Nischal, Shikha, Madan, Kabita, Prerana' },
+      { date: '06-14', day: 'Wed', type: 'post-off', title: 'Post 24h OFF', ward: '', nicu: '', picu: '', er: '', second: '', opd: '' },
+      { date: '06-15', day: 'Thu', type: 'picu-day', title: 'PICU Day', ward: 'Nischal', nicu: 'Madan', picu: 'Devaki', er: 'Pritha', second: 'Prerana', opd: 'Saurav Singh, Kabita, Salina, Samichhhya, Kshitiz' },
+      { date: '06-16', day: 'Fri', type: 'opd', title: 'OPD', ward: 'Pritha', nicu: 'Sinda', picu: 'Kabita', er: 'Nischal', second: 'Saurav Singh', opd: 'Subas, Mrinal, Aayoush, Deepmala, Kshitiz' },
+      { date: '06-17', day: 'Sat', type: 'off', title: 'Saturday OFF', ward: 'Samichhhya', nicu: 'Shikha', picu: 'Srijana', er: '', second: 'Saurav Singh', opd: '' },
+      { date: '06-18', day: 'Sun', type: 'picu-day', title: 'PICU Day', ward: 'Salina', nicu: 'Kshitiz', picu: 'Devaki', er: 'Subas', second: 'Saurav Stha', opd: 'Kabita, Prerana, Pritha, Nischal, Sinda, Madan' },
+      { date: '06-19', day: 'Mon', type: 'er-day', title: 'Day ER', ward: 'Deepmala', nicu: 'Saurav Stha', picu: 'Aayoush', er: 'Mrinal', second: 'Krishna', opd: 'Samichhhya, Nischal, Saurav Singh, Shikha, Srijana' },
+      { date: '06-20', day: 'Tue', type: 'opd', title: 'OPD', ward: 'Pritha', nicu: 'Sinda', picu: 'Srijana', er: 'Samichhhya', second: 'Pusp Raj', opd: 'Salina, Subas, Kshitiz, Devaki, Mrinal' },
+      { date: '06-21', day: 'Wed', type: 'picu-day', title: 'PICU Day', ward: 'Samichhhya', nicu: 'Shikha', picu: 'Kabita', er: 'Kshitiz', second: 'Dilip', opd: 'Deepmala, Nischal, Subas, Aayoush, Prerana' },
+      { date: '06-22', day: 'Thu', type: 'picu-day', title: 'PICU Day', ward: 'Sinda', nicu: 'Madan', picu: 'Prerana', er: 'Srijana', second: 'Prerana', opd: 'Salina, Pritha, Saurav Singh, Kshitiz, Aayoush, Subas' },
+      { date: '06-23', day: 'Fri', type: 'picu-day', title: 'PICU Day', ward: 'Nischal', nicu: 'Subas', picu: 'Devaki', er: 'Shikha', second: 'Saurav Singh', opd: 'Pritha, Samichhhya, Sinda, Srijana, Devaki' },
+      { date: '06-24', day: 'Sat', type: 'off', title: 'Saturday OFF', ward: 'Salina', nicu: 'Kshitiz', picu: 'Aayoush', er: '', second: 'Pusp Raj', opd: '' },
+      { date: '06-25', day: 'Sun', type: 'picu-24', title: 'Ghatasthapana', ward: 'Deepmala', nicu: 'Sinda', picu: 'Mrinal', er: '', second: 'Saurav Stha', opd: 'GHATASTHAPANA' },
+      { date: '06-26', day: 'Mon', type: 'post-off', title: 'Post 24h OFF', ward: '', nicu: '', picu: '', er: '', second: '', opd: '' },
+      { date: '06-27', day: 'Tue', type: 'picu-day', title: 'PICU Day', ward: 'Samichhhya', nicu: 'Madan', picu: 'Srijana', er: 'Sinda', second: 'Pusp Raj', opd: 'Salina, Deepmala, Shikha, Kshitiz, Srijana' },
+      { date: '06-28', day: 'Wed', type: 'opd', title: 'OPD', ward: 'Nischal', nicu: 'Kshitiz', picu: 'Devaki', er: 'Aayoush', second: 'Dilip', opd: 'Prerana, Sinda, Shikha, Mrinal, Subas' },
+      { date: '06-29', day: 'Thu', type: 'picu-day', title: 'PICU Day', ward: 'Salina', nicu: 'Subas', picu: 'Prerana', er: 'Srijana', second: 'Prerana', opd: 'Pritha, Samichhhya, Saurav Singh, Sinda, Aayoush' },
+      { date: '06-30', day: 'Fri', type: 'picu-24', title: '24hr PICU', ward: 'Deepmala', nicu: 'Shikha', picu: 'Mrinal', er: 'Pritha', second: 'Saurav Singh', opd: 'Kabita, Kshitiz, Devaki, Srijana, Nischal' },
+      { date: '06-31', day: 'Sat', type: 'off', title: 'Saturday OFF', ward: 'Pritha', nicu: 'Madan', picu: 'Kabita', er: '', second: 'Saurav Stha', opd: '' }
     ];
 
     const notesDB = JSON.parse(localStorage.getItem('mrinalDutyNotes')) || {};
@@ -256,6 +311,10 @@
     let realTodayIndex = 0;
     let currentIndex = 0;
     let activeNoteDate = null;
+
+    function triggerHaptic(ms = 30) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
 
     function initData() {
       const now = new Date();
@@ -271,34 +330,73 @@
       document.getElementById('greetingText').innerText = greeting;
     }
 
-    function generateCard(data, type) {
+    function generateCard(data) {
       if(!data) return '';
-      const isMain = type === 'today';
-      const pills = data.team.split(', ').map(member => `<span class="pill">${member}</span>`).join('');
+      
+      let detailsHtml = '';
+      if (data.type === 'opd') {
+        const pills = data.opd ? data.opd.split(', ').map(m => `<span class="pill">${m}</span>`).join('') : '<span class="pill">None</span>';
+        detailsHtml = `
+          <div>
+            <div class="team-label">OPD Teammates</div>
+            <div class="pills">${pills}</div>
+          </div>
+        `;
+      } else if (data.type === 'off' || data.type === 'post-off') {
+        const statusText = data.type === 'off' ? 'Public Holiday / Off' : 'Post 24h Duty OFF';
+        const bgCol = data.type === 'off' ? '#dcfce7' : '#f1f5f9';
+        const txtCol = data.type === 'off' ? '#15803d' : '#475569';
+        detailsHtml = `
+          <div>
+            <div class="team-label">Duty Status</div>
+            <div class="pills"><span class="pill" style="background:${bgCol}; color:${txtCol}; width:100%; text-align:center;">${statusText}</span></div>
+          </div>
+        `;
+      } else {
+        let rows = [];
+        if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward / ER</span><span class="duty-v">${data.ward}</span></div>`);
+        if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v">${data.nicu}</span></div>`);
+        if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v">${data.picu}</span></div>`);
+        if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">Day ER</span><span class="duty-v">${data.er}</span></div>`);
+        
+        detailsHtml = `
+          <div>
+            <div class="team-label">Duty Assignments & Team</div>
+            <div class="duty-list">${rows.join('')}</div>
+          </div>
+        `;
+      }
+
       const secondCallHtml = data.second 
-        ? `<div class="second-call"><span class="second-call-label">📞 2nd Call</span><span class="second-call-name">${data.second}</span></div>` 
+        ? `<div class="second-call"><span class="second-call-label">📞 2nd On Call</span><span class="second-call-name">${data.second}</span></div>` 
         : '';
       
       const savedNote = notesDB[data.date];
       const noteHtml = savedNote 
-        ? `<div class="daily-note"><span>📝</span><span>${savedNote}</span></div>` 
+        ? `<div class="daily-note"><span style="font-size:11px; text-transform:uppercase; font-family:'Inter',sans-serif; display:block; margin-bottom:1px; opacity:0.8;">Note Attached</span>${savedNote}</div>` 
         : '';
       
+      const noteBadgeHtml = savedNote
+        ? `<div class="card-note-badge">Note Attached</div>`
+        : '';
+
       return `
-        <div class="card ${isMain ? 'today' : 'tomorrow'} type-${data.type}">
-          <div class="card-label">${isMain ? 'Main View • Selected Day' : 'Next Day Overview'}</div>
+        <div class="card today type-${data.type}" id="dailyCardElement" data-date="${data.date}">
           <div class="card-header">
             <div>
+              <span class="card-label">Selected Roster Day</span>
               <span class="date-num">Ashwin ${data.date.split('-')[1]}</span>
               <span class="day-name">${data.day}</span>
+              ${noteBadgeHtml}
             </div>
             <div class="badge type-${data.type}">${data.title}</div>
           </div>
-          <div>
-            <div class="team-label">Teammates</div>
-            <div class="pills">${pills}</div>
+          
+          <div class="card-body-content">
+            ${detailsHtml}
+            ${secondCallHtml}
           </div>
-          ${secondCallHtml}
+
           ${noteHtml}
         </div>
       `;
@@ -310,17 +408,9 @@
       
       setTimeout(() => {
         const mainData = roster[currentIndex];
-        const subData = roster[currentIndex + 1] || null;
-        
-        let html = generateCard(mainData, 'today');
-        if(subData) {
-          html += generateCard(subData, 'tomorrow');
-        } else {
-          html += `<div class="card tomorrow"><div class="card-label">End of Roster</div><div class="team-label">No duties left for Ashwin 2083.</div></div>`;
-        }
-        
-        renderArea.innerHTML = html;
+        renderArea.innerHTML = generateCard(mainData);
         renderArea.classList.remove('fade-out');
+        markPillOverflow();
       }, 100);
     }
 
@@ -331,15 +421,19 @@
       for(let i=0; i<4; i++) { html += `<div class="cal-cell empty"></div>`; }
       
       roster.forEach((day, index) => {
-        let titleAbbr = day.title.replace(' Day', '').replace(' OFF', '').substring(0,6);
         const hasNoteClass = notesDB[day.date] ? 'has-note' : '';
+        const isTodayClass = index === realTodayIndex ? 'is-today' : '';
+        const note = notesDB[day.date];
+        const preview = note 
+          ? `<span class="note-preview">${note.substring(0, 12)}${note.length > 12 ? '…' : ''}</span>` 
+          : '';
         
         html += `
-          <div class="cal-cell type-${day.type} ${hasNoteClass}" 
+          <div class="cal-cell type-${day.type} ${hasNoteClass} ${isTodayClass}" 
                data-index="${index}" data-date="${day.date}">
             <span class="cal-date">${day.date.split('-')[1]}</span>
-            <span class="cal-type">${titleAbbr}</span>
-            <span class="note-indicator">📝</span>
+            <span class="note-tag">✏️</span>
+            ${preview}
           </div>
         `;
       });
@@ -357,36 +451,33 @@
         const startPress = (e) => {
           isLongPress = false;
           if (e.type === 'contextmenu') e.preventDefault();
-          
           const touch = e.touches ? e.touches[0] : e;
           startX = touch.clientX;
           startY = touch.clientY;
 
           pressTimer = setTimeout(() => {
             isLongPress = true;
-            if (navigator.vibrate) navigator.vibrate(50);
+            triggerHaptic(50);
             openNoteModal(cell.dataset.date);
-          }, 300);
+          }, 400);
         };
 
         const movePress = (e) => {
           if (!pressTimer) return;
           const touch = e.touches ? e.touches[0] : e;
-          const moveX = Math.abs(touch.clientX - startX);
-          const moveY = Math.abs(touch.clientY - startY);
-          
-          if (moveX > 10 || moveY > 10) {
+          if (Math.abs(touch.clientX - startX) > 10 || Math.abs(touch.clientY - startY) > 10) {
             clearTimeout(pressTimer);
             pressTimer = null;
           }
         };
 
-        const endPress = (e) => {
+        const endPress = () => {
           if (pressTimer) {
             clearTimeout(pressTimer);
             pressTimer = null;
           }
           if (!isLongPress) {
+            triggerHaptic(20);
             jumpToDate(cell.dataset.index);
           }
         };
@@ -394,34 +485,29 @@
         cell.addEventListener('touchstart', startPress, { passive: true });
         cell.addEventListener('touchmove', movePress, { passive: true });
         cell.addEventListener('touchend', endPress);
-        
         cell.addEventListener('mousedown', startPress);
         cell.addEventListener('mousemove', movePress);
         cell.addEventListener('mouseup', endPress);
-        cell.addEventListener('mouseleave', () => {
-          if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-          }
-        });
         cell.addEventListener('contextmenu', e => e.preventDefault());
       });
     }
 
     function openNoteModal(dateKey) {
       activeNoteDate = dateKey;
-      document.getElementById('modal-title').innerText = `Ashwin ${dateKey.split('-')[1]}`;
+      document.getElementById('modal-title').innerText = `Ashwin ${dateKey.split('-')[1]} Note`;
       document.getElementById('modal-input').value = notesDB[dateKey] || '';
       document.getElementById('note-modal').classList.add('show');
       setTimeout(() => document.getElementById('modal-input').focus(), 300);
     }
 
     function closeNoteModal() {
+      triggerHaptic(20);
       document.getElementById('note-modal').classList.remove('show');
       activeNoteDate = null;
     }
 
     function saveNote() {
+      triggerHaptic(40);
       const val = document.getElementById('modal-input').value.trim();
       if (val === '') { delete notesDB[activeNoteDate]; } 
       else { notesDB[activeNoteDate] = val; }
@@ -433,19 +519,19 @@
     }
 
     function changeDay(step) {
+      triggerHaptic(30);
       const newIndex = currentIndex + step;
       if(newIndex >= 0 && newIndex < roster.length) {
         currentIndex = newIndex;
         renderDailyView();
-        document.getElementById('daily-render-area').scrollTo(0,0);
       }
     }
     
     function goToday() {
+      triggerHaptic(35);
       if(currentIndex !== realTodayIndex) {
         currentIndex = realTodayIndex;
         renderDailyView();
-        document.getElementById('daily-render-area').scrollTo(0,0);
       }
     }
     
@@ -455,6 +541,7 @@
     }
     
     function switchTab(tabId) {
+      triggerHaptic(30);
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       
@@ -464,12 +551,52 @@
       if(tabId === 'daily') {
         renderDailyView();
       }
+      if(tabId === 'month') {
+        setTimeout(() => {
+          const todayCell = document.querySelector('.cal-cell.is-today');
+          if (todayCell) todayCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 120);
+      }
+    }
+
+    function initSwipeGestures() {
+      const view = document.getElementById('view-daily');
+      let startX = 0;
+      let startY = 0;
+      let isSwiping = false;
+
+      view.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isSwiping = true;
+      }, { passive: true });
+
+      view.addEventListener('touchmove', (e) => {
+        if (!isSwiping) return;
+        const touch = e.touches[0];
+        if (Math.abs(touch.clientX - startX) > 20 && Math.abs(touch.clientY - startY) < 40) {
+          isSwiping = false;
+          const delX = touch.clientX - startX;
+          if (delX < -50) { triggerHaptic(20); changeDay(1); }
+          else if (delX > 50) { triggerHaptic(20); changeDay(-1); }
+        }
+      }, { passive: true });
+
+      view.addEventListener('touchend', () => { isSwiping = false; }, { passive: true });
+    }
+
+    function markPillOverflow() {
+      document.querySelectorAll('#daily-render-area .pills').forEach(pills => {
+        pills.classList.toggle('has-overflow', pills.scrollHeight > pills.clientHeight);
+      });
     }
 
     initData();
     currentIndex = realTodayIndex;
     renderDailyView();
     renderMonthView();
+    initSwipeGestures();
   </script>
 </body>
 </html>
