@@ -20,7 +20,7 @@
       --header-bg: #f1f5f9;
       --text-main: #1e293b;
       --text-muted: #64748b;
-      --nav-bg: rgba(255, 255, 255, 0.9);
+      --nav-bg: rgba(255, 255, 255, 0.92);
       --accent: #0284c7;
       
       /* Color Palette */
@@ -63,7 +63,7 @@
 
     /* View Container */
     .view-container { 
-      flex: 1; position: relative; overflow: hidden; padding: 16px 16px calc(84px + env(safe-area-inset-bottom)); 
+      flex: 1; position: relative; overflow: hidden; padding: 16px 16px calc(92px + env(safe-area-inset-bottom)); 
       display: flex; flex-direction: column; min-height: 0;
       touch-action: manipulation;
     }
@@ -79,8 +79,41 @@
     #view-daily { display: none; flex-direction: column; touch-action: pan-y; }
     #view-daily.active { display: flex; }
 
+    /* Bottom Day Navigation Controls */
+    .day-nav-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      flex-shrink: 0;
+    }
+    .day-nav-btn {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: var(--text-main);
+      padding: 14px 20px;
+      border-radius: 20px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s ease, background 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .day-nav-btn:active {
+      transform: scale(0.95);
+      background: #ffffff;
+    }
+
     /* Today Pill */
-    .today-pill { position: absolute; top: 24px; right: 16px; z-index: 30; background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); cursor: pointer; opacity: 0; transform: translateY(-6px) scale(0.9); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); -webkit-tap-highlight-color: transparent; }
+    .today-pill { position: absolute; top: 22px; right: 16px; z-index: 30; background: var(--accent); color: #fff; border: none; padding: 12px 20px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4); cursor: pointer; opacity: 0; transform: translateY(-6px) scale(0.9); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); -webkit-tap-highlight-color: transparent; }
     .today-pill.visible { opacity: 1; transform: none; pointer-events: auto; }
     .today-pill:active { transform: scale(0.94); }
 
@@ -106,12 +139,12 @@
     }
     
     /* Card Background Color Variants */
-    .card.today.type-picu-day { background: var(--picu-day-bg); border: 2px solid rgba(126, 34, 206, 0.18); }
-    .card.today.type-picu-24 { background: var(--picu-24-bg); border: 2px solid rgba(225, 29, 72, 0.18); }
-    .card.today.type-opd { background: var(--opd-bg); border: 2px solid rgba(2, 132, 199, 0.18); }
-    .card.today.type-er-day { background: var(--er-day-bg); border: 2px solid rgba(194, 65, 12, 0.18); }
-    .card.today.type-off { background: var(--off-bg); border: 2px dashed #86efac; }
-    .card.today.type-post-off { background: var(--post-off-bg); border: 2px solid rgba(71, 85, 105, 0.18); }
+    .card.today.type-picu-day, .upcoming-card.type-picu-day { background: var(--picu-day-bg); border: 2px solid rgba(126, 34, 206, 0.18); }
+    .card.today.type-picu-24, .upcoming-card.type-picu-24 { background: var(--picu-24-bg); border: 2px solid rgba(225, 29, 72, 0.18); }
+    .card.today.type-opd, .upcoming-card.type-opd { background: var(--opd-bg); border: 2px solid rgba(2, 132, 199, 0.18); }
+    .card.today.type-er-day, .upcoming-card.type-er-day { background: var(--er-day-bg); border: 2px solid rgba(194, 65, 12, 0.18); }
+    .card.today.type-off, .upcoming-card.type-off { background: var(--off-bg); border: 2px dashed #86efac; }
+    .card.today.type-post-off, .upcoming-card.type-post-off { background: var(--post-off-bg); border: 2px solid rgba(71, 85, 105, 0.18); }
 
     .card-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; }
@@ -139,6 +172,69 @@
     .card-note-badge { display: inline-flex; align-items: center; gap: 5px; background: #0f172a; color: white; padding: 5px 10px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); margin-top: 4px; }
     .daily-note { padding: 12px 14px; background: rgba(254, 249, 195, 0.95); border-radius: 16px; border: 2px dashed #fde047; font-size: 14px; font-weight: 800; color: #713f12; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
 
+    /* UPCOMING DAYS STYLES */
+    .upcoming-container {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .upcoming-header {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-left: 4px;
+    }
+    .upcoming-card {
+      padding: 12px 16px;
+      border-radius: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+      user-select: none;
+    }
+    .upcoming-card:active {
+      transform: scale(0.97);
+    }
+    .upcoming-date-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .upcoming-day {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+    .upcoming-weekday {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+    .upcoming-badge {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .upcoming-badge.type-picu-day { color: var(--picu-day-txt); }
+    .upcoming-badge.type-picu-24 { color: var(--picu-24-txt); }
+    .upcoming-badge.type-opd { color: var(--opd-txt); }
+    .upcoming-badge.type-er-day { color: var(--er-day-txt); }
+    .upcoming-badge.type-off { color: var(--off-txt); }
+    .upcoming-badge.type-post-off { color: var(--post-off-txt); }
+
     /* MONTH VIEW STYLES */
     #view-month { overflow-y: auto; scrollbar-width: none; }
     #view-month.active { display: flex; flex-direction: column; }
@@ -153,10 +249,9 @@
     .cal-cell:active { transform: scale(0.94); }
     .cal-cell.pressed { transform: scale(0.94); box-shadow: inset 0 3px 10px rgba(0,0,0,0.12); }
     .cal-cell.empty { background: transparent; cursor: default; }
-    .cal-cell .cal-date { font-size: 20px; font-weight: 900; }
+    .cal-cell .cal-date { font-size: 20px; font-weight: 900; display: inline-flex; align-items: flex-start; justify-content: center; }
     
-    .note-tag { position: absolute; bottom: 4px; background: #1e293b; color: white; font-size: 8px; font-family: 'Inter', sans-serif; font-weight: 900; padding: 1px 5px; border-radius: 4px; display: none; text-transform: uppercase; }
-    .has-note .note-tag { display: block; }
+    .note-asterisk { font-weight: 900; font-size: 18px; line-height: 1; margin-left: 1px; color: inherit; }
 
     /* Duty Pastel Color Mappings */
     .type-picu-day { background: var(--picu-day-bg); color: var(--picu-day-txt); }
@@ -170,9 +265,9 @@
     .cal-cell.type-post-off { border: 1px solid #cbd5e1; background: #f1f5f9; }
 
     /* BOTTOM NAV */
-    .bottom-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 26px; display: flex; padding: 7px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 84%; max-width: 300px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
-    .nav-item { flex: 1; text-align: center; padding: 12px 0; border-radius: 18px; font-size: 16px; font-weight: 900; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; }
-    .nav-item.active { background: white; color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .bottom-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 28px; display: flex; padding: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 88%; max-width: 340px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
+    .nav-item { flex: 1; text-align: center; padding: 14px 0; border-radius: 20px; font-size: 17px; font-weight: 900; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; }
+    .nav-item.active { background: white; color: var(--accent); box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
 
     /* NOTE MODAL */
     .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: none; opacity: 0; transition: opacity 0.3s; justify-content: center; align-items: center; padding: 20px; }
@@ -183,7 +278,7 @@
     .modal-textarea { width: 100%; height: 110px; border: 2px solid #e2e8f0; border-radius: 16px; padding: 14px; font-size: 15px; font-family: 'Nunito', sans-serif; resize: none; margin-bottom: 14px; outline: none; transition: border 0.2s; font-weight: 700; color: #1e293b; }
     .modal-textarea:focus { border-color: var(--accent); }
     .modal-actions { display: flex; gap: 10px; }
-    .modal-btn { flex: 1; padding: 12px; border-radius: 14px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Nunito', sans-serif;}
+    .modal-btn { flex: 1; padding: 14px; border-radius: 16px; font-size: 16px; font-weight: 900; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Nunito', sans-serif;}
     .modal-btn:active { transform: scale(0.95); }
     .btn-cancel { background: #f1f5f9; color: #475569; }
     .btn-save { background: var(--accent); color: white; }
@@ -196,41 +291,28 @@
     /* Today Highlight */
     .cal-cell.is-today .cal-date { background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35); }
 
-    /* Note Preview */
-    .note-preview { display: block; font-size: 8px; font-family: 'Inter', sans-serif; font-weight: 800; color: var(--text-muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; background: rgba(255,255,255,0.75); border-radius: 5px; padding: 1px 4px; }
-    .has-note .note-preview { display: block; }
-
     /* Pill Overflow Indicator */
     .pills.has-overflow { -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) calc(100% - 22px), rgba(0,0,0,0)); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) calc(100% - 22px), rgba(0,0,0,0)); }
 
     /* ---- ANIMATIONS ---- */
-
     @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
     @keyframes fadeUp   { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
     @keyframes popIn    { from { opacity: 0; transform: scale(0.88) translateY(6px); } to { opacity: 1; transform: none; } }
     @keyframes popScale { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: none; } }
-    @keyframes pillPop  { 0% { transform: scale(0) rotate(-12deg); } 70% { transform: scale(1.08) rotate(2deg); } 100% { transform: none; } }
     @keyframes ringPulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.45); } 70% { box-shadow: 0 0 0 9px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
     @keyframes shimmer  { 0% { transform: translateX(-100%); } 100% { transform: translateX(120%); } }
     @keyframes breathe  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
     @keyframes slideUp  { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
 
-    /* Header entrance */
     .greeting { animation: fadeDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
     .title    { animation: fadeDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards; animation-delay: 0.06s; }
 
-    /* Card children stagger */
     .card.today > *            { animation: fadeUp 0.48s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
     .card.today > *:nth-child(1) { animation-delay: 0.03s; }
     .card.today > *:nth-child(2) { animation-delay: 0.10s; }
     .card.today > *:nth-child(3) { animation-delay: 0.17s; }
     .card.today > *:nth-child(4) { animation-delay: 0.24s; }
-    .card.today > *:nth-child(5) { animation-delay: 0.31s; }
-    .card.today > *:nth-child(6) { animation-delay: 0.38s; }
-    .card.today > *:nth-child(7) { animation-delay: 0.45s; }
-    .card.today > *:nth-child(8) { animation-delay: 0.52s; }
 
-    /* OFF-type shimmer */
     .card.today.type-off::before {
       content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
       background: linear-gradient(110deg, transparent 28%, rgba(255,255,255,0.55) 46%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.55) 54%, transparent 72%);
@@ -238,53 +320,20 @@
     }
     .card.today.type-off > * { position: relative; z-index: 1; }
 
-    /* Duty row / pill press feedback */
     .duty-row { transition: transform 0.15s ease, box-shadow 0.15s ease; }
     .duty-row:active { transform: scale(0.975); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
     .second-call { transition: transform 0.15s ease; }
     .second-call:active { transform: scale(0.985); }
 
-    /* Badge pop on mount */
     .badge { animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: 0.05s; }
-
-    /* Note badge breathe */
     .card-note-badge { animation: breathe 2.4s ease-in-out 0.6s infinite; }
-
-    /* Today pill ring pulse */
     .today-pill.visible .pill-dot { animation: ringPulse 1.8s ease-out infinite; }
-
-    /* Bottom nav active bounce */
     .nav-item.active { animation: popScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
-
-    /* Calendar cell grid entrance */
     #view-month.active .cal-cell { animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-
-    /* Note modal */
     .modal-card { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: 0.05s; }
 
-    /* ---- / ANIMATIONS ---- */
-
-    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-    }
-    /* Responsive: short screens */
-    @media (max-height: 700px) {
-      header { padding: 24px 16px 12px; }
-      .title { font-size: 20px; }
-      .card.today { padding: 16px 14px; gap: 10px; border-radius: 22px; }
-      .date-num { font-size: 24px; }
-      .duty-row { padding: 9px 12px; }
-      .today-pill { top: 14px; right: 14px; padding: 8px 14px; font-size: 12px; }
-    }
-    /* Responsive: narrow screens */
-    @media (max-width: 350px) {
-      .badge { padding: 7px 11px; font-size: 10px; border-radius: 12px; }
-      .card.today { padding: 14px 12px; border-radius: 20px; }
-      .duty-row { font-size: 13px; padding: 8px 10px; }
-      .duty-v { font-size: 13px; }
-      .second-call-name { font-size: 14px; }
-      .today-pill { top: 12px; right: 12px; }
     }
   </style>
 </head>
@@ -303,6 +352,12 @@
       <!-- DAILY VIEW -->
       <div id="view-daily" class="tab-content active">
         <div id="daily-render-area"></div>
+
+        <!-- DAY NAVIGATION BUTTONS AT BOTTOM -->
+        <div class="day-nav-controls">
+          <button class="day-nav-btn" onclick="changeDay(-1)">‹ Prev Day</button>
+          <button class="day-nav-btn" onclick="changeDay(1)">Next Day ›</button>
+        </div>
       </div>
 
       <!-- MONTH VIEW -->
@@ -344,7 +399,6 @@
   </div>
 
   <script>
-    // STRUCTURED KIOCH ASHWIN 2083 ROSTER
     const roster = [
       { date: '06-01', day: 'Thu', type: 'picu-day', title: 'PICU Day', ward: 'Nischal', nicu: 'Krishna', picu: 'Aayoush', er: 'Salina', second: 'Prerana', opd: 'Saurav Singh, Prerana, Sinda, Pritha, Devaki' },
       { date: '06-02', day: 'Fri', type: 'opd', title: 'OPD', ward: 'Salina', nicu: 'Sinda', picu: 'Srijana', er: 'Kshitiz', second: 'Saurav Singh', opd: 'Kabita, Madan, Mrinal, Pritha, Samikshya' },
@@ -453,6 +507,31 @@
         ? `<div class="card-note-badge">Note Attached</div>`
         : '';
 
+      // Render Upcoming 3 Days Mini-Cards
+      let upcomingItems = [];
+      for (let i = 1; i <= 3; i++) {
+        const upIdx = currentIndex + i;
+        if (upIdx < roster.length) {
+          const upData = roster[upIdx];
+          upcomingItems.push(`
+            <div class="upcoming-card type-${upData.type}" onclick="jumpToDate(${upIdx})">
+              <div class="upcoming-date-info">
+                <span class="upcoming-day">Ashwin ${upData.date.split('-')[1]}</span>
+                <span class="upcoming-weekday">• ${upData.day}</span>
+              </div>
+              <div class="upcoming-badge type-${upData.type}">${upData.title}</div>
+            </div>
+          `);
+        }
+      }
+
+      const upcomingHtml = upcomingItems.length > 0 ? `
+        <div class="upcoming-container">
+          <div class="upcoming-header">Upcoming Days</div>
+          ${upcomingItems.join('')}
+        </div>
+      ` : '';
+
       return `
         <div class="card today type-${data.type}" id="dailyCardElement" data-date="${data.date}">
           <div class="card-header">
@@ -472,6 +551,7 @@
 
           ${noteHtml}
         </div>
+        ${upcomingHtml}
       `;
     }
 
@@ -499,20 +579,18 @@
       for(let i=0; i<4; i++) { html += `<div class="cal-cell empty"></div>`; }
       
       roster.forEach((day, index) => {
-        const hasNoteClass = notesDB[day.date] ? 'has-note' : '';
+        const hasNote = !!notesDB[day.date];
+        const hasNoteClass = hasNote ? 'has-note' : '';
         const isTodayClass = index === realTodayIndex ? 'is-today' : '';
-        const note = notesDB[day.date];
-        const preview = note 
-          ? `<span class="note-preview">${note.substring(0, 12)}${note.length > 12 ? '…' : ''}</span>` 
-          : '';
+        
+        // Bold asterisk next to date with matching duty text color
+        const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
         
         html += `
           <div class="cal-cell type-${day.type} ${hasNoteClass} ${isTodayClass}" 
                data-index="${index}" data-date="${day.date}"
                style="animation-delay: ${(index + 4) * 18}ms;">
-            <span class="cal-date">${day.date.split('-')[1]}</span>
-            <span class="note-tag">✏️</span>
-            ${preview}
+            <span class="cal-date">${day.date.split('-')[1]}${asteriskHtml}</span>
           </div>
         `;
       });
@@ -657,15 +735,18 @@
       }
     }
 
+    // Swipe Gesture with Spring Back Threshold
     function initSwipeGestures() {
       const view = document.getElementById('view-daily');
       const area = document.getElementById('daily-render-area');
       let startX = 0, startY = 0, axisLocked = null, tracking = false;
+      const swipeThreshold = 70; // minimum pixels required to trigger day change
 
       view.addEventListener('touchstart', (e) => {
         const t = e.touches[0];
         startX = t.clientX; startY = t.clientY;
         tracking = true; axisLocked = null;
+        area.style.transition = 'none';
       }, { passive: true });
 
       view.addEventListener('touchmove', (e) => {
@@ -674,30 +755,44 @@
         const dx = t.clientX - startX;
         const dy = t.clientY - startY;
         if (!axisLocked) {
-          if (Math.abs(dx) > 12 || Math.abs(dy) > 12)
+          if (Math.abs(dx) > 10 || Math.abs(dy) > 10)
             axisLocked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
         }
         if (axisLocked === 'x') {
-          area.style.transform = 'translateX(' + (dx * 0.45) + 'px) scale(0.98)';
-          area.style.transition = 'none';
-          area.style.opacity = 1 - Math.abs(dx) / 500;
+          area.style.transform = `translateX(${dx * 0.45}px) scale(${1 - Math.min(Math.abs(dx)/1200, 0.04)})`;
+          area.style.opacity = `${1 - Math.min(Math.abs(dx)/500, 0.35)}`;
         }
       }, { passive: true });
 
       const endSwipe = (e) => {
         if (!tracking) return;
         tracking = false;
-        area.style.transform = '';
-        area.style.transition = '';
-        area.style.opacity = '';
         const t = e.changedTouches[0];
         const dx = t.clientX - startX;
         const dy = t.clientY - startY;
-        if (axisLocked === 'x' && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
-          if (dx < 0) changeDay(1);
-          else changeDay(-1);
+
+        if (axisLocked === 'x' && Math.abs(dx) >= swipeThreshold && Math.abs(dx) > Math.abs(dy)) {
+          const step = dx < 0 ? 1 : -1;
+          const nextIndex = currentIndex + step;
+          area.style.transform = '';
+          area.style.transition = '';
+          area.style.opacity = '';
+          if (nextIndex >= 0 && nextIndex < roster.length) {
+            changeDay(step);
+          } else {
+            // Spring back if out of roster bounds
+            area.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease';
+            area.style.transform = 'translateX(0) scale(1)';
+            area.style.opacity = '1';
+          }
+        } else {
+          // Spring back into position if swipe threshold was not met
+          area.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease';
+          area.style.transform = 'translateX(0) scale(1)';
+          area.style.opacity = '1';
         }
       };
+      
       view.addEventListener('touchend', endSwipe, { passive: true });
       view.addEventListener('touchcancel', endSwipe, { passive: true });
     }
