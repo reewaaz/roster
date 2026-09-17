@@ -113,6 +113,23 @@
     .card.today.type-off, .upcoming-card.type-off { background: var(--off-bg); border: 2px dashed #86efac; }
     .card.today.type-post-off, .upcoming-card.type-post-off { background: var(--post-off-bg); border: 2px solid rgba(71, 85, 105, 0.18); }
 
+    /* Compact 24h Cards */
+    .card.today.type-picu-24 {
+      padding: 16px 16px;
+      gap: 10px;
+      border-radius: 24px;
+    }
+    .card.today.type-picu-24 .date-num {
+      font-size: 25px;
+    }
+    .card.today.type-picu-24 .card-header {
+      padding-bottom: 8px;
+    }
+    .card.today.type-picu-24 .badge {
+      padding: 7px 12px;
+      font-size: 11px;
+    }
+
     .card-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 12px; }
     .date-num { font-size: 30px; font-weight: 900; color: var(--text-main); display: block; line-height: 1.1; }
@@ -123,28 +140,43 @@
     .card-body-content { display: flex; flex-direction: column; gap: 10px; }
     .team-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
     
-    .duty-list { display: flex; flex-direction: column; gap: 8px; }
-    .duty-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.92); padding: 11px 16px; border-radius: 16px; font-size: 15px; border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .duty-k { font-family: 'Inter', sans-serif; font-weight: 900; color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
-    .duty-v { font-weight: 800; color: var(--text-main); font-size: 15px; }
+    /* 2-Column Grid Layout for Assignments (2 Rows instead of 4) */
+    .duty-list { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 8px; 
+    }
+    .duty-row { 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: flex-start; 
+      background: rgba(255, 255, 255, 0.92); 
+      padding: 8px 12px; 
+      border-radius: 14px; 
+      border: 1px solid rgba(255,255,255,0.7); 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+    }
+    .duty-k { font-family: 'Inter', sans-serif; font-weight: 900; color: var(--text-muted); font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+    .duty-v { font-weight: 800; color: var(--text-main); font-size: 14px; }
 
     .pills { display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; scrollbar-width: none; padding: 2px 0; }
     .pills::-webkit-scrollbar { display: none; }
     .pill { background: rgba(255, 255, 255, 0.95); color: #1e293b; padding: 9px 14px; border-radius: 14px; font-size: 14px; font-weight: 800; border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
     
-    .second-call { padding: 11px 16px; background: rgba(0, 0, 0, 0.05); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.06); box-shadow: inset 0 1px 3px rgba(255,255,255,0.4); }
-    .second-call-label { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; }
-    .second-call-name { font-size: 16px; font-weight: 900; color: #0f172a; }
+    .second-call { padding: 9px 14px; background: rgba(0, 0, 0, 0.05); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.06); box-shadow: inset 0 1px 3px rgba(255,255,255,0.4); }
+    .second-call-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; color: #475569; text-transform: uppercase; }
+    .second-call-name { font-size: 14px; font-weight: 900; color: #0f172a; }
 
     .card-note-badge { display: inline-flex; align-items: center; gap: 5px; background: #0f172a; color: white; padding: 5px 10px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); margin-top: 4px; }
-    .daily-note { padding: 12px 14px; background: rgba(254, 249, 195, 0.95); border-radius: 16px; border: 2px dashed #fde047; font-size: 14px; font-weight: 800; color: #713f12; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .daily-note { padding: 10px 12px; background: rgba(254, 249, 195, 0.95); border-radius: 14px; border: 2px dashed #fde047; font-size: 13px; font-weight: 800; color: #713f12; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
 
     /* UPCOMING DAYS STYLES */
     .upcoming-container {
-      margin-top: 16px;
+      margin-top: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
     .upcoming-header {
       font-family: 'Inter', sans-serif;
@@ -156,8 +188,8 @@
       margin-left: 4px;
     }
     .upcoming-card {
-      padding: 12px 16px;
-      border-radius: 20px;
+      padding: 10px 14px;
+      border-radius: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -175,20 +207,20 @@
       gap: 8px;
     }
     .upcoming-day {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 900;
       color: var(--text-main);
     }
     .upcoming-weekday {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       color: var(--text-muted);
     }
     .upcoming-badge {
-      padding: 6px 12px;
-      border-radius: 12px;
+      padding: 5px 10px;
+      border-radius: 10px;
       font-family: 'Inter', sans-serif;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -483,7 +515,6 @@
       
       let detailsHtml = '';
       if (data.type === 'opd') {
-        // Exclude Mrinal from OPD Teammates pills
         const opdTeammates = data.opd
           ? data.opd.split(', ')
               .map(m => m.trim())
@@ -531,14 +562,14 @@
       
       const savedNote = notesDB[data.date];
       const noteHtml = savedNote 
-        ? `<div class="daily-note"><span style="font-size:11px; text-transform:uppercase; font-family:'Inter',sans-serif; display:block; margin-bottom:1px; opacity:0.8;">Note Attached</span>${savedNote}</div>` 
+        ? `<div class="daily-note"><span style="font-size:10px; text-transform:uppercase; font-family:'Inter',sans-serif; display:block; margin-bottom:1px; opacity:0.8;">Note Attached</span>${savedNote}</div>` 
         : '';
       
       const noteBadgeHtml = savedNote
         ? `<div class="card-note-badge">Note Attached</div>`
         : '';
 
-      // Render Upcoming 3 Days Mini-Cards
+      // Render Upcoming Days Mini-Cards
       let upcomingItems = [];
       for (let i = 1; i <= 3; i++) {
         const upIdx = currentIndex + i;
@@ -714,7 +745,6 @@
         currentIndex = newIndex;
         triggerHaptic(30);
         
-        // Auto-switch to daily tab if arrow is clicked while in month view
         if (!document.getElementById('view-daily').classList.contains('active')) {
           switchTab('daily');
         } else {
@@ -771,7 +801,6 @@
       }
     }
 
-    // Swipe Gesture with Spring Back Threshold
     function initSwipeGestures() {
       const view = document.getElementById('view-daily');
       const area = document.getElementById('daily-render-area');
