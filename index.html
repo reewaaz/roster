@@ -63,7 +63,7 @@
 
     /* View Container */
     .view-container { 
-      flex: 1; position: relative; overflow: hidden; padding: 16px 16px calc(92px + env(safe-area-inset-bottom)); 
+      flex: 1; position: relative; overflow: hidden; padding: 16px 16px calc(88px + env(safe-area-inset-bottom)); 
       display: flex; flex-direction: column; min-height: 0;
       touch-action: manipulation;
     }
@@ -78,39 +78,6 @@
     /* DAILY VIEW STYLES */
     #view-daily { display: none; flex-direction: column; touch-action: pan-y; }
     #view-daily.active { display: flex; }
-
-    /* Bottom Day Navigation Controls */
-    .day-nav-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-top: 12px;
-      flex-shrink: 0;
-    }
-    .day-nav-btn {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      color: var(--text-main);
-      padding: 14px 20px;
-      border-radius: 20px;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 900;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: transform 0.15s ease, background 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .day-nav-btn:active {
-      transform: scale(0.95);
-      background: #ffffff;
-    }
 
     /* Today Pill */
     .today-pill { position: absolute; top: 22px; right: 16px; z-index: 30; background: var(--accent); color: #fff; border: none; padding: 12px 20px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4); cursor: pointer; opacity: 0; transform: translateY(-6px) scale(0.9); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); -webkit-tap-highlight-color: transparent; }
@@ -264,9 +231,66 @@
     .cal-cell.type-off { border: 2px dashed #86efac; background: #f0fdf4; }
     .cal-cell.type-post-off { border: 1px solid #cbd5e1; background: #f1f5f9; }
 
-    /* BOTTOM NAV */
-    .bottom-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 28px; display: flex; padding: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); width: 88%; max-width: 340px; z-index: 20; border: 1px solid rgba(255,255,255,0.8); }
-    .nav-item { flex: 1; text-align: center; padding: 14px 0; border-radius: 20px; font-size: 17px; font-weight: 900; color: var(--text-muted); cursor: pointer; transition: all 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; }
+    /* BOTTOM NAV WITH ARROWS */
+    .bottom-nav { 
+      position: absolute; 
+      bottom: calc(12px + env(safe-area-inset-bottom)); 
+      left: 50%; 
+      transform: translateX(-50%); 
+      background: var(--nav-bg); 
+      backdrop-filter: blur(15px); 
+      -webkit-backdrop-filter: blur(15px); 
+      border-radius: 28px; 
+      display: flex; 
+      align-items: center;
+      gap: 6px;
+      padding: 6px; 
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06); 
+      width: 90%; 
+      max-width: 380px; 
+      z-index: 20; 
+      border: 1px solid rgba(255,255,255,0.8); 
+    }
+    
+    .nav-arrow-btn {
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text-main);
+      width: 44px;
+      height: 48px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+    .nav-arrow-btn:active {
+      transform: scale(0.88);
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-item { 
+      flex: 1; 
+      text-align: center; 
+      padding: 12px 0; 
+      border-radius: 20px; 
+      font-size: 16px; 
+      font-weight: 900; 
+      color: var(--text-muted); 
+      cursor: pointer; 
+      transition: all 0.3s; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      gap: 6px; 
+      font-family: 'Nunito', sans-serif; 
+    }
     .nav-item.active { background: white; color: var(--accent); box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
 
     /* NOTE MODAL */
@@ -352,12 +376,6 @@
       <!-- DAILY VIEW -->
       <div id="view-daily" class="tab-content active">
         <div id="daily-render-area"></div>
-
-        <!-- DAY NAVIGATION BUTTONS AT BOTTOM -->
-        <div class="day-nav-controls">
-          <button class="day-nav-btn" onclick="changeDay(-1)">‹ Prev Day</button>
-          <button class="day-nav-btn" onclick="changeDay(1)">Next Day ›</button>
-        </div>
       </div>
 
       <!-- MONTH VIEW -->
@@ -373,13 +391,16 @@
 
     </div>
 
+    <!-- BOTTOM NAV WITH INTEGRATED ARROWS -->
     <nav class="bottom-nav">
+      <button class="nav-arrow-btn" onclick="changeDay(-1)" aria-label="Previous Day">‹</button>
       <div class="nav-item active" onclick="switchTab('daily')" id="nav-daily">
         <span>👶</span> Daily
       </div>
       <div class="nav-item" onclick="switchTab('month')" id="nav-month">
         <span>📅</span> Month
       </div>
+      <button class="nav-arrow-btn" onclick="changeDay(1)" aria-label="Next Day">›</button>
     </nav>
 
     <!-- NOTE MODAL -->
@@ -462,7 +483,17 @@
       
       let detailsHtml = '';
       if (data.type === 'opd') {
-        const pills = data.opd ? data.opd.split(', ').map(m => `<span class="pill">${m}</span>`).join('') : '<span class="pill">None</span>';
+        // Exclude Mrinal from OPD Teammates pills
+        const opdTeammates = data.opd
+          ? data.opd.split(', ')
+              .map(m => m.trim())
+              .filter(m => m.toLowerCase() !== 'mrinal')
+          : [];
+        
+        const pills = opdTeammates.length > 0 
+          ? opdTeammates.map(m => `<span class="pill">${m}</span>`).join('') 
+          : '<span class="pill">None</span>';
+
         detailsHtml = `
           <div>
             <div class="team-label">OPD Teammates</div>
@@ -583,7 +614,6 @@
         const hasNoteClass = hasNote ? 'has-note' : '';
         const isTodayClass = index === realTodayIndex ? 'is-today' : '';
         
-        // Bold asterisk next to date with matching duty text color
         const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
         
         html += `
@@ -680,10 +710,16 @@
 
     function changeDay(step) {
       const newIndex = currentIndex + step;
-      if(newIndex >= 0 && newIndex < roster.length) {
+      if (newIndex >= 0 && newIndex < roster.length) {
         currentIndex = newIndex;
         triggerHaptic(30);
-        renderDailyView(step > 0 ? 'right' : 'left');
+        
+        // Auto-switch to daily tab if arrow is clicked while in month view
+        if (!document.getElementById('view-daily').classList.contains('active')) {
+          switchTab('daily');
+        } else {
+          renderDailyView(step > 0 ? 'right' : 'left');
+        }
       } else {
         triggerHaptic([12, 40, 12]);
       }
@@ -740,7 +776,7 @@
       const view = document.getElementById('view-daily');
       const area = document.getElementById('daily-render-area');
       let startX = 0, startY = 0, axisLocked = null, tracking = false;
-      const swipeThreshold = 70; // minimum pixels required to trigger day change
+      const swipeThreshold = 70;
 
       view.addEventListener('touchstart', (e) => {
         const t = e.touches[0];
@@ -780,13 +816,11 @@
           if (nextIndex >= 0 && nextIndex < roster.length) {
             changeDay(step);
           } else {
-            // Spring back if out of roster bounds
             area.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease';
             area.style.transform = 'translateX(0) scale(1)';
             area.style.opacity = '1';
           }
         } else {
-          // Spring back into position if swipe threshold was not met
           area.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease';
           area.style.transform = 'translateX(0) scale(1)';
           area.style.opacity = '1';
