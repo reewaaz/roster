@@ -232,7 +232,7 @@ function mainCardHtml(data, mountCls = '') {
     <div class="card today type-${data.type} ${mTint}${mountCls}" id="dailyCardElement" data-date="${data.date}">
       <div class="card-header">
         <div>
-          <span class="date-num">${escapeHtml(meta.month.split(' ')[0])} ${data.date.split('-')[1]}${savedNote ? '<span class="scroll-note">*</span>' : ''}</span>
+          <span class="date-num">${escapeHtml(meta.month.split(' ')[0])} ${data.date.split('-')[1]}${savedNote ? '<span class="scroll-note" style="color:var(--text-main);font-size:18px;font-weight:900;">*</span>' : ''}</span>
           <span class="day-name">${fullDayName(data.day)}</span>
           ${festNote}
           ${fromToHtml}
@@ -397,7 +397,7 @@ export function renderScrollView(dir, align) {
       return;
     }
     const past = i < currentIndex ? ' scroll-past' : '';
-    const noteMark = notesDB[d.date] ? '<span class="scroll-note">*</span>' : '';
+    const noteMark = notesDB[d.date] ? '<span class="scroll-note" style="color:var(--text-main);font-size:18px;font-weight:900;">*</span>' : '';
     const sw = getSwaps()[d.date];
     const swapMark = sw ? `<span class="swap-badge">⇄</span>` : '';
     const m = mrinalDutyAt(i);
@@ -512,7 +512,7 @@ export function renderMonthView() {
     const cell = new Date(startMs + index * DAY_MS);
     const cellKey = `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`;
     const isTodayClass = cellKey === todayKey ? 'is-today' : '';
-    const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
+    const asteriskHtml = hasNote ? `<span class="note-asterisk" style="font-size:16px;font-weight:900;color:var(--text-main);">*</span>` : '';
     /* Calendar cells are tinted purely by Dr. Mrinal's duty placement —
        no text label needed under the date. */
     const m = mrinalDutyAt(index);

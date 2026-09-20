@@ -43,7 +43,6 @@ export function openPrintModal() {
             <div class="settings-item-icon">${s.icon}</div>
             <div style="flex:1;">
               <div class="settings-item-label">${s.label}</div>
-              <div class="settings-item-sub">${s.sub}</div>
             </div>
             <span style="color:var(--text-muted);">›</span>
           </div>`).join('')}
@@ -89,11 +88,17 @@ function buildSettingsContent() {
       </div>
 
       <div class="settings-section-title">Roster</div>
+      <div class="settings-item" data-action="sync-rosters">
+        <div class="settings-item-icon">🔃</div>
+        <div style="flex:1;">
+          <div class="settings-item-label">Update Rosters</div>
+        </div>
+        <span style="color:var(--text-muted);">›</span>
+      </div>
       <div class="settings-item" data-action="generate">
         <div class="settings-item-icon">✨</div>
         <div style="flex:1;">
           <div class="settings-item-label">Generate Roster</div>
-          <div class="settings-item-sub">Generate / replace the current ${escapeHtml(meta.month)} roster</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
@@ -101,7 +106,6 @@ function buildSettingsContent() {
         <div class="settings-item-icon">🖨️</div>
         <div style="flex:1;">
           <div class="settings-item-label">Print Roster</div>
-          <div class="settings-item-sub">Print ${escapeHtml(meta.month)} as crisp A4 sheets — Simple, Name-first or Date-first</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
@@ -109,7 +113,6 @@ function buildSettingsContent() {
         <div class="settings-item-icon">⇄</div>
         <div style="flex:1;">
           <div class="settings-item-label">Swap / Reassign Duty</div>
-          <div class="settings-item-sub">${swaps ? `${swaps} active swaps` : 'Swap a person between days / roles'}</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
@@ -117,7 +120,6 @@ function buildSettingsContent() {
         <div class="settings-item-icon">🧹</div>
         <div style="flex:1;">
           <div class="settings-item-label">Clear All Swaps</div>
-          <div class="settings-item-sub">Revert every swap back to original</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>` : ''}
@@ -127,35 +129,15 @@ function buildSettingsContent() {
         <div class="settings-item-icon">🔔</div>
         <div style="flex:1;">
           <div class="settings-item-label">Duty Alerts</div>
-          <div class="settings-item-sub">Reminders before each duty day</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
 
-      <div class="settings-section-title">Roster Store</div>
-      <div class="settings-item" data-action="sync-rosters">
-        <div class="settings-item-icon">🔄</div>
-        <div style="flex:1;">
-          <div class="settings-item-label">Check for New Rosters</div>
-          <div class="settings-item-sub">Scan GitHub /rosters/ and download new &amp; updated months for offline use</div>
-        </div>
-        <span style="color:var(--text-muted);">›</span>
-      </div>
-
-      <div class="settings-item" data-action="cloud">
-        <div class="settings-item-icon">☁️</div>
-        <div style="flex:1;">
-          <div class="settings-item-label">GitHub Rosters</div>
-          <div class="settings-item-sub">${tokenConfigured ? 'Connected · ' + (lastSync ? `last sync ${new Date(lastSync).toLocaleDateString()}` : 'set up') : 'Add PAT — upload, load & delete stored rosters'}</div>
-        </div>
-        <span style="color:var(--text-muted);">›</span>
-      </div>
-
+      <div class="settings-section-title">Backup</div>
       <div class="settings-item" data-action="backup">
         <div class="settings-item-icon">💾</div>
         <div style="flex:1;">
           <div class="settings-item-label">Backup / Restore</div>
-          <div class="settings-item-sub">Export or import the roster, notes &amp; swaps as one JSON file</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
@@ -172,7 +154,6 @@ function buildSettingsContent() {
       else if (action === 'swap') { openSwapModal(); }
       else if (action === 'swap-clear') { clearSwaps(); showToast('All swaps reverted'); dispatchEvent(new CustomEvent('roster-changed')); }
       else if (action === 'alerts') openAlertModal();
-      else if (action === 'cloud') openCloudModal();
       else if (action === 'sync-rosters') openRosterSyncModal();
       else if (action === 'backup') openBackupModal();
     });

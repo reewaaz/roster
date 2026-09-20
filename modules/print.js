@@ -8,9 +8,9 @@ import { triggerHaptic, escapeHtml } from './utils.js';
    Layouts / typography follow the reference print1/2/3 files. */
 
 export const PRINT_STYLES = [
-  { id: 'simple', label: 'Simple', icon: '🗓️', sub: 'Daily list — one row per day, a column per duty' },
-  { id: 'name', label: 'Name first', icon: '👥', sub: 'Matrix by person — rows are the whole team' },
-  { id: 'date', label: 'Date first', icon: '📅', sub: 'Matrix by date — columns are the whole team' },
+  { id: 'simple', label: 'Simple', icon: '🗓️' },
+  { id: 'name', label: 'Name first', icon: '👥' },
+  { id: 'date', label: 'Date first', icon: '📅' },
 ];
 
 /* notes map injected from rendering module */
