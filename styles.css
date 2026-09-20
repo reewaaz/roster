@@ -2,8 +2,8 @@
 
 :root {
   --bg: #fcfbfa;
-  --header-bg: rgba(255, 255, 255, 0.25);
-  --header-border: rgba(255, 255, 255, 0.5);
+  --header-bg: rgba(255, 255, 255, 0.12);
+  --header-border: rgba(255, 255, 255, 0.45);
   --text-main: #1e293b;
   --text-muted: #64748b;
   --nav-bg: rgba(255, 255, 255, 0.30);
@@ -23,8 +23,8 @@
 /* DARK MODE */
 :root[data-theme="dark"] {
   --bg: #0b1220;
-  --header-bg: rgba(15, 26, 46, 0.22);
-  --header-border: rgba(148, 163, 184, 0.18);
+  --header-bg: rgba(15, 26, 46, 0.10);
+  --header-border: rgba(148, 163, 184, 0.16);
   --text-main: #e2e8f0;
   --text-muted: #8fa3bd;
   --nav-bg: rgba(15, 26, 46, 0.28);
@@ -63,25 +63,25 @@ body {
 
 /* Fixed Header */
 header {
-  padding: 36px 20px 16px;
+  padding: 26px 20px 12px;
   background: var(--header-bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
   border-bottom: 1px solid var(--header-border);
   border-bottom-left-radius: 28px;
   border-bottom-right-radius: 28px;
   flex-shrink: 0;
-  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.08);
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
 }
 :root[data-theme="dark"] header {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.header-actions { display: flex; gap: 10px; margin-top: 10px; }
-.icon-btn { width: 44px; height: 44px; border: none; border-radius: 15px; background: rgba(255, 255, 255, 0.7); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.18s ease; -webkit-tap-highlight-color: transparent; }
+.header-actions { display: flex; gap: 10px; margin-top: 6px; }
+.icon-btn { width: 40px; height: 40px; border: none; border-radius: 13px; background: rgba(255, 255, 255, 0.6); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05); font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.18s ease, background 0.2s ease; -webkit-tap-highlight-color: transparent; }
 .icon-btn:active { transform: scale(0.9); }
 .icon-btn svg { display: block; }
-:root[data-theme="dark"] .icon-btn { background: rgba(30, 41, 59, 0.7); }
+:root[data-theme="dark"] .icon-btn { background: rgba(30, 41, 59, 0.55); }
 .greeting { font-family: 'Inter', sans-serif; font-size: 12px; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
 .title { font-size: 24px; font-weight: 900; color: #1e293b; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
 :root[data-theme="dark"] .greeting { color: #8fa3bd; }
@@ -412,7 +412,7 @@ header {
   border-radius: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 0;
   box-shadow: none;
   width: auto;
