@@ -112,9 +112,11 @@ function mainCardHtml(data, mountCls = '') {
         const from = occupant(prev);
         const to = occupant(next);
         const bits = [];
-        if (from) bits.push(`<span class="ft-name">From: ${escapeHtml(from)}</span>`);
-        if (to) bits.push(`<span class="ft-name">To: ${escapeHtml(to)}</span>`);
-        return bits.length ? `<div class="handover-fromto c-${m.key}">${bits.join(' ')}</div>` : '';
+        if (from) bits.push(`<span class="ft-item"><span class="ft-k">From</span><span class="ft-name">${escapeHtml(from)}</span></span>`);
+        if (to) bits.push(`<span class="ft-item"><span class="ft-k">To</span><span class="ft-name">${escapeHtml(to)}</span></span>`);
+        return bits.length
+          ? `<div class="handover-fromto c-${m.key}">${bits.join('<span class="ft-arrow">→</span>')}</div>`
+          : '';
       })()
     : '';
 

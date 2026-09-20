@@ -224,18 +224,18 @@ header {
 .duty-v { font-weight: 800; color: var(--text-main); font-size: 14px; }
 
 /* Placement-coloured duty rows (assigned palette inside the card) */
-.duty-row.dr-ward { background: rgba(185, 236, 226, 0.55); border-color: rgba(15, 118, 110, 0.2); }
-.duty-row.dr-nicu { background: rgba(251, 208, 234, 0.55); border-color: rgba(163, 25, 111, 0.2); }
-.duty-row.dr-picu { background: rgba(255, 223, 227, 0.55); border-color: rgba(220, 38, 70, 0.2); }
-.duty-row.dr-er   { background: rgba(255, 240, 168, 0.55); border-color: rgba(146, 64, 14, 0.2); }
+.duty-row.dr-ward { background: rgba(185, 236, 226, 0.38); border-color: rgba(15, 118, 110, 0.2); }
+.duty-row.dr-nicu { background: rgba(251, 208, 234, 0.38); border-color: rgba(163, 25, 111, 0.2); }
+.duty-row.dr-picu { background: rgba(255, 223, 227, 0.38); border-color: rgba(220, 38, 70, 0.2); }
+.duty-row.dr-er   { background: rgba(255, 240, 168, 0.38); border-color: rgba(146, 64, 14, 0.2); }
 .duty-row.dr-ward .duty-k, .duty-row.dr-ward .duty-v { color: #0f766e; }
 .duty-row.dr-nicu .duty-k, .duty-row.dr-nicu .duty-v { color: #a3196f; }
 .duty-row.dr-picu .duty-k, .duty-row.dr-picu .duty-v { color: #dc2646; }
 .duty-row.dr-er   .duty-k, .duty-row.dr-er   .duty-v { color: #92400e; }
-:root[data-theme="dark"] .duty-row.dr-ward { background: rgba(16, 81, 72, 0.4); border-color: rgba(94, 234, 212, 0.2); }
-:root[data-theme="dark"] .duty-row.dr-nicu { background: rgba(84, 31, 71, 0.45); border-color: rgba(249, 168, 212, 0.22); }
-:root[data-theme="dark"] .duty-row.dr-picu { background: rgba(76, 35, 49, 0.5); border-color: rgba(253, 164, 175, 0.22); }
-:root[data-theme="dark"] .duty-row.dr-er   { background: rgba(138, 109, 26, 0.4); border-color: rgba(253, 230, 138, 0.22); }
+:root[data-theme="dark"] .duty-row.dr-ward { background: rgba(16, 81, 72, 0.3); border-color: rgba(94, 234, 212, 0.2); }
+:root[data-theme="dark"] .duty-row.dr-nicu { background: rgba(84, 31, 71, 0.34); border-color: rgba(249, 168, 212, 0.22); }
+:root[data-theme="dark"] .duty-row.dr-picu { background: rgba(76, 35, 49, 0.38); border-color: rgba(253, 164, 175, 0.22); }
+:root[data-theme="dark"] .duty-row.dr-er   { background: rgba(138, 109, 26, 0.3); border-color: rgba(253, 230, 138, 0.22); }
 :root[data-theme="dark"] .duty-row.dr-ward .duty-k, :root[data-theme="dark"] .duty-row.dr-ward .duty-v { color: #5eead4; }
 :root[data-theme="dark"] .duty-row.dr-nicu .duty-k, :root[data-theme="dark"] .duty-row.dr-nicu .duty-v { color: #f9a8d4; }
 :root[data-theme="dark"] .duty-row.dr-picu .duty-k, :root[data-theme="dark"] .duty-row.dr-picu .duty-v { color: #fda4af; }
@@ -272,15 +272,33 @@ header {
 /* From/To handover line on Mrinal's 24h cards */
 .handover-fromto {
   margin-top: 8px;
-  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px;
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px;
   font-family: 'Inter', sans-serif;
-  font-size: 12px; font-weight: 900;
-  color: var(--text-muted);
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 12px;
+  padding: 5px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
-.handover-fromto .ft-name { color: var(--text-main); }
+:root[data-theme="dark"] .handover-fromto {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.ft-item { display: inline-flex; align-items: baseline; gap: 5px; }
+.ft-k { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+.ft-name { font-weight: 900; font-size: 12.5px; color: var(--text-main); }
+.ft-arrow { color: var(--text-muted); opacity: 0.6; font-weight: 900; font-size: 12.5px; }
+.handover-fromto.c-ward { background: rgba(185, 236, 226, 0.45); border-color: rgba(15, 118, 110, 0.22); }
+.handover-fromto.c-nicu { background: rgba(251, 208, 234, 0.45); border-color: rgba(163, 25, 111, 0.22); }
+.handover-fromto.c-picu { background: rgba(255, 223, 227, 0.45); border-color: rgba(220, 38, 70, 0.22); }
 .handover-fromto.c-ward .ft-name { color: #0f766e; }
 .handover-fromto.c-nicu .ft-name { color: #a3196f; }
 .handover-fromto.c-picu .ft-name { color: #dc2646; }
+:root[data-theme="dark"] .handover-fromto.c-ward { background: rgba(16, 81, 72, 0.35); border-color: rgba(94, 234, 212, 0.25); }
+:root[data-theme="dark"] .handover-fromto.c-nicu { background: rgba(84, 31, 71, 0.4); border-color: rgba(249, 168, 212, 0.28); }
+:root[data-theme="dark"] .handover-fromto.c-picu { background: rgba(76, 35, 49, 0.45); border-color: rgba(253, 164, 175, 0.28); }
 :root[data-theme="dark"] .handover-fromto.c-ward .ft-name { color: #5eead4; }
 :root[data-theme="dark"] .handover-fromto.c-nicu .ft-name { color: #f9a8d4; }
 :root[data-theme="dark"] .handover-fromto.c-picu .ft-name { color: #fda4af; }
@@ -319,6 +337,10 @@ header {
   border-radius: 999px; padding: 4px 10px;
 }
 :root[data-theme="dark"] .opd-pill { background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.3); }
+/* OPD contrast: deeper sky tones on light theme so labels/pills/count read clearly */
+:root:not([data-theme="dark"]) .opd-label { color: #0369a1; }
+:root:not([data-theme="dark"]) .opd-count { background: #0369a1; }
+:root:not([data-theme="dark"]) .opd-pill { color: #075985; background: rgba(2, 132, 199, 0.10); border-color: rgba(2, 132, 199, 0.18); }
 
 /* Roster Expired Card */
 .expired-card { border-radius: 22px; padding: 18px 16px; margin-bottom: 14px; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px dashed #f59e0b; cursor: pointer; text-align: center; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15); }
@@ -847,15 +869,15 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 
 /* ---- Card + up-coming cards + calendar cells take their colour and label
    from Dr. Mrinal's actual duty placement (reference print palette) ---- */
-.card.today.mrd-picuday, .upcoming-card.mrd-picuday, .sr-chip.mrd-picuday { background: #ead9ff; border-color: rgba(126, 34, 206, 0.3); }
-.card.today.mrd-dayer,   .upcoming-card.mrd-dayer,   .sr-chip.mrd-dayer   { background: #ffe680; border-color: rgba(146, 64, 14, 0.3); }
-.card.today.mrd-opd,     .upcoming-card.mrd-opd,     .sr-chip.mrd-opd     { background: #bfe3fc; border-color: rgba(3, 105, 161, 0.3); }
-.card.today.mrd-picu24,  .upcoming-card.mrd-picu24,  .sr-chip.mrd-picu24  { background: #ffcdd4; border-color: rgba(220, 38, 70, 0.3); }
-.card.today.mrd-nicu24,  .upcoming-card.mrd-nicu24,  .sr-chip.mrd-nicu24  { background: #f7b7dd; border-color: rgba(163, 25, 111, 0.3); }
-.card.today.mrd-ward24,  .upcoming-card.mrd-ward24,  .sr-chip.mrd-ward24  { background: #8fe6d4; border-color: rgba(15, 118, 110, 0.3); }
+.card.today.mrd-picuday, .upcoming-card.mrd-picuday, .sr-chip.mrd-picuday { background: #ebdefd; border-color: rgba(126, 34, 206, 0.3); }
+.card.today.mrd-dayer,   .upcoming-card.mrd-dayer,   .sr-chip.mrd-dayer   { background: #fce898; border-color: rgba(146, 64, 14, 0.3); }
+.card.today.mrd-opd,     .upcoming-card.mrd-opd,     .sr-chip.mrd-opd     { background: #c9e6fb; border-color: rgba(3, 105, 161, 0.3); }
+.card.today.mrd-picu24,  .upcoming-card.mrd-picu24,  .sr-chip.mrd-picu24  { background: #fcd4db; border-color: rgba(220, 38, 70, 0.3); }
+.card.today.mrd-nicu24,  .upcoming-card.mrd-nicu24,  .sr-chip.mrd-nicu24  { background: #f6c3e2; border-color: rgba(163, 25, 111, 0.3); }
+.card.today.mrd-ward24,  .upcoming-card.mrd-ward24,  .sr-chip.mrd-ward24  { background: #a3e8db; border-color: rgba(15, 118, 110, 0.3); }
 .card.today.mrd-post,    .upcoming-card.mrd-post,    .sr-chip.mrd-post    { background: #f2f5f8; border-color: rgba(71, 85, 105, 0.3); }
-.card.today.mrd-off,     .upcoming-card.mrd-off,     .sr-chip.mrd-off     { background: #baf2cd; border-color: rgba(22, 101, 52, 0.3); }
-.card.today.mrd-nagar,   .upcoming-card.mrd-nagar,   .sr-chip.mrd-nagar   { background: #cdd8ff; border-color: rgba(67, 56, 202, 0.3); }
+.card.today.mrd-off,     .upcoming-card.mrd-off,     .sr-chip.mrd-off     { background: #c5f2d5; border-color: rgba(22, 101, 52, 0.3); }
+.card.today.mrd-nagar,   .upcoming-card.mrd-nagar,   .sr-chip.mrd-nagar   { background: #d4ddfd; border-color: rgba(67, 56, 202, 0.3); }
 .card.today.mrd-second,  .upcoming-card.mrd-second,  .sr-chip.mrd-second  { background: #334155; border-color: rgba(71, 85, 105, 0.35); color: #fff; }
 
 .badge.mrd-picuday, .upcoming-badge.mrd-picuday { background: #ead9ff; color: #7e22ce; }
@@ -880,15 +902,15 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 .cal-cell.mrd-nagar   { background: #cdd8ff; border: 2px solid rgba(67, 56, 202, 0.22); }
 .cal-cell.mrd-second  { background: #334155; border: 2px solid rgba(71, 85, 105, 0.28); color: #fff; }
 
-:root[data-theme="dark"] .card.today.mrd-picuday, :root[data-theme="dark"] .upcoming-card.mrd-picuday, :root[data-theme="dark"] .sr-chip.mrd-picuday { background: #372a5f; border-color: rgba(216, 180, 254, 0.35); }
-:root[data-theme="dark"] .card.today.mrd-dayer,   :root[data-theme="dark"] .upcoming-card.mrd-dayer,   :root[data-theme="dark"] .sr-chip.mrd-dayer   { background: #8a6d1a; border-color: rgba(253, 230, 138, 0.4); }
-:root[data-theme="dark"] .card.today.mrd-opd,     :root[data-theme="dark"] .upcoming-card.mrd-opd,     :root[data-theme="dark"] .sr-chip.mrd-opd     { background: #135a8c; border-color: rgba(125, 211, 252, 0.4); }
-:root[data-theme="dark"] .card.today.mrd-picu24,  :root[data-theme="dark"] .upcoming-card.mrd-picu24,  :root[data-theme="dark"] .sr-chip.mrd-picu24  { background: #4c2331; border-color: rgba(253, 164, 175, 0.35); }
-:root[data-theme="dark"] .card.today.mrd-nicu24,  :root[data-theme="dark"] .upcoming-card.mrd-nicu24,  :root[data-theme="dark"] .sr-chip.mrd-nicu24  { background: #541f47; border-color: rgba(249, 168, 212, 0.35); }
-:root[data-theme="dark"] .card.today.mrd-ward24,  :root[data-theme="dark"] .upcoming-card.mrd-ward24,  :root[data-theme="dark"] .sr-chip.mrd-ward24  { background: #105148; border-color: rgba(94, 234, 212, 0.35); }
+:root[data-theme="dark"] .card.today.mrd-picuday, :root[data-theme="dark"] .upcoming-card.mrd-picuday, :root[data-theme="dark"] .sr-chip.mrd-picuday { background: #362c59; border-color: rgba(216, 180, 254, 0.35); }
+:root[data-theme="dark"] .card.today.mrd-dayer,   :root[data-theme="dark"] .upcoming-card.mrd-dayer,   :root[data-theme="dark"] .sr-chip.mrd-dayer   { background: #786221; border-color: rgba(253, 230, 138, 0.4); }
+:root[data-theme="dark"] .card.today.mrd-opd,     :root[data-theme="dark"] .upcoming-card.mrd-opd,     :root[data-theme="dark"] .sr-chip.mrd-opd     { background: #19537d; border-color: rgba(125, 211, 252, 0.4); }
+:root[data-theme="dark"] .card.today.mrd-picu24,  :root[data-theme="dark"] .upcoming-card.mrd-picu24,  :root[data-theme="dark"] .sr-chip.mrd-picu24  { background: #462734; border-color: rgba(253, 164, 175, 0.35); }
+:root[data-theme="dark"] .card.today.mrd-nicu24,  :root[data-theme="dark"] .upcoming-card.mrd-nicu24,  :root[data-theme="dark"] .sr-chip.mrd-nicu24  { background: #4d2445; border-color: rgba(249, 168, 212, 0.35); }
+:root[data-theme="dark"] .card.today.mrd-ward24,  :root[data-theme="dark"] .upcoming-card.mrd-ward24,  :root[data-theme="dark"] .sr-chip.mrd-ward24  { background: #164c46; border-color: rgba(94, 234, 212, 0.35); }
 :root[data-theme="dark"] .card.today.mrd-post,    :root[data-theme="dark"] .upcoming-card.mrd-post,    :root[data-theme="dark"] .sr-chip.mrd-post    { background: #4a5567; border-color: rgba(203, 213, 225, 0.35); }
-:root[data-theme="dark"] .card.today.mrd-off,     :root[data-theme="dark"] .upcoming-card.mrd-off,     :root[data-theme="dark"] .sr-chip.mrd-off     { background: #14572f; border-color: rgba(134, 239, 172, 0.35); }
-:root[data-theme="dark"] .card.today.mrd-nagar,   :root[data-theme="dark"] .upcoming-card.mrd-nagar,   :root[data-theme="dark"] .sr-chip.mrd-nagar   { background: #2d2c70; border-color: rgba(165, 180, 252, 0.35); }
+:root[data-theme="dark"] .card.today.mrd-off,     :root[data-theme="dark"] .upcoming-card.mrd-off,     :root[data-theme="dark"] .sr-chip.mrd-off     { background: #1a5032; border-color: rgba(134, 239, 172, 0.35); }
+:root[data-theme="dark"] .card.today.mrd-nagar,   :root[data-theme="dark"] .upcoming-card.mrd-nagar,   :root[data-theme="dark"] .sr-chip.mrd-nagar   { background: #2e2e66; border-color: rgba(165, 180, 252, 0.35); }
 :root[data-theme="dark"] .card.today.mrd-second,  :root[data-theme="dark"] .upcoming-card.mrd-second,  :root[data-theme="dark"] .sr-chip.mrd-second  { background: #283a5c; border-color: rgba(203, 213, 225, 0.35); }
 
 :root[data-theme="dark"] .badge.mrd-picuday, :root[data-theme="dark"] .upcoming-badge.mrd-picuday { background: #372a5f; color: #d8b4fe; }
