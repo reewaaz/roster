@@ -46,7 +46,15 @@ const contentCache = new Map(); // name -> { at, data }
 export function getStoreConfig() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-    return { ...DEFAULT_STORE, ...(saved || {}) };
+    if (saved && typeof saved === 'object') {
+      /* A stale/corrupt saved config (e.g. a missing folder/owner from an older
+         build) must never break the scan — only accept configs that name a real
+         target, otherwise fall back to the default store (reewaaz/roster → /rosters). */
+      const required = ['owner', 'repo', 'branch', 'folder'];
+      const valid = required.every((k) => typeof saved[k] === 'string' && saved[k].trim());
+      if (valid) return { ...DEFAULT_STORE, ...saved };
+    }
+    return { ...DEFAULT_STORE };
   } catch (e) {
     return { ...DEFAULT_STORE };
   }
@@ -382,12 +390,59 @@ export function removeLocalRoster(name) {
   return false;
 }
 
+/* Month-file names to probe when the GitHub contents API is unavailable (rate
+   limit, CORS block, stale store config…). The raw CDN can't list a folder, but
+   the file names are deterministic (YYYYMM.json), so we probe candidates around
+   the loaded month: every month of the same BS year (index ±6), plus the same
+   month of the neighbouring years. */
+function candidateRosterNames() {
+  const names = new Set();
+  const addYearAround = (monthStr) => {
+    const p = parseMonthYear(monthStr);
+    if (!p) return;
+    const year = Number(p.year);
+    for (let i = Math.max(1, p.index - 6); i <= Math.min(12, p.index + 6); i++) {
+      names.add(`${year}${String(i).padStart(2, '0')}.json`);
+    }
+    names.add(`${year - 1}${String(p.index).padStart(2, '0')}.json`);
+    names.add(`${year + 1}${String(p.index).padStart(2, '0')}.json`);
+  };
+  addYearAround(getMeta().month);
+  return [...names];
+}
+
+/* Fallback scan: probe the candidates straight off the raw CDN at the store path
+   the rest of the app already uses — raw.githubusercontent.com/<owner>/<repo>/
+   <branch>/<folder>/<file> (i.e. reewaaz/roster/main/rosters). Seeding the content
+   cache here means the sync loop below doesn't re-fetch the same file. */
+async function probeRawRosters() {
+  const cfg = getStoreConfig();
+  const found = [];
+  await Promise.all(candidateRosterNames().map(async (name) => {
+    try {
+      const url = `${cfg.rawBase}/${cfg.owner}/${cfg.repo}/${cfg.branch}/${cfg.folder}/${encodeURIComponent(name)}`;
+      const res = await fetch(url, { headers: rawHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      const validation = validateRosterData(data);
+      if (validation) return;
+      found.push({ name, sha: '', size: 0, path: `${cfg.folder}/${name}`, root: false });
+      contentCache.set(name, { at: Date.now(), data });
+    } catch (e) { /* 404 / offline — skip */ }
+  }));
+  return found;
+}
+
 /* "Check for new rosters": scan the GitHub /rosters/ folder, download every month
    file, validate it and keep a copy on this device. Newly downloaded rosters stay
    readable offline and keep the calendar ⇄ arrows working without a connection.
    When the roster covering today changed on GitHub it is adopted immediately. */
 export async function checkAndCacheRosters({ adoptCurrent = true } = {}) {
-  const files = await listStoreRosters(true); /* force a fresh listing */
+  let files = [];
+  try { files = await listStoreRosters(true); } catch (e) { /* ignore */ }
+  /* If the API listing came back empty (rate limit, CORS, stale config…), probe
+     the raw CDN for the expected month files — same /rosters/ folder. */
+  if (!files.length) files = await probeRawRosters();
   const cache = getLocalRosterCache();
   const before = cache.files;
   const s = { total: 0, fetched: [], newFiles: [], updated: [], invalid: [], unchanged: [] };

@@ -133,20 +133,20 @@ function buildSettingsContent() {
       </div>
 
       <div class="settings-section-title">Roster Store</div>
-      <div class="settings-item" data-action="cloud">
-        <div class="settings-item-icon">☁️</div>
-        <div style="flex:1;">
-          <div class="settings-item-label">GitHub Rosters</div>
-          <div class="settings-item-sub">${tokenConfigured ? 'Connected · ' + (lastSync ? `last sync ${new Date(lastSync).toLocaleDateString()}` : 'set up') : 'Add PAT — upload, load & delete stored rosters'}</div>
-        </div>
-        <span style="color:var(--text-muted);">›</span>
-      </div>
-
       <div class="settings-item" data-action="sync-rosters">
         <div class="settings-item-icon">🔄</div>
         <div style="flex:1;">
           <div class="settings-item-label">Check for New Rosters</div>
           <div class="settings-item-sub">Scan GitHub /rosters/ and download new &amp; updated months for offline use</div>
+        </div>
+        <span style="color:var(--text-muted);">›</span>
+      </div>
+
+      <div class="settings-item" data-action="cloud">
+        <div class="settings-item-icon">☁️</div>
+        <div style="flex:1;">
+          <div class="settings-item-label">GitHub Rosters</div>
+          <div class="settings-item-sub">${tokenConfigured ? 'Connected · ' + (lastSync ? `last sync ${new Date(lastSync).toLocaleDateString()}` : 'set up') : 'Add PAT — upload, load & delete stored rosters'}</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>

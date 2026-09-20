@@ -1,6 +1,6 @@
 /* Bump this on every deploy so installed clients re-run install() and
    drop the stale cached app JS (Cache-First SW never revalidates assets). */
-const CACHE_NAME = 'duty-app-v22';
+const CACHE_NAME = 'duty-app-v23';
 const ASSETS = [
   './',
   './index.html',

@@ -5,7 +5,7 @@
   --header-bg: #f1f5f9;
   --text-main: #1e293b;
   --text-muted: #64748b;
-  --nav-bg: rgba(255, 255, 255, 0.55);
+  --nav-bg: rgba(255, 255, 255, 0.40);
   --accent: #0284c7;
 
   /* Color Palette */
@@ -25,7 +25,7 @@
   --header-bg: #0f1a2e;
   --text-main: #e2e8f0;
   --text-muted: #8fa3bd;
-  --nav-bg: rgba(15, 26, 46, 0.55);
+  --nav-bg: rgba(15, 26, 46, 0.38);
   --accent: #38bdf8;
 
   --picu-day-bg: #432d70; --picu-day-txt: #e6ccff;
@@ -130,7 +130,7 @@ header {
 .scroll-note { font-size: 11px; font-weight: 900; color: #d97706; margin-left: 2px; }
 
 /* Today Pill */
-.today-pill { position: absolute; bottom: calc(88px + env(safe-area-inset-bottom)); right: 16px; z-index: 30; background: var(--accent); color: #fff; border: none; padding: 12px 20px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4); cursor: pointer; opacity: 0; transform: translateY(-6px) scale(0.9); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); -webkit-tap-highlight-color: transparent; }
+.today-pill { position: absolute; bottom: calc(96px + env(safe-area-inset-bottom)); right: 16px; z-index: 30; background: var(--accent); color: #fff; border: none; padding: 12px 20px; border-radius: 999px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4); cursor: pointer; opacity: 0; transform: translateY(-6px) scale(0.9); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); -webkit-tap-highlight-color: transparent; }
 .today-pill.visible { opacity: 1; transform: none; pointer-events: auto; }
 .today-pill:active { transform: scale(0.94); }
 
@@ -399,20 +399,20 @@ header {
   left: 50%;
   transform: translateX(-50%);
   background: var(--nav-bg);
-  backdrop-filter: blur(22px) saturate(170%);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
   border-radius: 28px;
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 6px;
-  box-shadow: 0 8px 32px rgba(2, 132, 199, 0.12);
+  box-shadow: 0 8px 32px rgba(2, 132, 199, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 0 rgba(255, 255, 255, 0.25);
   width: 90%;
   max-width: 380px;
   z-index: 20;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.6);
 }
-:root[data-theme="dark"] .bottom-nav { border-color: rgba(148, 163, 184, 0.18); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); }
+:root[data-theme="dark"] .bottom-nav { border-color: rgba(148, 163, 184, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(148, 163, 184, 0.18); }
 
 .nav-item {
   flex: 1;
@@ -430,8 +430,8 @@ header {
   gap: 5px;
   font-family: 'Nunito', sans-serif;
 }
-.nav-item.active { background: rgba(255, 255, 255, 0.85); color: var(--accent); box-shadow: 0 4px 14px rgba(0,0,0,0.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-:root[data-theme="dark"] .nav-item.active { background: rgba(30, 41, 59, 0.75); }
+.nav-item.active { background: rgba(255, 255, 255, 0.55); color: var(--accent); box-shadow: 0 4px 14px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8); backdrop-filter: blur(12px) saturate(160%); -webkit-backdrop-filter: blur(12px) saturate(160%); }
+:root[data-theme="dark"] .nav-item.active { background: rgba(30, 41, 59, 0.5); box-shadow: 0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(148, 163, 184, 0.15); }
 
 /* MODALS */
 .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 100; display: none; opacity: 0; transition: opacity 0.3s; justify-content: center; align-items: center; padding: 20px; }
@@ -1047,3 +1047,115 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---- GLOBAL TEXT SCALE +10% ----
+   App-shell UI text is raised ~10% so everything reads slightly bigger.
+   Print styles (.pr-*) live inside @media print above and are NOT touched —
+   the A4 sheets keep their exact mm sizing. */
+body { font-size: 17.6px; }
+
+.icon-btn { font-size: 21px; }
+.greeting { font-size: 13px; }
+.title { font-size: 26px; }
+.scroll-note { font-size: 12px; }
+
+.today-pill { font-size: 15px; padding: 13px 22px; }
+
+.card-label { font-size: 12px; }
+.date-num { font-size: 33px; }
+.card.today.type-picu-24 .date-num { font-size: 28px; }
+.day-name { font-size: 17px; }
+.badge { font-size: 13px; }
+.card.today.type-picu-24 .badge { font-size: 12px; }
+.team-label { font-size: 12px; }
+.duty-k { font-size: 11px; }
+.duty-v { font-size: 15px; }
+.pill { font-size: 15px; padding: 10px 15px; }
+.second-call-label { font-size: 11px; }
+.second-call-name { font-size: 15px; }
+.card-note-badge { font-size: 11px; }
+.swap-badge { font-size: 10px; }
+.daily-note { font-size: 14px; }
+.handover-label { font-size: 11px; }
+.handover-name { font-size: 14px; }
+.nagar-label { font-size: 11px; }
+.nagar-name { font-size: 14px; }
+.opd-label { font-size: 11px; }
+.opd-count { font-size: 11px; min-width: 20px; height: 20px; }
+.opd-pill { font-size: 14px; padding: 5px 11px; }
+.expired-title { font-size: 17px; }
+.expired-sub { font-size: 13px; }
+.expired-cta { font-size: 14px; }
+
+.upcoming-day { font-size: 15px; }
+.upcoming-weekday { font-size: 13px; }
+.upcoming-badge { font-size: 11px; }
+.sr-chip .upcoming-badge { font-size: 12px; }
+
+.cal-month-title { font-size: 19px; }
+.cal-nav { font-size: 24px; }
+.cal-header span { font-size: 13px; }
+.cal-cell .cal-date { font-size: 22px; }
+.cal-cell.is-today .cal-date { width: 36px; height: 36px; }
+.note-asterisk { font-size: 20px; }
+
+.nav-item { font-size: 17px; }
+
+.modal-header { font-size: 20px; }
+.modal-close-x { font-size: 20px; }
+.modal-textarea { font-size: 17px; }
+
+.sr-date { font-size: 18px; }
+.sr-match { font-size: 14px; }
+.sr-match-label { font-size: 11.5px; }
+.sr-foot { font-size: 14px; }
+.sr-summary { font-size: 14px; }
+.modal-btn { font-size: 18px; }
+
+.settings-item-label { font-size: 17px; }
+.settings-item-sub { font-size: 13px; }
+.settings-item-icon { font-size: 24px; }
+.settings-section-title { font-size: 12px; }
+
+.swap-pick select { font-size: 17px; }
+.swap-pick-label { font-size: 13px; }
+.swap-preview { font-size: 14px; }
+.swap-day-chip { font-size: 15px; }
+.swap-day-chip .swap-chip-role { font-size: 13px; }
+.reassign-row .reassign-day { font-size: 14px; }
+.reassign-row .reassign-role { font-size: 13px; }
+.reassign-row input { font-size: 14px; }
+.swap-hint { font-size: 13px; }
+.swap-day-head { font-size: 14px; }
+.swap-chip { font-size: 15px; padding: 7px 13px; }
+.swap-chip .swap-chip-role { font-size: 11px; }
+.swap-leave { font-size: 14px; }
+.swap-addsel { font-size: 14px; }
+.swap-ghost { font-size: 15px; }
+.swap-small-toggle { font-size: 14px; }
+
+.setting-label { font-size: 17px; }
+.setting-sub { font-size: 13px; }
+.alert-select { font-size: 15px; }
+.alert-type-label { font-size: 14px; }
+.alert-actions .btn-cancel { font-size: 14px; }
+.reminder-days, .reminder-time { font-size: 14px; }
+.reminder-remove { font-size: 15px; }
+.add-reminder { font-size: 14px; }
+
+.install-icon { font-size: 46px; }
+.install-title { font-size: 20px; }
+.install-sub { font-size: 14px; }
+.roster-steps { font-size: 14px; }
+.roster-textarea { font-size: 13px; }
+.roster-status { font-size: 14px; }
+
+.print-style-hint { font-size: 13px; }
+
+.github-token-input { font-size: 14px; }
+.github-status { font-size: 13px; }
+.github-btn { font-size: 15px; }
+.store-row-actions .modal-btn { font-size: 13px; }
+.store-badge { font-size: 11px; }
+
+.app-toast { font-size: 14px; }
