@@ -20,6 +20,10 @@ const MRINAL_DUTY = {
   picuDay: { label: 'PICU Day',   cls: 'd-picuday', tint: 'mrd-picuday' },
 };
 
+/* Full weekday names for card headers / mini cards ("Sunday" instead of "Sun"). */
+const FULL_DAYS = { Sun: 'Sunday', Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday' };
+function fullDayName(d) { return (d && FULL_DAYS[d]) || d || ''; }
+
 export function mrinalDutyAt(idx) {
   const roster = getRoster();
   if (!roster || idx < 0 || idx >= roster.length) return null;
@@ -79,7 +83,6 @@ function mainCardHtml(data, mountCls = '') {
   const meta = getMeta();
   const roster = getRoster();
 
-  let handoverHtml = '';
   let detailsHtml = '';
   const idx = roster.findIndex((r) => r.date === data.date);
 
@@ -90,6 +93,30 @@ function mainCardHtml(data, mountCls = '') {
   const mTint = m ? m.tint : 'mrd-off';
   const mLabel = m ? m.label : '';
   const hideDutyMeta = !!(m && (m.key === 'ward' || m.key === 'nicu' || m.key === 'picu' || m.key === 'postOff'));
+
+  /* Handover line on Mrinal's 24h cards (Ward/ER, NICU, PICU): who held the same
+     placement the day before (take handover from) and who takes over the next day
+     (give handover to). Unknown sides are omitted; the whole line only shows when
+     at least one side is known. */
+  const fromToHtml = (m && (m.key === 'ward' || m.key === 'nicu' || m.key === 'picu'))
+    ? (() => {
+        const prev = idx > 0 ? roster[idx - 1] : (window.__prevDayData && window.__prevDayData.day);
+        const next = idx < roster.length - 1 ? roster[idx + 1] : null;
+        const occupant = (d) => {
+          if (!d) return null;
+          const v = d[m.key];
+          if (!v) return null;
+          const names = String(v).split(',').map((s) => s.trim()).filter((s) => s && s !== '—');
+          return names.length ? names.join(', ') : null;
+        };
+        const from = occupant(prev);
+        const to = occupant(next);
+        const bits = [];
+        if (from) bits.push(`<span class="ft-name">From: ${escapeHtml(from)}</span>`);
+        if (to) bits.push(`<span class="ft-name">To: ${escapeHtml(to)}</span>`);
+        return bits.length ? `<div class="handover-fromto c-${m.key}">${bits.join(' ')}</div>` : '';
+      })()
+    : '';
 
   if (data.type === 'opd') {
     const opdTeammates = data.opd
@@ -113,38 +140,13 @@ function mainCardHtml(data, mountCls = '') {
         </div>`;
     }
   } else if (data.type === 'picu-24') {
-    /* Handover: who was on duty 1 day prior (PICU 24h), supports cross-month for day 1 */
-    let handoverName = null;
-    let prevDayDetail = null;
-    if (idx > 0) {
-      const prevDay = roster[idx - 1];
-      prevDayDetail = prevDay;
-      handoverName = prevDay && (prevDay.type === 'picu-24' || prevDay.picu) ? prevDay.picu : null;
-    } else {
-      /* First day of roster — check previous month's last day (from cloud history) */
-      const prev = window.__prevDayData && window.__prevDayData.day;
-      if (prev && (prev.type === 'picu-24' || prev.picu)) {
-        handoverName = prev.picu;
-        prevDayDetail = prev;
-      }
-    }
-    if (handoverName) {
-      const prevDateNum = prevDayDetail.date ? prevDayDetail.date.split('-')[1] : '—';
-      const prevDayName = prevDayDetail.day ? prevDayDetail.day : '';
-      handoverHtml = `
-        <div class="handover-row">
-          <span class="handover-label">🔄 On duty yesterday</span>
-          <span class="handover-name">${escapeHtml(handoverName)} (${prevDateNum} ${prevDayName})</span>
-        </div>`;
-    }
     let rows = [];
-    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward/ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swaps[data.date] && swaps[data.date].field === 'ward' ? swapBadge(data.date, 'ward') : ''}</span></div>`);
-    if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swaps[data.date] && swaps[data.date].field === 'nicu' ? swapBadge(data.date, 'nicu') : ''}</span></div>`);
-    if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swaps[data.date] && swaps[data.date].field === 'picu' ? swapBadge(data.date, 'picu') : ''}</span></div>`);
-    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">ER Day</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swaps[data.date] && swaps[data.date].field === 'er' ? swapBadge(data.date, 'er') : ''}</span></div>`);
+    if (data.ward) rows.push(`<div class="duty-row dr-ward"><span class="duty-k">Ward/ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swaps[data.date] && swaps[data.date].field === 'ward' ? swapBadge(data.date, 'ward') : ''}</span></div>`);
+    if (data.nicu) rows.push(`<div class="duty-row dr-nicu"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swaps[data.date] && swaps[data.date].field === 'nicu' ? swapBadge(data.date, 'nicu') : ''}</span></div>`);
+    if (data.picu) rows.push(`<div class="duty-row dr-picu"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swaps[data.date] && swaps[data.date].field === 'picu' ? swapBadge(data.date, 'picu') : ''}</span></div>`);
+    if (data.er) rows.push(`<div class="duty-row dr-er"><span class="duty-k">ER Day</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swaps[data.date] && swaps[data.date].field === 'er' ? swapBadge(data.date, 'er') : ''}</span></div>`);
     detailsHtml = `
       <div>
-        <div class="team-label">Duty Assignments & Team</div>
         <div class="duty-list">${rows.join('')}</div>
       </div>`;
     if (data.nagarHospital && String(data.nagarHospital).trim()) {
@@ -159,8 +161,9 @@ function mainCardHtml(data, mountCls = '') {
     const bgCol = data.type === 'off' ? '#dcfce7' : '#f1f5f9';
     const txtCol = data.type === 'off' ? '#15803d' : '#475569';
     const people = getOffDutyPeople(data);
+    const placeCls = { 'Ward/ER': 'dr-ward', NICU: 'dr-nicu', PICU: 'dr-picu', 'ER Day': 'dr-er' };
     const peopleRows = people.map(p => `
-      <div class="duty-row">
+      <div class="duty-row ${placeCls[p.label] || ''}">
         <span class="duty-k">${escapeHtml(p.label)}</span>
         <span class="duty-v">${escapeHtml(p.value)}</span>
       </div>`).join('');
@@ -172,13 +175,12 @@ function mainCardHtml(data, mountCls = '') {
       </div>`;
   } else {
     let rows = [];
-    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward/ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swapBadge(data.date, 'ward')}</span></div>`);
-    if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swapBadge(data.date, 'nicu')}</span></div>`);
-    if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swapBadge(data.date, 'picu')}</span></div>`);
-    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">ER Day</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swapBadge(data.date, 'er')}</span></div>`);
+    if (data.ward) rows.push(`<div class="duty-row dr-ward"><span class="duty-k">Ward/ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swapBadge(data.date, 'ward')}</span></div>`);
+    if (data.nicu) rows.push(`<div class="duty-row dr-nicu"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swapBadge(data.date, 'nicu')}</span></div>`);
+    if (data.picu) rows.push(`<div class="duty-row dr-picu"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swapBadge(data.date, 'picu')}</span></div>`);
+    if (data.er) rows.push(`<div class="duty-row dr-er"><span class="duty-k">ER Day</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swapBadge(data.date, 'er')}</span></div>`);
     detailsHtml = `
       <div>
-        <div class="team-label">Duty Assignments & Team</div>
         <div class="duty-list">${rows.join('')}</div>
       </div>`;
     if (data.nagarHospital && String(data.nagarHospital).trim()) {
@@ -224,9 +226,9 @@ function mainCardHtml(data, mountCls = '') {
     <div class="card today type-${data.type} ${mTint}${mountCls}" id="dailyCardElement" data-date="${data.date}">
       <div class="card-header">
         <div>
-          <span class="card-label">Selected Roster Day</span>
           <span class="date-num">${escapeHtml(meta.month.split(' ')[0])} ${data.date.split('-')[1]}${savedNote ? '<span class="scroll-note">*</span>' : ''}</span>
-          <span class="day-name">${data.day}</span>
+          <span class="day-name">${fullDayName(data.day)}</span>
+          ${fromToHtml}
         </div>
         <div class="card-header-right">
           <div class="badge type-${data.type} ${mTint}">${escapeHtml(mLabel || data.title)}</div>
@@ -235,7 +237,6 @@ function mainCardHtml(data, mountCls = '') {
       </div>
 
       <div class="card-body-content">
-        ${handoverHtml}
         ${detailsHtml}
         ${opdTeamHtml}
         ${secondCallHtml}
@@ -378,7 +379,7 @@ export function renderScrollView(dir, align) {
       <div class="upcoming-card type-${d.type} ${mTint}${past}" data-index="${i}" data-date="${d.date}" onclick="window.__openScrollDay(${i})">
         <div class="upcoming-date-info">
           <span class="upcoming-day">${mon} ${d.date.split('-')[1]}${noteMark}${swapMark}</span>
-          <span class="upcoming-weekday">• ${d.day}</span>
+          <span class="upcoming-weekday">• ${fullDayName(d.day)}</span>
         </div>
         <div class="upcoming-badge type-${d.type} ${mTint}">${escapeHtml(mLabel || d.title)}</div>
       </div>`;

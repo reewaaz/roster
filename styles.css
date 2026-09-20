@@ -223,6 +223,24 @@ header {
 .duty-k { font-family: 'Inter', sans-serif; font-weight: 900; color: var(--text-muted); font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
 .duty-v { font-weight: 800; color: var(--text-main); font-size: 14px; }
 
+/* Placement-coloured duty rows (assigned palette inside the card) */
+.duty-row.dr-ward { background: rgba(185, 236, 226, 0.55); border-color: rgba(15, 118, 110, 0.2); }
+.duty-row.dr-nicu { background: rgba(251, 208, 234, 0.55); border-color: rgba(163, 25, 111, 0.2); }
+.duty-row.dr-picu { background: rgba(255, 223, 227, 0.55); border-color: rgba(220, 38, 70, 0.2); }
+.duty-row.dr-er   { background: rgba(255, 240, 168, 0.55); border-color: rgba(146, 64, 14, 0.2); }
+.duty-row.dr-ward .duty-k, .duty-row.dr-ward .duty-v { color: #0f766e; }
+.duty-row.dr-nicu .duty-k, .duty-row.dr-nicu .duty-v { color: #a3196f; }
+.duty-row.dr-picu .duty-k, .duty-row.dr-picu .duty-v { color: #dc2646; }
+.duty-row.dr-er   .duty-k, .duty-row.dr-er   .duty-v { color: #92400e; }
+:root[data-theme="dark"] .duty-row.dr-ward { background: rgba(16, 81, 72, 0.4); border-color: rgba(94, 234, 212, 0.2); }
+:root[data-theme="dark"] .duty-row.dr-nicu { background: rgba(84, 31, 71, 0.45); border-color: rgba(249, 168, 212, 0.22); }
+:root[data-theme="dark"] .duty-row.dr-picu { background: rgba(76, 35, 49, 0.5); border-color: rgba(253, 164, 175, 0.22); }
+:root[data-theme="dark"] .duty-row.dr-er   { background: rgba(138, 109, 26, 0.4); border-color: rgba(253, 230, 138, 0.22); }
+:root[data-theme="dark"] .duty-row.dr-ward .duty-k, :root[data-theme="dark"] .duty-row.dr-ward .duty-v { color: #5eead4; }
+:root[data-theme="dark"] .duty-row.dr-nicu .duty-k, :root[data-theme="dark"] .duty-row.dr-nicu .duty-v { color: #f9a8d4; }
+:root[data-theme="dark"] .duty-row.dr-picu .duty-k, :root[data-theme="dark"] .duty-row.dr-picu .duty-v { color: #fda4af; }
+:root[data-theme="dark"] .duty-row.dr-er   .duty-k, :root[data-theme="dark"] .duty-row.dr-er   .duty-v { color: #fde68a; }
+
 .pills { display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; scrollbar-width: none; padding: 2px 0; }
 .pills::-webkit-scrollbar { display: none; }
 .pill { background: rgba(255, 255, 255, 0.95); color: #1e293b; padding: 9px 14px; border-radius: 14px; font-size: 14px; font-weight: 800; border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
@@ -251,17 +269,21 @@ header {
 }
 .duty-v.swapped { text-decoration: line-through; opacity: 0.55; }
 
-/* Handover row */
-.handover-row {
-  padding: 9px 14px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px dashed rgba(126, 34, 206, 0.35);
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+/* From/To handover line on Mrinal's 24h cards */
+.handover-fromto {
+  margin-top: 8px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 900;
+  color: var(--text-muted);
 }
-:root[data-theme="dark"] .handover-row { background: rgba(154, 92, 240, 0.1); border-color: rgba(154, 92, 240, 0.4); }
-.handover-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.handover-name { font-size: 13px; font-weight: 900; color: var(--picu-24-txt); text-align: right; }
+.handover-fromto .ft-name { color: var(--text-main); }
+.handover-fromto.c-ward .ft-name { color: #0f766e; }
+.handover-fromto.c-nicu .ft-name { color: #a3196f; }
+.handover-fromto.c-picu .ft-name { color: #dc2646; }
+:root[data-theme="dark"] .handover-fromto.c-ward .ft-name { color: #5eead4; }
+:root[data-theme="dark"] .handover-fromto.c-nicu .ft-name { color: #f9a8d4; }
+:root[data-theme="dark"] .handover-fromto.c-picu .ft-name { color: #fda4af; }
 
 /* Nagar Hospital row */
 .nagar-row {
@@ -1095,8 +1117,7 @@ body { font-size: 17.6px; }
 .card-note-badge { font-size: 11px; }
 .swap-badge { font-size: 10px; }
 .daily-note { font-size: 14px; }
-.handover-label { font-size: 11px; }
-.handover-name { font-size: 14px; }
+.handover-fromto { font-size: 13.2px; }
 .nagar-label { font-size: 11px; }
 .nagar-name { font-size: 14px; }
 .opd-label { font-size: 11px; }
@@ -1106,10 +1127,10 @@ body { font-size: 17.6px; }
 .expired-sub { font-size: 13px; }
 .expired-cta { font-size: 14px; }
 
-.upcoming-day { font-size: 15px; }
-.upcoming-weekday { font-size: 13px; }
-.upcoming-badge { font-size: 11px; }
-.sr-chip .upcoming-badge { font-size: 12px; }
+.upcoming-day { font-size: 16.5px; }
+.upcoming-weekday { font-size: 14.3px; }
+.upcoming-badge { font-size: 12.1px; }
+.sr-chip .upcoming-badge { font-size: 13.2px; }
 
 .cal-month-title { font-size: 19px; }
 .cal-nav { font-size: 24px; }
