@@ -4,6 +4,7 @@ import {
   findHandoverName, getOffDutyPeople, dayRole, WEEKDAYS,
 } from './roster.js';
 import { getSwaps } from './swaps.js';
+import { listStoreRosters, parseMonthYear, loadRosterFromStore, coversDate } from './rosters.js';
 
 /* Dr. Mrinal's day chip — same colour language as the print references. */
 const MRINAL_DUTY = {
@@ -39,6 +40,7 @@ let currentIndex = 0;
 let expandMountFor = -1;
 let mountOrigin = null;  // { x, y } percentages — where the new card should expand from
 let suppressScrollDayUntil = 0;  // timestamp; ignore ghost clicks right after a view switch
+let browsingNonCurrent = false; // true when calendar arrows moved to a month that doesn't contain today
 
 function loadNotes() {
   try {
@@ -194,6 +196,12 @@ function mainCardHtml(data, mountCls = '') {
     ? `<div class="second-call"><span class="second-call-label">📞 2nd On Call</span><span class="second-call-name">${escapeHtml(data.second)}</span></div>`
     : '';
 
+  /* Who's on the OPD team this day — shown on every expanded card (not just OPD
+     days), so the OPD roster is always visible alongside the duty details. */
+  const opdTeamHtml = (data.type !== 'opd' && data.opd && String(data.opd).trim())
+    ? `<div class="opd-row"><span class="opd-label">🏥 OPD Team</span><span class="opd-name">${escapeHtml(String(data.opd).trim())}</span></div>`
+    : '';
+
   const hoursHtml = (!hideDutyMeta && getDutyHours(data))
     ? `<div class="hours-row"><span class="hours-label">🕘 Duty Hours</span><span class="hours-value">${getDutyHours(data)}</span></div>`
     : '';
@@ -225,6 +233,7 @@ function mainCardHtml(data, mountCls = '') {
         ${handoverHtml}
         ${hoursHtml}
         ${detailsHtml}
+        ${opdTeamHtml}
         ${secondCallHtml}
       </div>
 
@@ -327,7 +336,7 @@ export function renderScrollView(dir, align) {
   const roster = getRoster();
   const meta = getMeta();
   let html = '';
-  if (isExpired()) {
+  if (isExpired() && !browsingNonCurrent) {
     html += `<div class="expired-card" onclick="window.__openRosterModal && window.__openRosterModal()">
         <div class="expired-title">✨ Next month's roster not loaded yet</div>
         <div class="expired-sub">${escapeHtml(meta.month)} ends soon. Generate the next roster.</div>
@@ -383,6 +392,57 @@ export function renderScrollView(dir, align) {
 }
 
 /* ---- MONTH VIEW ---- */
+
+/* File name for the neighbour month: "Ashwin 2083" + dir → 208305.json / 208307.json. */
+function neighborFileName(dir) {
+  const p = parseMonthYear(getMeta().month);
+  if (!p) return null;
+  let year = Number(p.year), index = p.index;
+  if (dir < 0) { index -= 1; if (index < 1) { index = 12; year -= 1; } }
+  else { index += 1; if (index > 12) { index = 1; year += 1; } }
+  return `${year}${String(index).padStart(2, '0')}.json`;
+}
+
+/* Enable/disable the calendar arrows based on which neighbour rosters actually exist
+   in the GitHub /rosters/ folder. Re-evaluated on every month render. */
+async function updateMonthNav() {
+  const prevBtn = document.getElementById('cal-prev');
+  const nextBtn = document.getElementById('cal-next');
+  if (!prevBtn || !nextBtn) return;
+  const prevName = neighborFileName(-1);
+  const nextName = neighborFileName(1);
+  let names = new Set();
+  try { names = new Set((await listStoreRosters()).map((f) => f.name)); } catch (e) { /* offline → leave arrows off */ }
+  prevBtn.disabled = !prevName || !names.has(prevName);
+  nextBtn.disabled = !nextName || !names.has(nextName);
+}
+
+/* Switch the whole app to the previous/next month's roster, but ONLY when that
+   month's file exists in the GitHub /rosters/ folder (e.g. 208307.json). */
+export async function switchMonth(dir) {
+  const name = neighborFileName(dir);
+  if (!name) { showToast('Could not identify this month'); return { ok: false, reason: 'unparseable' }; }
+  try {
+    const result = await loadRosterFromStore(name);
+    /* Land on a sensible day: today if the month covers it, otherwise the last day
+       of a past month or the first day of a future one (recomputeToday clamps). */
+    realTodayIndex = recomputeToday();
+    currentIndex = realTodayIndex;
+    browsingNonCurrent = !coversDate({ startDate: result.meta.startDate, days: result.days }, new Date());
+    reRenderAll();
+    updateTodayPill(document.getElementById('daily-render-area'));
+    /* Re-sync duty alerts to the newly active month. */
+    import('./alerts.js').then((m) => m.scheduleDutyAlerts()).catch(() => {});
+    return { ok: true, name, meta: result.meta };
+  } catch (e) {
+    const msg = String(e && e.message || e);
+    showToast(msg.includes('Invalid')
+      ? `Can't open ${name}: ${msg.replace(/^Invalid roster [^:]+: /, '')}`
+      : 'No roster for that month yet');
+    return { ok: false, reason: msg.includes('Invalid') ? 'invalid' : 'fetch-failed', error: msg, name };
+  }
+}
+
 export function renderMonthView() {
   const grid = document.getElementById('calendar-grid');
   const monthTitle = document.getElementById('cal-month-title');
@@ -417,6 +477,8 @@ export function renderMonthView() {
   });
   grid.innerHTML = html;
   attachCalendarInteractions();
+  /* Keep the prev/next arrows in sync with which roster files exist on GitHub. */
+  updateMonthNav();
 }
 
 export function attachCalendarInteractions() {

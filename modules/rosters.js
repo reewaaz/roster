@@ -94,6 +94,17 @@ function apiHeaders(json) {
   return headers;
 }
 
+/* CORS-safe headers for raw.githubusercontent.com. The raw CDN does not answer
+   OPTIONS preflights for the custom X-GitHub-Api-Version header, so every browser
+   fetch to raw shipped that header and died with "Failed to fetch". Raw requests
+   therefore carry only safelisted headers (plus Authorization for private repos). */
+function rawHeaders() {
+  const headers = { Accept: 'application/vnd.github+json' };
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 /* List roster files in the store: the rosters/ folder first, then any NNNNNN.json
    sitting at the repo root (the user may upload either place). [{ name, sha, size, path }]. */
 export async function listStoreRosters(force = false) {
@@ -152,7 +163,7 @@ export async function fetchStoreRoster(name) {
   ];
   let lastErr = null;
   for (const url of candidates) {
-    const res = await fetch(url, { headers: apiHeaders(false) });
+    const res = await fetch(url, { headers: rawHeaders() });
     if (res.status === 404) { lastErr = new Error(`Not found: ${name}`); continue; }
     if (!res.ok) { lastErr = new Error(`GitHub ${res.status}`); continue; }
     const data = await res.json();

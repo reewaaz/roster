@@ -4,6 +4,7 @@ import {
   initRendering, renderScrollView, renderMonthView, reRenderAll, setRealTodayIndex, setCurrentIndex,
   getRealTodayIndex, getCurrentIndex, openNoteModal, closeNoteModal as closeNoteMod,
   jumpToDate, goToday, changeDay, switchTab, openScrollDay, saveNote as saveNoteMod, notesDB,
+  switchMonth,
 } from './modules/rendering.js';
 import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, clearAppState, openCloudModal, openSearchModal, closeSearchModal, openPrintModal, closePrintModal, closeAllModals as closeAll } from './modules/modals.js';
 import { initDutyAlerts, openAlertModal, closeAlertModal, saveAlertSettings, sendTestNotification } from './modules/alerts.js';
@@ -45,6 +46,8 @@ window.openSearchModal = openSearchModal;
 window.closeSearchModal = closeSearchModal;
 
 window.__jumpToIndex = (i) => jumpToDate(i);
+
+window.__switchMonth = (dir) => switchMonth(dir);
 
 window.__prevDayData = null;
 

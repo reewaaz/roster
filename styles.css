@@ -271,6 +271,17 @@ header {
 .nagar-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .nagar-name { font-size: 13px; font-weight: 900; color: var(--nagar-txt); }
 
+/* OPD Team row on expanded day cards */
+.opd-row {
+  padding: 8px 12px;
+  background: var(--opd-bg);
+  border-radius: 14px;
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.opd-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.opd-name { font-size: 13px; font-weight: 900; color: var(--opd-txt); text-align: right; }
+
 /* Roster Expired Card */
 .expired-card { border-radius: 22px; padding: 18px 16px; margin-bottom: 14px; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 2px dashed #f59e0b; cursor: pointer; text-align: center; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15); }
 :root[data-theme="dark"] .expired-card { background: linear-gradient(135deg, #3a2c10, #2f250e); border-color: #b45309; }
@@ -337,6 +348,16 @@ header {
 :root[data-theme="dark"] .calendar-wrapper { background: #0f1a2e; border-color: #1e293b; }
 .cal-topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px; }
 .cal-month-title { font-weight: 900; text-align: center; color: var(--text-main); font-size: 17px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-nav {
+  width: 34px; height: 34px; border: none; border-radius: 12px; flex-shrink: 0;
+  background: rgba(148, 163, 184, 0.14); color: var(--text-main);
+  font-size: 22px; line-height: 1; font-weight: 900; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+}
+.cal-nav:not(:disabled):active { transform: scale(0.92); }
+.cal-nav:disabled { opacity: 0.35; cursor: default; }
+:root[data-theme="dark"] .cal-nav { background: rgba(148, 163, 184, 0.18); }
 
 .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 10px; margin-top: 12px; }
 .cal-header span { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
