@@ -2,11 +2,11 @@
 
 :root {
   --bg: #fcfbfa;
-  --header-bg: rgba(255, 255, 255, 0.12);
-  --header-border: rgba(255, 255, 255, 0.45);
+  --header-bg: rgba(255, 255, 255, 0.20);
+  --header-border: rgba(255, 255, 255, 0.6);
   --text-main: #1e293b;
   --text-muted: #64748b;
-  --nav-bg: rgba(255, 255, 255, 0.30);
+  --nav-bg: rgba(255, 255, 255, 0.34);
   --accent: #0284c7;
 
   /* Color Palette */
@@ -23,11 +23,11 @@
 /* DARK MODE */
 :root[data-theme="dark"] {
   --bg: #0b1220;
-  --header-bg: rgba(15, 26, 46, 0.10);
-  --header-border: rgba(148, 163, 184, 0.16);
+  --header-bg: rgba(15, 26, 46, 0.16);
+  --header-border: rgba(148, 163, 184, 0.25);
   --text-main: #e2e8f0;
   --text-muted: #8fa3bd;
-  --nav-bg: rgba(15, 26, 46, 0.28);
+  --nav-bg: rgba(15, 26, 46, 0.32);
   --accent: #38bdf8;
 
   --picu-day-bg: #432d70; --picu-day-txt: #e6ccff;
@@ -71,10 +71,10 @@ header {
   border-bottom-left-radius: 28px;
   border-bottom-right-radius: 28px;
   flex-shrink: 0;
-  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.06);
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 :root[data-theme="dark"] header {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(148, 163, 184, 0.15);
 }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .header-actions { display: flex; gap: 10px; margin-top: 6px; }
@@ -400,33 +400,35 @@ header {
 :root[data-theme="dark"] .cal-cell.type-off { border-color: #86efac; background: #0f2a1c; }
 :root[data-theme="dark"] .cal-cell.type-post-off { border-color: #334155; background: #182235; }
 
-/* BOTTOM NAV — floating glass pills (Daily / Month) */
+/* BOTTOM NAV — frosted-glass pill bar (Daily / Month) */
 .bottom-nav {
   position: absolute;
   bottom: calc(12px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-radius: 0;
+  background: var(--nav-bg);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  box-shadow: 0 8px 28px rgba(2, 132, 199, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -1px 0 rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0;
-  box-shadow: none;
-  width: auto;
-  max-width: none;
+  gap: 6px;
+  padding: 6px;
+  width: min(90%, 384px);
   z-index: 20;
-  border: none;
 }
-:root[data-theme="dark"] .bottom-nav { }
+:root[data-theme="dark"] .bottom-nav {
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(148, 163, 184, 0.14);
+}
 
 .nav-item {
-  flex: 0 0 auto;
+  flex: 1;
   text-align: center;
-  padding: 12px 24px;
-  border-radius: 100px;
+  padding: 12px 0;
+  border-radius: 999px;
   font-size: 17px;
   font-weight: 900;
   color: var(--text-muted);
@@ -437,26 +439,16 @@ header {
   align-items: center;
   gap: 5px;
   font-family: 'Nunito', sans-serif;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-:root[data-theme="dark"] .nav-item {
-  background: rgba(30, 41, 59, 0.35);
-  border-color: rgba(148, 163, 184, 0.2);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(148, 163, 184, 0.12);
+  background: transparent;
 }
 .nav-item.active {
-  background: rgba(2, 132, 199, 0.25);
+  background: rgba(2, 132, 199, 0.22);
   color: var(--accent);
-  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.25), inset 0 1px 0 rgba(2, 132, 199, 0.15);
-  transform: scale(1.02);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 :root[data-theme="dark"] .nav-item.active {
-  background: rgba(56, 189, 248, 0.28);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3), inset 0 1px 0 rgba(56, 189, 248, 0.18);
+  background: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25), inset 0 1px 0 rgba(148, 163, 184, 0.12);
 }
 
 /* MODALS */
