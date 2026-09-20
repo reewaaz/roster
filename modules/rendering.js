@@ -9,7 +9,16 @@ let realTodayIndex = 0;
 let currentIndex = 0;
 let expandMountFor = -1;
 
-export const notesDB = JSON.parse(localStorage.getItem('mrinalDutyNotes')) || {};
+function loadNotes() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('mrinalDutyNotes'));
+    return raw && typeof raw === 'object' ? raw : {};
+  } catch (e) {
+    /* Corrupted note data must not brick the whole app on startup. */
+    return {};
+  }
+}
+export const notesDB = loadNotes();
 export function getNotes() { return notesDB; }
 export function setRealTodayIndex(v) { realTodayIndex = v; }
 export function getRealTodayIndex() { return realTodayIndex; }

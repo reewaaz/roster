@@ -3,7 +3,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   root: '.',
-  publicDir: false,
+  /* Relative base so the build works when hosted from any path
+     (domain root, GitHub Pages sub-path, etc.). Without this Vite
+     emits root-absolute /assets/... URLs that 404 on sub-path hosts,
+     leaving the app blank and its buttons dead. */
+  base: './',
   build: {
     outDir: 'dist',
     assetsInlineLimit: 4096,
@@ -15,7 +19,9 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*', 'manifest.webmanifest'],
+      /* PWA manifest is generated from the `manifest` option below, so only
+         the icons need copying into dist (from the public/ dir). */
+      includeAssets: ['icons/*'],
       manifest: {
         name: 'Dr. Mrinal Duty App',
         short_name: 'Duty App',

@@ -133,7 +133,7 @@ export function buildTimeOptions(selectedHour) {
   }).join('');
 }
 
-export function renderReminderRows(container) {
+export function renderReminderRows() {
   const rows = document.getElementById('reminder-rows');
   if (!rows) return;
   const s = alertSettings();
@@ -149,7 +149,6 @@ export function renderReminderRows(container) {
   rows.querySelectorAll('[data-action="remove"]').forEach((btn) => {
     btn.addEventListener('click', () => removeReminderRow(btn));
   });
-  container.innerHTML += ''; // no-op to keep container referenced
 }
 
 export function addReminderRow() {
@@ -186,7 +185,7 @@ export function collectReminders() {
   return out.sort((a, b) => a.daysBefore - b.daysBefore || a.time - b.time);
 }
 
-export function openAlertModal(container) {
+export function openAlertModal() {
   triggerHaptic(20);
   const s = alertSettings();
   const list = document.getElementById('alert-types-list');
@@ -195,7 +194,7 @@ export function openAlertModal(container) {
       `<label class="alert-type-label" data-t="${t.type}"><input class="alert-type" type="checkbox" value="${t.type}">${t.label}</label>`
     ).join('');
   }
-  renderReminderRows(container);
+  renderReminderRows();
   document.getElementById('alert-enabled').checked = localStorage.getItem(ALERT_KEY) === '1';
   list.querySelectorAll('.alert-type').forEach(ch => {
     ch.checked = s.types.includes(ch.value);
