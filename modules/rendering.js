@@ -278,7 +278,7 @@ function updateTodayPill(area) {
   area = area; // silence unused
 }
 
-const SCROLL_TOP_PAD = 12;
+const SCROLL_TOP_PAD = 4;
 
 /* Scroll so the opened day's card sits at the top of the scroll area ('top'),
    or stays centered within it ('center', e.g. arrow navigation). */

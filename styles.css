@@ -89,7 +89,7 @@ header {
 
 /* View Container */
 .view-container {
-  flex: 1; position: relative; overflow: hidden; padding: 16px 16px calc(88px + env(safe-area-inset-bottom));
+  flex: 1; position: relative; overflow: hidden; padding: 0 16px;
   display: flex; flex-direction: column; min-height: 0;
   touch-action: pan-y;
 }
@@ -104,10 +104,10 @@ header {
 .tab-content.tab-enter-right { animation: slideFromRight 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 
 /* DAILY VIEW STYLES */
-#view-daily { display: none; flex-direction: column; touch-action: pan-y; }
+#view-daily { display: none; flex-direction: column; touch-action: pan-y; padding-top: 6px; }
 #view-daily.active { display: flex; }
 
-#daily-render-area { gap: 12px; scroll-behavior: smooth; padding-bottom: 8px; scroll-padding-top: 12px; }
+#daily-render-area { gap: 12px; scroll-behavior: smooth; padding-bottom: calc(96px + env(safe-area-inset-bottom)); scroll-padding-top: 12px; }
 #daily-render-area .card.today, #daily-render-area .upcoming-card { flex-shrink: 0; }
 #daily-render-area .card.today { animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 .upcoming-card { touch-action: manipulation; }
@@ -145,7 +145,7 @@ header {
 #daily-render-area {
   width: 100%; display: flex; flex-direction: column;
   flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  scroll-padding-bottom: 16px;
+  scroll-padding-bottom: calc(24px + env(safe-area-inset-bottom));
   overscroll-behavior: contain;
 }
 #daily-render-area::-webkit-scrollbar { display: none; }
@@ -356,7 +356,7 @@ header {
 .upcoming-badge.type-post-off { color: var(--post-off-txt); }
 
 /* MONTH VIEW STYLES */
-#view-month { overflow-y: auto; scrollbar-width: none; }
+#view-month { overflow-y: auto; scrollbar-width: none; padding: 16px 0 calc(88px + env(safe-area-inset-bottom)); }
 #view-month.active { display: flex; flex-direction: column; }
 #view-month::-webkit-scrollbar { display: none; }
 
@@ -1058,7 +1058,8 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 @media (min-width: 768px) {
   body { overflow: auto; padding: 18px; }
   .app-container { max-width: 760px; height: calc(100vh - 36px); height: calc(100dvh - 36px); border-radius: 32px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); }
-  .view-container { padding: 20px 24px calc(96px + env(safe-area-inset-bottom)); }
+  .view-container { padding: 0 24px; }
+  #view-month { padding: 20px 0 calc(96px + env(safe-area-inset-bottom)); }
   .card.today { padding: 26px 24px; border-radius: 32px; }
   .card.today.type-picu-24 { padding: 20px 20px; }
   .duty-list { grid-template-columns: repeat(3, 1fr); }
