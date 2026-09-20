@@ -183,7 +183,9 @@ export function getOffDutyPeople(day) {
     { key: 'nicu', label: 'NICU' },
     { key: 'picu', label: 'PICU' },
     { key: 'er', label: 'Day ER' },
-    { key: 'second', label: '2nd Call' },
+    /* 'second' is intentionally omitted here — the day card already shows the
+       "2nd On Call" person in the bottom .second-call block, so listing it again
+       under "People On Duty" would duplicate the same information. */
     { key: 'nagarHospital', label: 'Nagar Hospital' },
   ];
   for (const m of map) {

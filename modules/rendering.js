@@ -9,6 +9,7 @@ let realTodayIndex = 0;
 let currentIndex = 0;
 let expandMountFor = -1;
 let mountOrigin = null;  // { x, y } percentages — where the new card should expand from
+let suppressScrollDayUntil = 0;  // timestamp; ignore ghost clicks right after a view switch
 
 function loadNotes() {
   try {
@@ -221,19 +222,32 @@ function updateTodayPill(area) {
   area = area; // silence unused
 }
 
-function centerScrollOnCurrent(area) {
+const SCROLL_TOP_PAD = 12;
+
+/* Scroll so the opened day's card sits at the top of the scroll area ('top'),
+   or stays centered within it ('center', e.g. arrow navigation). */
+function alignCurrentCard(area, mode) {
   const main = document.getElementById('dailyCardElement');
   if (!main) return;
   requestAnimationFrame(() => {
     const rect = main.getBoundingClientRect();
     const areaRect = area.getBoundingClientRect();
-    area.scrollTop += (rect.top - areaRect.top) - (area.clientHeight - rect.height) / 2;
+    let target;
+    if (mode === 'top') {
+      target = area.scrollTop + (rect.top - areaRect.top) - SCROLL_TOP_PAD;
+    } else {
+      target = area.scrollTop + (rect.top - areaRect.top) - (area.clientHeight - rect.height) / 2;
+    }
+    area.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
   });
 }
 
 export function openScrollDay(idx) {
   const roster = getRoster();
   idx = parseInt(idx, 10);
+  /* Browser-synthesized click from a just-finished touch (e.g. after switching to
+     the daily view) can land on a mini card and fire this handler — ignore it. */
+  if (Date.now() < suppressScrollDayUntil) return;
   if (isNaN(idx) || idx < 0 || idx >= roster.length || idx === currentIndex) return;
   triggerHaptic(25);
   const area = document.getElementById('daily-render-area');
@@ -249,6 +263,10 @@ export function openScrollDay(idx) {
     const cx = mr.width ? ((ir.left + ir.width / 2) - mr.left) / mr.width * 100 : 50;
     const cy = mr.height ? ((ir.top + ir.height / 2) - mr.top) / mr.height * 100 : 50;
     mountOrigin = { x: Math.max(0, Math.min(100, cx)), y: Math.max(0, Math.min(100, cy)) };
+    /* Set the transform-origin on the OUTGOING card as well so the collapse and
+       the incoming expand both pivot around the same spot. */
+    main.style.setProperty('--iso-origin-x', mountOrigin.x + '%');
+    main.style.setProperty('--iso-origin-y', mountOrigin.y + '%');
   } else {
     mountOrigin = null;
   }
@@ -259,10 +277,10 @@ export function openScrollDay(idx) {
     currentIndex = idx;
     renderScrollView();
     mountOrigin = null;
-  }, 230);
+  }, 240);
 }
 
-export function renderScrollView(dir) {
+export function renderScrollView(dir, align) {
   const area = document.getElementById('daily-render-area');
   if (!area) return;
   const roster = getRoster();
@@ -313,7 +331,7 @@ export function renderScrollView(dir) {
   }
   markPillOverflow(area);
   updateTodayPill(area);
-  centerScrollOnCurrent(area);
+  alignCurrentCard(area, align === 'top' ? 'top' : 'center');
 }
 
 /* ---- MONTH VIEW ---- */
@@ -380,11 +398,15 @@ export function attachCalendarInteractions() {
       }
     };
 
-    const endPress = () => {
+    const endPress = (e) => {
       cell.classList.remove('pressed');
       if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
       if (!isLongPress && !moved) {
         triggerHaptic(20);
+        /* Suppress the browser's synthesized mouse events / click for this touch.
+           After jumpToDate() switches to the daily view, a ghost click would land
+           on whatever card now sits under the finger and re-navigate to a random day. */
+        if (e.type === 'touchend') e.preventDefault();
         jumpToDate(cell.dataset.index);
       }
     };
@@ -466,7 +488,12 @@ export function changeDay(step) {
 
 export function goToday() {
   triggerHaptic(35);
-  if (currentIndex === realTodayIndex) return;
+  if (currentIndex === realTodayIndex) {
+    /* Already on today's card — still make sure it reveals at the top. */
+    const area = document.getElementById('daily-render-area');
+    if (area) alignCurrentCard(area, 'top');
+    return;
+  }
   if (!document.getElementById('view-daily').classList.contains('active')) {
     currentIndex = realTodayIndex;
     switchTab('daily');
@@ -479,11 +506,11 @@ export function goToday() {
     main.classList.add(exitCls);
     setTimeout(() => {
       currentIndex = realTodayIndex;
-      renderScrollView(enterDir);
+      renderScrollView(enterDir, 'top');
     }, 180);
   } else {
     currentIndex = realTodayIndex;
-    renderScrollView(enterDir);
+    renderScrollView(enterDir, 'top');
   }
 }
 
@@ -501,7 +528,10 @@ export function switchTab(tabId, dir) {
   document.getElementById(`nav-${tabId}`)?.classList.add('active');
 
   if (tabId === 'daily') {
-    renderScrollView();
+    /* Brief window where a browser-synthesized click (ghost tap) may hit a card —
+       swallow it so it can't re-navigate to a seemingly random day. */
+    suppressScrollDayUntil = Date.now() + 300;
+    renderScrollView(undefined, 'top');
     updateTodayPill(document.getElementById('daily-render-area'));
   }
   if (tabId === 'month') {
@@ -555,7 +585,7 @@ function initSpringyScroll() {
 export function initRendering() {
   realTodayIndex = recomputeToday();
   currentIndex = realTodayIndex;
-  renderScrollView();
+  renderScrollView(undefined, 'top');
   renderMonthView();
   updateTodayPill(document.getElementById('daily-render-area'));
   initSpringyScroll();
