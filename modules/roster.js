@@ -1,4 +1,7 @@
-import defaultRosterData from '../data/roster.json';
+/* Built-in roster shipped as a JS module (not .json) so the app also runs when
+   static hosts like GitHub Pages serve the raw source tree — browsers reject
+   native `.json` ES-module imports ("MIME type ... is not a JavaScript module"). */
+import defaultRosterData from './roster-data.js';
 
 export const ROSTER_KEY = 'mrinalRosterData';
 export const VALID_TYPES = ['picu-day', 'picu-24', 'opd', 'er-day', 'off', 'post-off'];

@@ -1,6 +1,6 @@
 /* Bump this on every deploy so installed clients re-run install() and
    drop the stale cached app JS (Cache-First SW never revalidates assets). */
-const CACHE_NAME = 'duty-app-v7';
+const CACHE_NAME = 'duty-app-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -14,7 +14,7 @@ const ASSETS = [
   './modules/rendering.js',
   './modules/modals.js',
   './modules/print.js',
-  './data/roster.json',
+  './modules/roster-data.js',
   './manifest.webmanifest',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',

@@ -71,6 +71,15 @@ window.addEventListener('DOMContentLoaded', () => {
   initTheme();
   loadRoster();
 
+  /* Static hosts (e.g. GitHub Pages) serve the raw source and never get the
+     VitePWA-injected <link rel="manifest">, so add it at runtime when missing. */
+  if (!document.querySelector('link[rel="manifest"]')) {
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = './manifest.webmanifest';
+    document.head.appendChild(manifestLink);
+  }
+
   /* greeting */
   const hour = new Date().getHours();
   let greeting = 'Good Evening,';

@@ -7,7 +7,10 @@
   <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%238FBDF1'/%3E%3Cstop%20offset='1'%20stop-color='%235B93D8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width='100'%20height='100'%20rx='25'%20fill='url(%23g)'/%3E%3Crect%20x='11.5'%20y='33.5'%20width='77'%20height='33'%20rx='16.5'%20fill='white'/%3E%3Crect%20x='33.5'%20y='11.5'%20width='33'%20height='77'%20rx='16.5'%20fill='white'/%3E%3Crect%20x='13'%20y='35'%20width='74'%20height='30'%20rx='15'%20fill='%23C1403A'/%3E%3Crect%20x='35'%20y='13'%20width='30'%20height='74'%20rx='15'%20fill='%23C1403A'/%3E%3C/svg%3E">
-  <link rel="manifest" href="./manifest.webmanifest">
+  <!-- Manifest link is omitted here on purpose: VitePWA injects it at build time,
+       and when a static host serves the raw source we add it at runtime (app.js)
+       referencing ./manifest.webmanifest. Keeping it out of <head> also prevents
+       Vite from bundling a hashed copy under assets/ whose relative icon paths 404. -->
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
