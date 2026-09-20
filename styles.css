@@ -943,6 +943,14 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 :root[data-theme="dark"] .cal-cell.mrd-nagar   { background: #262565; border-color: rgba(165, 180, 252, 0.26); }
 :root[data-theme="dark"] .cal-cell.mrd-second  { background: #1f2e4b; border-color: rgba(203, 213, 225, 0.26); color: #e2e8f0; }
 
+/* Festival/holiday cell outline — gold/amber stroke that's visible on all tints */
+.cal-cell.cal-festival {
+  box-shadow: inset 0 0 0 2px #f59e0b, inset 0 0 0 4px rgba(245, 158, 11, 0.15);
+}
+:root[data-theme="dark"] .cal-cell.cal-festival {
+  box-shadow: inset 0 0 0 2px #fbbf24, inset 0 0 0 4px rgba(251, 191, 36, 0.18);
+}
+
 /* PRINT AREA — A4 landscape sheets mirroring print1/2/3.html reference files */
 #print-area { display: none; }
 @page { size: A4 landscape; margin: 0; }

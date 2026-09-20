@@ -509,18 +509,20 @@ export function renderMonthView() {
   roster.forEach((day, index) => {
     const hasNote = !!notesDB[day.date];
     const hasNoteClass = hasNote ? 'has-note' : '';
+    const isFestival = day.title && day.title.trim() && !/off/i.test(day.title.trim());
+    const festivalClass = isFestival ? 'cal-festival' : '';
     const cell = new Date(startMs + index * DAY_MS);
     const cellKey = `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`;
     const isTodayClass = cellKey === todayKey ? 'is-today' : '';
     const asteriskHtml = hasNote ? `<span class="note-asterisk" style="font-size:16px;font-weight:900;color:var(--text-main);">*</span>` : '';
     /* Calendar cells are tinted purely by Dr. Mrinal's duty placement —
-       no text label needed under the date. */
+       no text label needed under the date. Festival/holiday cells get an outline. */
     const m = mrinalDutyAt(index);
     const mTint = m ? m.tint : 'mrd-off';
     html += `
-      <div class="cal-cell ${mTint} ${hasNoteClass} ${isTodayClass}"
+      <div class="cal-cell ${mTint} ${hasNoteClass} ${isTodayClass} ${festivalClass}"
            data-index="${index}" data-date="${day.date}"
-           title="Dr. Mrinal — ${escapeHtml(m ? m.label : 'OFF')}"
+           title="Dr. Mrinal — ${escapeHtml(m ? m.label : 'OFF')}${isFestival ? ` · ${escapeHtml(day.title.trim())}` : ''}"
            style="animation-delay: ${(index + startDay) * 18}ms;">
         <span class="cal-date">${day.date.split('-')[1]}${asteriskHtml}</span>
       </div>`;

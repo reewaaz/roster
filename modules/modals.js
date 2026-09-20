@@ -79,7 +79,6 @@ function buildSettingsContent() {
         <div class="settings-item-icon">${dark ? '☀️' : '🌙'}</div>
         <div style="flex:1;">
           <div class="settings-item-label">Dark Mode</div>
-          <div class="settings-item-sub">Toggle light / dark theme</div>
         </div>
         <label class="switch" onclick="event.stopPropagation();">
           <input type="checkbox" id="settings-theme-toggle" ${dark ? 'checked' : ''}>
