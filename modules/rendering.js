@@ -162,6 +162,7 @@ function mainCardHtml(data, mountCls = '') {
     const statusText = data.type === 'off' ? 'Public Holiday / Off' : 'Post 24h Duty OFF';
     const bgCol = data.type === 'off' ? '#dcfce7' : '#f1f5f9';
     const txtCol = data.type === 'off' ? '#15803d' : '#475569';
+    const isPublicHoliday = data.type === 'off';
     const people = getOffDutyPeople(data);
     const placeCls = { 'Ward/ER': 'dr-ward', NICU: 'dr-nicu', PICU: 'dr-picu', 'ER Day': 'dr-er' };
     const peopleRows = people.map(p => `
@@ -171,9 +172,9 @@ function mainCardHtml(data, mountCls = '') {
       </div>`).join('');
     detailsHtml = `
       <div>
-        ${hideDutyMeta ? '' : `<div class="team-label">Duty Status</div>
+        ${(hideDutyMeta || isPublicHoliday) ? '' : `<div class="team-label">Duty Status</div>
         <div class="pills"><span class="pill" style="background:${bgCol}; color:${txtCol}; width:100%; text-align:center;">${statusText}</span></div>`}
-        ${people.length ? `<div class="team-label" style="margin-top:8px;">People On Duty</div><div class="duty-list">${peopleRows}</div>` : ''}
+        ${people.length ? `<div class="duty-list">${peopleRows}</div>` : ''}
       </div>`;
   } else {
     let rows = [];
@@ -281,23 +282,41 @@ function updateTodayPill(area) {
   area = area; // silence unused
 }
 
-const SCROLL_TOP_PAD = 4;
+/* The expanded card is mid popIn/enter-animation (scale .88 + 6px translate) at
+   the moment alignCurrentCard's rAF fires, so getBoundingClientRect includes a
+   transform offset that skews the scroll target. Pause the card's animation for
+   one layout read to get its true resting geometry. */
+function restingRect(el) {
+  const cs = getComputedStyle(el);
+  if (!cs.animationName || cs.animationName === 'none') return el.getBoundingClientRect();
+  const prev = el.style.animation;
+  el.style.animation = 'none';
+  const r = el.getBoundingClientRect();
+  el.style.animation = prev;
+  return r;
+}
 
-/* Scroll so the opened day's card sits at the top of the scroll area ('top'),
-   or stays centered within it ('center', e.g. arrow navigation). */
+/* Scroll so the opened day's card sits just below the frosted header ('top'),
+   or stays centered within the scroll area ('center', e.g. arrow navigation). */
 function alignCurrentCard(area, mode) {
   const main = document.getElementById('dailyCardElement');
   if (!main) return;
   requestAnimationFrame(() => {
-    const rect = main.getBoundingClientRect();
+    const rect = restingRect(main);
     const areaRect = area.getBoundingClientRect();
     let target;
     if (mode === 'top') {
-      target = area.scrollTop + (rect.top - areaRect.top) - SCROLL_TOP_PAD;
+      /* Park the card just below the frosted header overlay. The scroller has
+         overflow-anchor: none, so scroll anchoring can't shift the content
+         between this rect read and the scroll below. */
+      const c = document.querySelector('.app-container');
+      const v = c ? parseInt(getComputedStyle(c).getPropertyValue('--header-h'), 10) : NaN;
+      const headerH = Number.isFinite(v) && v >= 72 ? v : 94;
+      target = area.scrollTop + (rect.top - areaRect.top) - (headerH + 12);
     } else {
       target = area.scrollTop + (rect.top - areaRect.top) - (area.clientHeight - rect.height) / 2;
     }
-    area.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+    area.scrollTo({ top: Math.max(0, Math.round(target)), behavior: 'smooth' });
   });
 }
 

@@ -111,7 +111,7 @@ header {
 #view-daily { display: none; flex-direction: column; touch-action: pan-y; }
 #view-daily.active { display: flex; }
 
-#daily-render-area { gap: 12px; scroll-behavior: smooth; padding-bottom: calc(96px + env(safe-area-inset-bottom)); scroll-padding-top: 12px; }
+#daily-render-area { gap: 12px; scroll-behavior: smooth; padding-bottom: calc(96px + env(safe-area-inset-bottom)); scroll-padding-top: calc(var(--header-h, 92px) + 12px); }
 #daily-render-area .card.today, #daily-render-area .upcoming-card { flex-shrink: 0; }
 #daily-render-area .card.today { animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 .upcoming-card { touch-action: manipulation; }
@@ -152,6 +152,7 @@ header {
   padding-top: calc(var(--header-h, 92px) + 10px);   /* content starts below the frosted header */
   scroll-padding-bottom: calc(24px + env(safe-area-inset-bottom));
   overscroll-behavior: contain;
+  overflow-anchor: none;   /* innerHTML re-renders must not yank the scroll position */
 }
 #daily-render-area::-webkit-scrollbar { display: none; }
 
@@ -293,14 +294,14 @@ header {
 }
 .ft-item { display: inline-flex; align-items: baseline; gap: 5px; }
 .ft-k { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
-.ft-name { font-weight: 900; font-size: 12.5px; color: var(--text-main); }
-.ft-arrow { color: var(--text-muted); opacity: 0.6; font-weight: 900; font-size: 12.5px; }
+.ft-name { font-weight: 900; font-size: 13px; color: var(--text-main); }
+.ft-arrow { color: var(--text-muted); opacity: 0.6; font-weight: 900; font-size: 13px; }
 .handover-fromto.c-ward { background: rgba(185, 236, 226, 0.45); border-color: rgba(15, 118, 110, 0.22); }
 .handover-fromto.c-nicu { background: rgba(251, 208, 234, 0.45); border-color: rgba(163, 25, 111, 0.22); }
 .handover-fromto.c-picu { background: rgba(255, 223, 227, 0.45); border-color: rgba(220, 38, 70, 0.22); }
 .handover-fromto.c-ward .ft-name { color: #0f766e; }
 .handover-fromto.c-nicu .ft-name { color: #a3196f; }
-.handover-fromto.c-picu .ft-name { color: #dc2646; }
+.handover-fromto.c-picu .ft-name { color: #d95a71; }
 :root[data-theme="dark"] .handover-fromto.c-ward { background: rgba(16, 81, 72, 0.35); border-color: rgba(94, 234, 212, 0.25); }
 :root[data-theme="dark"] .handover-fromto.c-nicu { background: rgba(84, 31, 71, 0.4); border-color: rgba(249, 168, 212, 0.28); }
 :root[data-theme="dark"] .handover-fromto.c-picu { background: rgba(76, 35, 49, 0.45); border-color: rgba(253, 164, 175, 0.28); }
@@ -885,16 +886,16 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 .card.today.mrd-nagar,   .upcoming-card.mrd-nagar,   .sr-chip.mrd-nagar   { background: #d4ddfd; border-color: rgba(67, 56, 202, 0.3); }
 .card.today.mrd-second,  .upcoming-card.mrd-second,  .sr-chip.mrd-second  { background: #334155; border-color: rgba(71, 85, 105, 0.35); color: #fff; }
 
-.badge.mrd-picuday, .upcoming-badge.mrd-picuday { background: #ead9ff; color: #7e22ce; }
-.badge.mrd-dayer,   .upcoming-badge.mrd-dayer   { background: #ffe680; color: #92400e; }
-.badge.mrd-opd,     .upcoming-badge.mrd-opd     { background: #bfe3fc; color: #0369a1; }
-.badge.mrd-picu24,  .upcoming-badge.mrd-picu24  { background: #ffcdd4; color: #dc2646; }
-.badge.mrd-nicu24,  .upcoming-badge.mrd-nicu24  { background: #f7b7dd; color: #a3196f; }
-.badge.mrd-ward24,  .upcoming-badge.mrd-ward24  { background: #8fe6d4; color: #0f766e; }
-.badge.mrd-post,    .upcoming-badge.mrd-post    { background: #f2f5f8; color: #475569; }
-.badge.mrd-off,     .upcoming-badge.mrd-off     { background: #baf2cd; color: #166534; }
-.badge.mrd-nagar,   .upcoming-badge.mrd-nagar   { background: #cdd8ff; color: #4338ca; }
-.badge.mrd-second,  .upcoming-badge.mrd-second  { background: #334155; color: #fff; }
+.badge.mrd-picuday, .upcoming-badge.mrd-picuday { background: #7e22ce; color: #fff; box-shadow: 0 6px 14px rgba(126, 34, 206, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-dayer,   .upcoming-badge.mrd-dayer   { background: #b45309; color: #fff; box-shadow: 0 6px 14px rgba(180, 83, 9, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-opd,     .upcoming-badge.mrd-opd     { background: #0369a1; color: #fff; box-shadow: 0 6px 14px rgba(3, 105, 161, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-picu24,  .upcoming-badge.mrd-picu24  { background: #dc2646; color: #fff; box-shadow: 0 6px 14px rgba(220, 38, 70, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-nicu24,  .upcoming-badge.mrd-nicu24  { background: #a3196f; color: #fff; box-shadow: 0 6px 14px rgba(163, 25, 111, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-ward24,  .upcoming-badge.mrd-ward24  { background: #0f766e; color: #fff; box-shadow: 0 6px 14px rgba(15, 118, 110, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-post,    .upcoming-badge.mrd-post    { background: #475569; color: #fff; box-shadow: 0 6px 14px rgba(71, 85, 105, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-off,     .upcoming-badge.mrd-off     { background: #166534; color: #fff; box-shadow: 0 6px 14px rgba(22, 101, 52, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-nagar,   .upcoming-badge.mrd-nagar   { background: #4338ca; color: #fff; box-shadow: 0 6px 14px rgba(67, 56, 202, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+.badge.mrd-second,  .upcoming-badge.mrd-second  { background: #334155; color: #fff; box-shadow: 0 6px 14px rgba(71, 85, 105, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
 
 .cal-cell.mrd-picuday { background: #ead9ff; border: 2px solid rgba(126, 34, 206, 0.2); }
 .cal-cell.mrd-dayer   { background: #ffe680; border: 2px solid rgba(146, 64, 14, 0.2); }
@@ -918,16 +919,16 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 :root[data-theme="dark"] .card.today.mrd-nagar,   :root[data-theme="dark"] .upcoming-card.mrd-nagar,   :root[data-theme="dark"] .sr-chip.mrd-nagar   { background: #2e2e66; border-color: rgba(165, 180, 252, 0.35); }
 :root[data-theme="dark"] .card.today.mrd-second,  :root[data-theme="dark"] .upcoming-card.mrd-second,  :root[data-theme="dark"] .sr-chip.mrd-second  { background: #283a5c; border-color: rgba(203, 213, 225, 0.35); }
 
-:root[data-theme="dark"] .badge.mrd-picuday, :root[data-theme="dark"] .upcoming-badge.mrd-picuday { background: #372a5f; color: #d8b4fe; }
-:root[data-theme="dark"] .badge.mrd-dayer,   :root[data-theme="dark"] .upcoming-badge.mrd-dayer   { background: #8a6d1a; color: #fde68a; }
-:root[data-theme="dark"] .badge.mrd-opd,     :root[data-theme="dark"] .upcoming-badge.mrd-opd     { background: #135a8c; color: #7dd3fc; }
-:root[data-theme="dark"] .badge.mrd-picu24,  :root[data-theme="dark"] .upcoming-badge.mrd-picu24  { background: #4c2331; color: #fda4af; }
-:root[data-theme="dark"] .badge.mrd-nicu24,  :root[data-theme="dark"] .upcoming-badge.mrd-nicu24  { background: #541f47; color: #f9a8d4; }
-:root[data-theme="dark"] .badge.mrd-ward24,  :root[data-theme="dark"] .upcoming-badge.mrd-ward24  { background: #105148; color: #5eead4; }
-:root[data-theme="dark"] .badge.mrd-post,    :root[data-theme="dark"] .upcoming-badge.mrd-post    { background: #4a5567; color: #cbd5e1; }
-:root[data-theme="dark"] .badge.mrd-off,     :root[data-theme="dark"] .upcoming-badge.mrd-off     { background: #14572f; color: #86efac; }
-:root[data-theme="dark"] .badge.mrd-nagar,   :root[data-theme="dark"] .upcoming-badge.mrd-nagar   { background: #2d2c70; color: #a5b4fc; }
-:root[data-theme="dark"] .badge.mrd-second,  :root[data-theme="dark"] .upcoming-badge.mrd-second  { background: #283a5c; color: #e2e8f0; }
+:root[data-theme="dark"] .badge.mrd-picuday, :root[data-theme="dark"] .upcoming-badge.mrd-picuday { background: #7e22ce; color: #fff; box-shadow: 0 6px 14px rgba(126, 34, 206, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-dayer,   :root[data-theme="dark"] .upcoming-badge.mrd-dayer   { background: #b45309; color: #fff; box-shadow: 0 6px 14px rgba(180, 83, 9, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-opd,     :root[data-theme="dark"] .upcoming-badge.mrd-opd     { background: #0369a1; color: #fff; box-shadow: 0 6px 14px rgba(3, 105, 161, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-picu24,  :root[data-theme="dark"] .upcoming-badge.mrd-picu24  { background: #dc2646; color: #fff; box-shadow: 0 6px 14px rgba(220, 38, 70, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-nicu24,  :root[data-theme="dark"] .upcoming-badge.mrd-nicu24  { background: #a3196f; color: #fff; box-shadow: 0 6px 14px rgba(163, 25, 111, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-ward24,  :root[data-theme="dark"] .upcoming-badge.mrd-ward24  { background: #0f766e; color: #fff; box-shadow: 0 6px 14px rgba(15, 118, 110, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-post,    :root[data-theme="dark"] .upcoming-badge.mrd-post    { background: #475569; color: #fff; box-shadow: 0 6px 14px rgba(71, 85, 105, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-off,     :root[data-theme="dark"] .upcoming-badge.mrd-off     { background: #166534; color: #fff; box-shadow: 0 6px 14px rgba(22, 101, 52, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-nagar,   :root[data-theme="dark"] .upcoming-badge.mrd-nagar   { background: #4338ca; color: #fff; box-shadow: 0 6px 14px rgba(67, 56, 202, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+:root[data-theme="dark"] .badge.mrd-second,  :root[data-theme="dark"] .upcoming-badge.mrd-second  { background: #334155; color: #fff; box-shadow: 0 6px 14px rgba(71, 85, 105, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
 
 :root[data-theme="dark"] .cal-cell.mrd-picuday { background: #2f2452; border-color: rgba(216, 180, 254, 0.26); }
 :root[data-theme="dark"] .cal-cell.mrd-dayer   { background: #6e5816; border-color: rgba(253, 230, 138, 0.3); }
@@ -1226,3 +1227,29 @@ body { font-size: 17.6px; }
 .store-badge { font-size: 11px; }
 
 .app-toast { font-size: 14px; }
+
+/* ---- EXPANDED CARD TEXT +5% ----
+   Everything inside the big .card.today ("expanded") card reads ~5% bigger.
+   Mini (.upcoming-card), shell UI, calendar and A4 prints are untouched —
+   sizes below are 1.05x the values in the +10% block above. */
+#daily-render-area .card.today .date-num { font-size: 34.5px; }
+#daily-render-area .card.today.type-picu-24 .date-num { font-size: 29.5px; }
+#daily-render-area .card.today .day-name { font-size: 18px; }
+#daily-render-area .card.today .badge { font-size: 13.5px; }
+#daily-render-area .card.today.type-picu-24 .badge { font-size: 12.5px; }
+#daily-render-area .card.today .team-label { font-size: 12.5px; }
+#daily-render-area .card.today .duty-k { font-size: 11.5px; }
+#daily-render-area .card.today .duty-v { font-size: 15.5px; }
+#daily-render-area .card.today .pill { font-size: 15.5px; }
+#daily-render-area .card.today .second-call-label { font-size: 11.5px; }
+#daily-render-area .card.today .second-call-name { font-size: 15.5px; }
+#daily-render-area .card.today .card-note-badge { font-size: 11.5px; }
+#daily-render-area .card.today .swap-badge { font-size: 10.5px; }
+#daily-render-area .card.today .daily-note { font-size: 14.5px; }
+#daily-render-area .card.today .handover-fromto { font-size: 13.8px; }
+#daily-render-area .card.today .handover-fromto .ft-name { font-size: 13.5px; }
+#daily-render-area .card.today .nagar-label { font-size: 11.5px; }
+#daily-render-area .card.today .nagar-name { font-size: 14.5px; }
+#daily-render-area .card.today .opd-label { font-size: 11.5px; }
+#daily-render-area .card.today .opd-count { font-size: 11.5px; }
+#daily-render-area .card.today .opd-pill { font-size: 14.5px; }
