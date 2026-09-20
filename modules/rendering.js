@@ -19,34 +19,19 @@ const MRINAL_DUTY = {
   picuDay: { label: 'PICU Day',   cls: 'd-picuday', tint: 'mrd-picuday' },
 };
 
-const MRINAL_NOTES = {
-  picuDay: 'Day PICU coverage — she’s not on the roster today, so this is her default',
-  postOff: 'Rest day after a 24h shift',
-};
-
 function mrinalDutyAt(idx) {
   const roster = getRoster();
   if (!roster || idx < 0 || idx >= roster.length) return null;
   const prevDay = idx === 0 ? (window.__prevDayData && window.__prevDayData.day) : null;
   const r = dayRole(roster, idx, 'Mrinal', prevDay);
   const d = MRINAL_DUTY[r.key];
-  return { key: r.key, label: d.label, cls: d.cls, tint: d.tint, note: MRINAL_NOTES[r.key] || '' };
+  return { key: r.key, label: d.label, cls: d.cls, tint: d.tint };
 }
 
 function mrinalDutyOf(data) {
   if (!data) return null;
   const roster = getRoster();
   return mrinalDutyAt(roster.findIndex((r) => r.date === data.date));
-}
-
-function mrinalDutyBannerHtml(m) {
-  if (!m) return '';
-  return `
-    <div class="mrinal-duty">
-      <span class="mrinal-duty-lbl">Dr. Mrinal</span>
-      <span class="mrinal-duty-chip ${m.cls}">${escapeHtml(m.label)}</span>
-      ${m.note ? `<span class="mrinal-duty-note">${escapeHtml(m.note)}</span>` : ''}
-    </div>`;
 }
 
 let realTodayIndex = 0;
@@ -98,14 +83,22 @@ function mainCardHtml(data, mountCls = '') {
   let detailsHtml = '';
   const idx = roster.findIndex((r) => r.date === data.date);
 
+  /* Dr. Mrinal's actual duty drives the badge label + tint (not the raw roster
+     title). Her duty hours/status meta is hidden on 24h shifts and post-duty
+     recovery days. */
+  const m = mrinalDutyOf(data);
+  const mTint = m ? m.tint : 'mrd-off';
+  const mLabel = m ? m.label : '';
+  const hideDutyMeta = !!(m && (m.key === 'ward' || m.key === 'nicu' || m.key === 'picu' || m.key === 'postOff'));
+
   if (data.type === 'opd') {
     const opdTeammates = data.opd
       ? data.opd.split(', ')
-          .map(m => m.trim())
-          .filter(m => m.toLowerCase() !== 'mrinal')
+          .map(n => n.trim())
+          .filter(n => n.toLowerCase() !== 'mrinal')
       : [];
     const pills = opdTeammates.length > 0
-      ? opdTeammates.map(m => `<span class="pill">${escapeHtml(m)}</span>`).join('')
+      ? opdTeammates.map(n => `<span class="pill">${escapeHtml(n)}</span>`).join('')
       : '<span class="pill">None</span>';
     detailsHtml = `
       <div>
@@ -173,8 +166,8 @@ function mainCardHtml(data, mountCls = '') {
       </div>`).join('');
     detailsHtml = `
       <div>
-        <div class="team-label">Duty Status</div>
-        <div class="pills"><span class="pill" style="background:${bgCol}; color:${txtCol}; width:100%; text-align:center;">${statusText}</span></div>
+        ${hideDutyMeta ? '' : `<div class="team-label">Duty Status</div>
+        <div class="pills"><span class="pill" style="background:${bgCol}; color:${txtCol}; width:100%; text-align:center;">${statusText}</span></div>`}
         ${people.length ? `<div class="team-label" style="margin-top:8px;">People On Duty</div><div class="duty-list">${peopleRows}</div>` : ''}
       </div>`;
   } else {
@@ -201,7 +194,7 @@ function mainCardHtml(data, mountCls = '') {
     ? `<div class="second-call"><span class="second-call-label">📞 2nd On Call</span><span class="second-call-name">${escapeHtml(data.second)}</span></div>`
     : '';
 
-  const hoursHtml = getDutyHours(data)
+  const hoursHtml = (!hideDutyMeta && getDutyHours(data))
     ? `<div class="hours-row"><span class="hours-label">🕘 Duty Hours</span><span class="hours-value">${getDutyHours(data)}</span></div>`
     : '';
 
@@ -213,12 +206,6 @@ function mainCardHtml(data, mountCls = '') {
   const noteBadgeHtml = savedNote
     ? `<div class="card-note-badge">Note Attached</div>`
     : '';
-
-  /* Cardiac identity = Dr. Mrinal's actual duty placement: the badge label and
-     the card's background tint follow her duty (not the raw roster title). */
-  const m = mrinalDutyOf(data);
-  const mTint = m ? m.tint : 'mrd-off';
-  const mLabel = m ? m.label : '';
 
   return `
     <div class="card today type-${data.type} ${mTint}${mountCls}" id="dailyCardElement" data-date="${data.date}">
@@ -235,7 +222,6 @@ function mainCardHtml(data, mountCls = '') {
       </div>
 
       <div class="card-body-content">
-        ${mrinalDutyBannerHtml(m)}
         ${handoverHtml}
         ${hoursHtml}
         ${detailsHtml}
