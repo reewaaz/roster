@@ -378,5 +378,6 @@ if (typeof window !== 'undefined') {
     fetch: fetchStoreRoster,
     current: () => findCurrentMonthRoster(),
     autoSelect: () => autoSelectRoster(),
+    clearCaches: () => { contentCache.clear(); listCache = { at: 0, items: [] }; },
   };
 }
