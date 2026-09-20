@@ -193,6 +193,15 @@ export function openAlertModal() {
     list.innerHTML = ALERT_TYPES.map(t =>
       `<label class="alert-type-label" data-t="${t.type}"><input class="alert-type" type="checkbox" value="${t.type}">${t.label}</label>`
     ).join('');
+    /* The checkboxes are display:none, so a tap gives no native visual cue.
+       Sync the pill's .checked class on every change so "Days To Alert"
+       feels selectable / deselectable straight away. */
+    list.addEventListener('change', (e) => {
+      const ch = e.target && e.target.closest && e.target.closest('.alert-type');
+      if (!ch) return;
+      const label = ch.closest('.alert-type-label');
+      if (label) label.classList.toggle('checked', ch.checked);
+    });
   }
   renderReminderRows();
   document.getElementById('alert-enabled').checked = localStorage.getItem(ALERT_KEY) === '1';

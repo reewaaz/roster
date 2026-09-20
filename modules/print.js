@@ -1,4 +1,4 @@
-import { getRoster, getMeta, getStart } from './roster.js';
+import { getRoster, getMeta, getStart, dayRole } from './roster.js';
 import { triggerHaptic, escapeHtml } from './utils.js';
 
 /* Print generator — three A4-landscape styles:
@@ -23,6 +23,15 @@ const CHUNK = 11; /* days per page */
 function adLabel(start, i) {
   const d = new Date(start.getTime() + i * 86400000);
   return `${MONTH_ABB[d.getMonth()]} ${d.getDate()}`;
+}
+
+/* Festival titles are often stored ALL-CAPS in the roster data; the reference
+   prints show them sentence-case ("Ghatasthapana"), so title-case on render. */
+function festivalLabel(title) {
+  const t = String(title || '').trim();
+  if (!t) return '';
+  return t.replace(/\w[\w'-]*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase())
+          .replace(/\b(The|And|Of)\b/g, (w) => w.toLowerCase());
 }
 
 function isMe(name) { return /mrinal/i.test(name || ''); }
@@ -54,11 +63,17 @@ function simpleRow(d, i, start) {
   const off = d.type === 'off' || d.type === 'post-off';
   const noteMark = notesDB[d.date] ? '<span class="pr-note">*</span>' : '';
   const offBadge = off ? ' <i class="pr-offb">OFF</i>' : '';
+  /* A holiday written in the title (Ghatasthapana, Dashain, …) gets its own
+     line beneath the date — Saturday/post-duty OFF titles stay bare. */
+  const fest = off && d.title && !/off/i.test(String(d.title))
+    ? `<em class="pr-fest">${escapeHtml(festivalLabel(d.title))}</em>` : '';
   const nagar = d.nagarHospital && String(d.nagarHospital).trim() && d.nagarHospital !== '—'
     ? `<div class="pr-nagar"><b>Nagar Hospital</b>${personSpan(d.nagarHospital)}</div>` : '';
   const cells = SIMPLE_COLS.map((c) => {
     if (c.key === 'opd') {
-      const names = namesInline(d.opd);
+      /* Holidays have no OPD postings — the cell stays blank even when the raw
+         data scribbles a festival name into the OPD column. */
+      const names = off ? '' : namesInline(d.opd);
       return `<td class="${c.cls}">${names ? `<div class="pr-names">${names}</div>` : ''}${nagar}</td>`;
     }
     const names = namesInline(d[c.key]);
@@ -67,7 +82,7 @@ function simpleRow(d, i, start) {
   }).join('');
   return `
     <tr class="${off ? 'pr-off' : ''}${i === simpleToday ? ' pr-today' : ''}">
-      <th class="pr-date"><div class="pr-dl"><b>${escapeHtml(d.date)}${noteMark}</b><span>${escapeHtml(d.day)}</span></div><div class="pr-ad">${adLabel(start, i)}${offBadge}</div></th>
+      <th class="pr-date"><div class="pr-dl"><b>${escapeHtml(d.date)}${noteMark}</b><span>${escapeHtml(d.day)}</span></div><div class="pr-ad">${adLabel(start, i)}${offBadge}</div>${fest}</th>
       ${cells}
     </tr>`;
 }
@@ -133,8 +148,6 @@ function renderSimple(roster, meta, start) {
 /* ------------------------------------------------------------------ */
 /* MATRIX — per-person, per-day cells (print2 + print3 share this)    */
 /* ------------------------------------------------------------------ */
-const ROLE_ORDER = ['picu', 'nicu', 'ward', 'er', 'opd', 'nagarHospital', 'second'];
-
 const ROLE_CELL = {
   ward:   { label: '24h Ward/ER', line: ['24h', 'Ward'], cls: 'k-ward24' },
   nicu:   { label: '24h NICU',    line: ['24h', 'NICU'], cls: 'k-nicu24' },
@@ -145,34 +158,18 @@ const ROLE_CELL = {
   second: { label: '2nd call',    line: ['2nd', 'call'], cls: 'k-second' },
   postOff: { label: 'Post-duty',  line: ['Post', 'duty'], cls: 'k-post' },
   off:    { label: 'OFF',         line: ['OFF'],         cls: 'k-off' },
+  picuDay: { label: 'PICU Day',   line: ['PICU', 'Day'], cls: 'k-picuday' },
 };
 
-function wordMatches(v, person) {
-  if (!v || !String(v).trim() || v === '—') return false;
-  return String(v).split(/,\s*/).map((s) => s.trim()).includes(person);
-}
+/* One coloured chip per person-day. */
 
-/* One coloured chip per person-day: a duty role wins, then the recovery
-   "Post-duty" after a 24h shift, then OFF on off days (residents only). */
 function dayCell(roster, i, person, isResident) {
-  const d = roster[i];
-  const roles = [];
-  for (const f of ROLE_ORDER) {
-    if (d[f] != null && wordMatches(d[f], person)) roles.push(f);
+  const r = dayRole(roster, i, person);
+  if (r.key === 'picuDay' || r.key === 'off') {
+    if (!isResident) return null;
+    return { cell: ROLE_CELL[r.key], tag: '' };
   }
-  if (roles.length) {
-    const mainF = roles[0];
-    const hasSecond = roles.includes('second') && mainF !== 'second';
-    return { cell: ROLE_CELL[mainF], tag: hasSecond ? '2nd' : '' };
-  }
-  const prev = roster[i - 1];
-  if (prev && (wordMatches(prev.ward, person) || wordMatches(prev.nicu, person) || wordMatches(prev.picu, person))) {
-    return { cell: ROLE_CELL.postOff, tag: '' };
-  }
-  if (d.type === 'off' || d.type === 'post-off') {
-    return isResident ? { cell: ROLE_CELL.off, tag: '' } : null;
-  }
-  return null;
+  return { cell: ROLE_CELL[r.key], tag: r.hasSecond ? '2nd' : '' };
 }
 
 function collectPeople(roster) {
@@ -185,7 +182,19 @@ function collectPeople(roster) {
   };
   roster.forEach((d) => {
     ['ward', 'nicu', 'picu', 'er', 'second', 'nagarHospital'].forEach((f) => add(d[f], f));
-    if (d.opd && String(d.opd).trim()) String(d.opd).split(/,\s*/).forEach((n) => add(n.trim(), 'opd'));
+    if (d.opd && String(d.opd).trim()) {
+      /* Holidays have no OPD postings — the OPD cell on an off day may hold a
+         festival name (e.g. GHATASTHAPANA) instead of people. Never treat that
+         text as a person, and skip any token that merely repeats the day's title
+         so a mislabelled caption can't leak into the roster as a fake doctor. */
+      const isOff = d.type === 'off' || d.type === 'post-off';
+      String(d.opd).split(/,\s*/).forEach((n) => {
+        const name = n.trim();
+        if (!name) return;
+        if (isOff || (d.title && name.toUpperCase() === String(d.title).toUpperCase())) return;
+        add(name, 'opd');
+      });
+    }
   });
   const residents = [];
   const consultants = [];
@@ -241,7 +250,9 @@ function renderNameFirst(roster, meta, start) {
     for (let i = from; i <= to; i++) {
       const d = roster[i];
       const off = d.type === 'off' || d.type === 'post-off';
-      heads.push(`<th class="pr-dh${off ? ' pr-offday' : ''}${i === simpleToday ? ' pr-today' : ''}"><b>${escapeHtml(d.date)}</b><span>${escapeHtml(d.day)}</span><small>${adLabel(start, i)}</small></th>`);
+      const fest = off && d.title && !/off/i.test(String(d.title))
+        ? `<em class="pr-fest">${escapeHtml(festivalLabel(d.title))}</em>` : '';
+      heads.push(`<th class="pr-dh${off ? ' pr-offday' : ''}${i === simpleToday ? ' pr-today' : ''}"><b>${escapeHtml(d.date)}</b><span>${escapeHtml(d.day)}</span><small>${adLabel(start, i)}</small>${fest}</th>`);
     }
     const dayCols = to - from + 1;
     const rows = [];
@@ -289,10 +300,12 @@ function renderDateFirst(roster, meta, start) {
     for (let i = from; i <= to; i++) {
       const d = roster[i];
       const off = d.type === 'off' || d.type === 'post-off';
+      const fest = off && d.title && !/off/i.test(String(d.title))
+        ? `<em class="pr-fest">${escapeHtml(festivalLabel(d.title))}</em>` : '';
       const cellsNew = residents.map((n) => matrixCellHtml(n, i, true, roster, true)).join('');
       const cellsCons = consultants.map((n) => matrixCellHtml(n, i, false, roster, true)).join('');
       rows.push(`<tr class="${i === simpleToday ? 'pr-today' : ''}">
-        <th class="pr-dt${off ? ' pr-offday' : ''}"><div class="pr-dl"><b>${escapeHtml(d.date)}</b><span>${escapeHtml(d.day)}</span><small>${adLabel(start, i)}</small></div></th>
+        <th class="pr-dt${off ? ' pr-offday' : ''}"><div class="pr-dl"><b>${escapeHtml(d.date)}</b><span>${escapeHtml(d.day)}</span><small>${adLabel(start, i)}</small></div>${fest}</th>
         ${cellsNew}${gapCell}${cellsCons}
       </tr>`);
     }

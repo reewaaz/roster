@@ -175,6 +175,39 @@ export function getHandover(idx) {
   return findHandoverName(idx);
 }
 
+function personIn(v, person) {
+  if (!v || !String(v).trim() || v === '—') return false;
+  return String(v).split(/,\s*/).some((s) => s.trim() === person);
+}
+
+/* The duty a person actually performs on a given day, using the same rules as
+   the reference print2/print3 matrices:
+     1. any explicit placement wins — ward/nicu/picu = 24h, er = Day ER, opd,
+        nagarHospital, second (a second-on-call person who also holds a main
+        role reports hasSecond);
+     2. else the day after a 24h shift is "postOff" (recovery day);
+     3. else off days (Saturdays / public holidays / JSON post-off) are "off";
+     4. else a resident defaults to "picuDay" (Day PICU duty).
+   Shared by the day cards, month calendar and the print matrices. */
+export function dayRole(roster, i, person) {
+  const d = roster[i];
+  if (!d) return { key: 'off', hasSecond: false };
+  const fields = ['picu', 'nicu', 'ward', 'er', 'opd', 'nagarHospital', 'second'];
+  const roles = [];
+  for (const f of fields) {
+    if (personIn(d[f], person)) roles.push(f);
+  }
+  if (roles.length) {
+    return { key: roles[0], hasSecond: roles.includes('second') && roles[0] !== 'second' };
+  }
+  const prev = roster[i - 1];
+  if (prev && (personIn(prev.ward, person) || personIn(prev.nicu, person) || personIn(prev.picu, person))) {
+    return { key: 'postOff', hasSecond: false };
+  }
+  if (d.type === 'off' || d.type === 'post-off') return { key: 'off', hasSecond: false };
+  return { key: 'picuDay', hasSecond: false };
+}
+
 /* Get the person(s) on duty for an off/post-off day (all non-empty roles) */
 export function getOffDutyPeople(day) {
   const roles = [];

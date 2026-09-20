@@ -1,9 +1,48 @@
 import { triggerHaptic, showToast, escapeHtml } from './utils.js';
 import {
   getRoster, getMeta, getStart, getEnd, isExpired, recomputeToday,
-  findHandoverName, getOffDutyPeople, WEEKDAYS,
+  findHandoverName, getOffDutyPeople, dayRole, WEEKDAYS,
 } from './roster.js';
 import { getSwaps } from './swaps.js';
+
+/* Dr. Mrinal's day chip — same colour language as the print references. */
+const MRINAL_DUTY = {
+  ward:   { label: 'Ward/ER 24h', cls: 'd-ward24' },
+  nicu:   { label: 'NICU 24h',    cls: 'd-nicu24' },
+  picu:   { label: 'PICU 24h',    cls: 'd-picu24' },
+  er:     { label: 'ER Day',      cls: 'd-dayer' },
+  opd:    { label: 'OPD',         cls: 'd-opd' },
+  nagarHospital: { label: 'Nagar Hospital', cls: 'd-nagar' },
+  second: { label: '2nd call',    cls: 'd-second' },
+  postOff: { label: 'Post 24h OFF', cls: 'd-post' },
+  off:    { label: 'OFF',         cls: 'd-off' },
+  picuDay: { label: 'PICU Day',   cls: 'd-picuday' },
+};
+
+const MRINAL_NOTES = {
+  picuDay: 'Day PICU coverage — she’s not on the roster today, so this is her default',
+  postOff: 'Rest day after a 24h shift',
+};
+
+function mrinalDutyOf(data) {
+  const roster = getRoster();
+  const idx = roster.findIndex((r) => r.date === data.date);
+  if (idx < 0) return null;
+  const r = dayRole(roster, idx, 'Mrinal');
+  const d = MRINAL_DUTY[r.key];
+  return { key: r.key, label: d.label, cls: d.cls, note: MRINAL_NOTES[r.key] || '' };
+}
+
+function mrinalDutyBannerHtml(data) {
+  const m = mrinalDutyOf(data);
+  if (!m) return '';
+  return `
+    <div class="mrinal-duty">
+      <span class="mrinal-duty-lbl">Dr. Mrinal</span>
+      <span class="mrinal-duty-chip ${m.cls}">${escapeHtml(m.label)}</span>
+      ${m.note ? `<span class="mrinal-duty-note">${escapeHtml(m.note)}</span>` : ''}
+    </div>`;
+}
 
 let realTodayIndex = 0;
 let currentIndex = 0;
@@ -185,6 +224,7 @@ function mainCardHtml(data, mountCls = '') {
       </div>
 
       <div class="card-body-content">
+        ${mrinalDutyBannerHtml(data)}
         ${handoverHtml}
         ${hoursHtml}
         ${detailsHtml}
@@ -362,11 +402,16 @@ export function renderMonthView() {
     const hasNoteClass = hasNote ? 'has-note' : '';
     const isTodayClass = index === realTodayIndex ? 'is-today' : '';
     const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
+    const m = mrinalDutyOf(day);
+    const mrd = m
+      ? `<span class="cal-mrduty ${m.cls}" title="Dr. Mrinal — ${escapeHtml(m.label)}">${escapeHtml(m.label)}</span>`
+      : '';
     html += `
       <div class="cal-cell type-${day.type} ${hasNoteClass} ${isTodayClass}"
            data-index="${index}" data-date="${day.date}"
            style="animation-delay: ${(index + startDay) * 18}ms;">
         <span class="cal-date">${day.date.split('-')[1]}${asteriskHtml}</span>
+        ${mrd}
       </div>`;
   });
   grid.innerHTML = html;

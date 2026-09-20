@@ -742,6 +742,35 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 #view-month.active .cal-cell { animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 .modal-card { animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: 0.05s; }
 
+/* ---- Dr. Mrinal's duty chip — day card + month calendar (colours match the
+   print references: PICU Day purple, ER Day yellow, 24h Ward teal, OPD blue,
+   OFF green, Post-duty slate, …) ---- */
+.mrinal-duty { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 13px;
+               padding: 10px 12px; border-radius: 14px; background: #f8fafc;
+               border: 1px dashed #cbd5e1; }
+:root[data-theme="dark"] .mrinal-duty { background: #0f172a; border-color: #334155; }
+.mrinal-duty-lbl { font-size: 12px; font-weight: 900; color: var(--text-main); }
+.mrinal-duty-chip { font-size: 12px; font-weight: 900; padding: 4px 12px; border-radius: 999px;
+                    line-height: 1.1; }
+.mrinal-duty-note { font-size: 11px; font-weight: 600; color: var(--text-muted); flex-basis: 100%; line-height: 1.35; }
+.cal-mrduty { display: inline-flex; margin-top: 3px; padding: 2px 6px; border-radius: 99px;
+              font-size: 8px; font-weight: 900; line-height: 1.15; max-width: 100%;
+              overflow: hidden; white-space: nowrap; }
+.d-picuday { background: #f3e8ff; color: #7e22ce; }
+.d-dayer   { background: #fff0a8; color: #92400e; }
+.d-opd     { background: #dff0fd; color: #0369a1; }
+.d-picu24  { background: #ffdfe3; color: #dc2646; }
+.d-nicu24  { background: #fbd0ea; color: #a3196f; }
+.d-ward24  { background: #b9ece2; color: #0f766e; }
+.d-post    { background: #e8ecf3; color: #475569; }
+.d-nagar   { background: #e0e7ff; color: #4338ca; }
+.d-second  { background: #334155; color: #fff; }
+.d-off     { background: #dcfce7; color: #166534; }
+@media (min-width: 768px) {
+  .mrinal-duty-chip { font-size: 13px; padding: 5px 14px; }
+  .cal-mrduty { font-size: 9px; }
+}
+
 /* PRINT AREA — A4 landscape sheets mirroring print1/2/3.html reference files */
 #print-area { display: none; }
 @page { size: A4 landscape; margin: 0; }
@@ -785,7 +814,7 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   .pr-sim .pr-hd { text-align: left; font-size: 9pt; font-weight: 800; padding: 1.6mm 1.8mm;
                    border: 0.4mm solid #e5e9f0; white-space: nowrap; }
   .pr-hd small { display: block; font-size: 7pt; font-weight: 800; opacity: 0.72; margin-top: 0.3mm; }
-  .pr-hdate { background: #eef4fb; color: #334155; }
+  .pr-hdate { background: #f1f1ee; color: #334155; }
   .pr-h-ward { background: #b9ece2; } .pr-h-ward small { color: #0d9488; }
   .pr-h-nicu { background: #fbd0ea; } .pr-h-nicu small { color: #be185d; }
   .pr-h-picu { background: #ffdfe3; } .pr-h-picu small { color: #be123c; }
@@ -809,6 +838,11 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   tr.pr-off th.pr-date { background: #e6f7ec; }
   .pr-offb { font-style: normal; font-size: 8pt; font-weight: 800; background: #bbf7d0; color: #166534;
              padding: 0.4mm 2mm; border-radius: 99px; margin-left: 2mm; }
+  /* Festival name under an off-date row (print1: em block; print2/3: 7pt line) */
+  .pr-fest { display: block; font-style: normal; font-size: 8.5pt; font-weight: 800; color: #166534;
+             line-height: 1.2; margin-top: 0.6mm; }
+  .pr-dh .pr-fest { font-size: 7pt; margin-top: 0.4mm; }
+  .pr-dt .pr-fest { font-size: 7pt; margin-top: 0.4mm; }
   tr.pr-today th.pr-date { box-shadow: inset 0 0 0 0.8mm #0284c7; }
   .pr-nagar { margin-top: 1.1mm; display: flex; align-items: baseline; gap: 2mm; font-size: 11pt; font-weight: 700; }
   .pr-nagar b { font-size: 8.5pt; font-weight: 800; background: #e0e7ff; padding: 0.4mm 1.8mm; border-radius: 99px; }
@@ -820,23 +854,23 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   .pr-mx col.pr-cg { width: 6mm; }
   .pr-mx td.pr-c { border: 0.3mm solid #f1f5f9; text-align: center; padding: 0.9mm 0.5mm;
                    font-weight: 800; font-size: 7.5pt; line-height: 1.15; }
-  .pr-c.blank { background: #fff; }
+  .pr-c.blank { background: #fafafa; }
   .pr-tx b { display: block; font-weight: 800; }
   .pr-t2 { background: #1e293b; color: #fff; font-style: normal; font-size: 6.5pt; font-weight: 800;
           border-radius: 0.8mm; padding: 0.2mm 1mm; margin-left: 0.8mm; white-space: nowrap; }
-  .pr-mx .pr-c.pr-me { box-shadow: inset 0 0 0 0.4mm #be185d; }
+  .pr-mx .pr-c.pr-me { box-shadow: inset 0 0 0 0.5mm rgba(190, 24, 93, 0.55); }
 
-  /* chip palette */
+  /* chip palette — hexes lifted verbatim from print1/2/3.html reference files */
   .pr-c.k-picuday { background: #f3e8ff; color: #7e22ce; }
-  .pr-c.k-dayer { background: #fef3c7; color: #92400e; }
-  .pr-c.k-opd { background: #e0f2fe; color: #0369a1; }
-  .pr-c.k-picu24 { background: #ffe4e6; color: #be123c; }
-  .pr-c.k-nicu24 { background: #fce7f3; color: #be185d; }
-  .pr-c.k-ward24 { background: #ccfbf1; color: #0f766e; }
-  .pr-c.k-post { background: #f1f5f9; color: #475569; }
-  .pr-c.k-nagar { background: #fee2e2; color: #b91c1c; }
-  .pr-c.k-off { background: #dcfce7; color: #15803d; }
-  .pr-c.k-second { background: #f1f5f9; color: #0f172a; }
+  .pr-c.k-dayer { background: #fff0a8; color: #92400e; }
+  .pr-c.k-opd { background: #dff0fd; color: #0369a1; }
+  .pr-c.k-picu24 { background: #ffdfe3; color: #dc2646; }
+  .pr-c.k-nicu24 { background: #fbd0ea; color: #a3196f; }
+  .pr-c.k-ward24 { background: #b9ece2; color: #0f766e; }
+  .pr-c.k-post { background: #e8ecf3; color: #475569; }
+  .pr-c.k-nagar { background: #e0e7ff; color: #4338ca; }
+  .pr-c.k-off { background: #dcfce7; color: #166534; }
+  .pr-c.k-second { background: #334155; color: #fff; }
 
   /* name-first headers */
   .pr-mx .pr-corner2 { background: #1e293b; color: #fff; font-size: 9pt; font-weight: 800;
@@ -846,14 +880,13 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   .pr-dh b { display: block; font-size: 9.5pt; font-weight: 800; }
   .pr-dh span { display: block; font-size: 7.5pt; font-weight: 700; color: #64748b; }
   .pr-dh small { display: block; font-size: 7pt; font-weight: 700; color: #94a3b8; margin-top: 0.4mm; }
-  .pr-dh.pr-offday { background: #dcfce7; }
+  .pr-dh.pr-offday { background: #e3f7e9; }
   .pr-dh.pr-today { box-shadow: inset 0 0 0 0.35mm #0284c7; }
   .pr-nm { text-align: left; padding: 1mm 1.8mm; font-size: 9.5pt; font-weight: 700; color: #1e293b;
            border: 0.3mm solid #e2e8f0; white-space: nowrap; }
-  .pr-nm-me { background: #ffe4e6; color: #9f1239; }
-  .pr-grprow th.pr-grp { text-align: left; padding: 1.4mm 1.8mm; font-size: 9pt; font-weight: 800;
-                         letter-spacing: 0.4px; color: #be185d; text-transform: uppercase;
-                         border: 0.3mm solid #e2e8f0; background: #fdf2f8; }
+  .pr-nm-me { background: #be185d; color: #fff; }
+  .pr-grprow th.pr-grp { text-align: left; height: 4.2mm; padding: 1.2mm 0 0 2.2mm; font-size: 7.5pt; font-weight: 800;
+                         letter-spacing: 0.2px; color: #94a3b8; background: transparent; border: none; }
 
   /* date-first headers */
   .pr-grhead th { background: #1e293b; color: #fff; font-size: 8.5pt; font-weight: 800;
@@ -861,14 +894,14 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   .pr-gapcol { width: 6mm; background: #fff !important; border: none !important; }
   .pr-pn { writing-mode: vertical-rl; transform: rotate(180deg); padding: 1.4mm 0.6mm;
           background: #fff; border: 0.3mm solid #e2e8f0; font-size: 8pt; font-weight: 800; text-align: center; }
-  .pr-pn.pr-me { background: #ffe4e6; color: #9f1239; }
+  .pr-pn.pr-me { background: #be185d; color: #fff; }
   .pr-corner { background: #1e293b; color: #fff; font-size: 9pt; font-weight: 800; text-align: left;
                padding: 1.2mm 1.8mm; }
   .pr-dt { background: #f1f5f9; border: 0.3mm solid #e2e8f0; padding: 0.8mm 1.2mm; text-align: left; white-space: nowrap; }
   .pr-dt .pr-dl b { font-size: 10.5pt; font-weight: 800; }
   .pr-dt .pr-dl span { font-size: 7.5pt; color: #64748b; font-weight: 700; }
   .pr-dt .pr-dl small { font-size: 7pt; color: #94a3b8; font-weight: 700; }
-  .pr-dt.pr-offday { background: #dcfce7; }
+  .pr-dt.pr-offday { background: #e3f7e9; }
   tr.pr-today .pr-dt { box-shadow: inset 0 0 0 0.4mm #0284c7; }
 
   /* legend footer */
@@ -876,15 +909,15 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   .pr-legend { display: flex; flex-wrap: wrap; gap: 1.2mm; align-items: center; }
   .pr-chip { font-size: 7.5pt; font-weight: 800; padding: 0.3mm 1.6mm; border-radius: 1mm; letter-spacing: 0.2px; }
   .pr-chip.k-picuday { background: #f3e8ff; color: #7e22ce; }
-  .pr-chip.k-dayer { background: #fef3c7; color: #92400e; }
-  .pr-chip.k-opd { background: #e0f2fe; color: #0369a1; }
-  .pr-chip.k-picu24 { background: #ffe4e6; color: #be123c; }
-  .pr-chip.k-nicu24 { background: #fce7f3; color: #be185d; }
-  .pr-chip.k-ward24 { background: #ccfbf1; color: #0f766e; }
-  .pr-chip.k-post { background: #f1f5f9; color: #475569; }
-  .pr-chip.k-nagar { background: #fee2e2; color: #b91c1c; }
-  .pr-chip.k-off { background: #dcfce7; color: #15803d; }
-  .pr-chip.k-second { background: #f1f5f9; color: #0f172a; }
+  .pr-chip.k-dayer { background: #fff0a8; color: #92400e; }
+  .pr-chip.k-opd { background: #dff0fd; color: #0369a1; }
+  .pr-chip.k-picu24 { background: #ffdfe3; color: #dc2646; }
+  .pr-chip.k-nicu24 { background: #fbd0ea; color: #a3196f; }
+  .pr-chip.k-ward24 { background: #b9ece2; color: #0f766e; }
+  .pr-chip.k-post { background: #e8ecf3; color: #475569; }
+  .pr-chip.k-nagar { background: #e0e7ff; color: #4338ca; }
+  .pr-chip.k-off { background: #dcfce7; color: #166534; }
+  .pr-chip.k-second { background: #334155; color: #fff; }
   .pr-lg { margin-left: 2mm; font-size: 7.5pt; color: #64748b; font-weight: 700;
            display: inline-flex; align-items: center; gap: 1mm; }
   .pr-t2-legend { margin-left: 0; }
