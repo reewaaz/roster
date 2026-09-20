@@ -6,7 +6,7 @@ import {
 import {
   setToken, getToken, getLastSync, persistCurrentRoster, fetchMonthRoster, loadHistory,
 } from './storage.js';
-import { renderSwapModal, clearSwaps, swapCount } from './swaps.js';
+import { renderSwapModal, clearSwaps, swapCount, getSwaps } from './swaps.js';
 import { openAlertModal, saveAlertSettings, sendTestNotification, scheduleDutyAlerts } from './alerts.js';
 import { printRoster } from './print.js';
 import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, notesDB, closeNoteModal as closeNoteModalFromRendering } from './rendering.js';
@@ -221,6 +221,35 @@ export function closeCloudModal() {
 }
 
 /* ---- SEARCH ---- */
+const SEARCH_FIELDS = [
+  { key: 'title', label: 'Posting' },
+  { key: 'ward', label: 'ER/Ward' },
+  { key: 'nicu', label: 'NICU' },
+  { key: 'picu', label: 'PICU' },
+  { key: 'er', label: 'Day ER' },
+  { key: 'second', label: '2nd Call' },
+  { key: 'opd', label: 'OPD' },
+  { key: 'nagarHospital', label: 'Nagar Hospital' },
+  { key: 'day', label: 'Day' },
+];
+
+function highlight(text, q) {
+  const esc = escapeHtml(text == null ? '' : String(text));
+  if (!q) return esc;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return esc.replace(re, '<mark>$1</mark>');
+}
+
+function srHours(d) {
+  if (!d) return '';
+  if (d.type === 'off') return 'Off';
+  if (d.type === 'post-off') return 'Off Day';
+  if (d.type === 'picu-24') return '🕘 9AM–9AM';
+  if (d.day === 'Fri') return '🕘 9AM–3PM';
+  if (d.day === 'Wed') return '🕘 9AM–1PM';
+  return '🕘 9AM–5PM';
+}
+
 export function openSearchModal() {
   triggerHaptic(20);
   const modal = document.getElementById('search-modal');
@@ -228,32 +257,52 @@ export function openSearchModal() {
   const input = document.getElementById('search-input');
   const results = document.getElementById('search-results');
   if (input) input.value = '';
-  if (results) results.innerHTML = '<div class="swap-preview empty">Type a name or duty to search the whole month.</div>';
+  if (results) results.innerHTML = '<div class="swap-preview empty">🔍 Type a name or duty to search the whole month.</div>';
   modal.classList.add('show');
   setTimeout(() => input && input.focus(), 250);
 
   const run = () => {
     const q = (input.value || '').trim().toLowerCase();
     if (!q) {
-      results.innerHTML = '<div class="swap-preview empty">Type a name or duty to search the whole month.</div>';
+      results.innerHTML = '<div class="swap-preview empty">🔍 Type a name or duty to search the whole month.</div>';
       return;
     }
     const meta = getMeta();
     const monthsName = meta.month.split(' ')[0];
-    const matches = getRoster().filter((d) => {
+    const roster = getRoster();
+    const matches = [];
+    roster.forEach((d) => {
       const hay = [d.title, d.ward, d.nicu, d.picu, d.er, d.second, d.opd, d.nagarHospital, d.day]
         .join(' | ').toLowerCase();
-      return hay.includes(q);
+      if (!hay.includes(q)) return;
+      const matched = [];
+      for (const f of SEARCH_FIELDS) {
+        const v = d[f.key];
+        if (!v || !String(v).trim() || v === '—') continue;
+        if (String(v).toLowerCase().includes(q)) matched.push({ label: f.label, value: String(v) });
+      }
+      matches.push({ d, matched });
     });
     if (!matches.length) {
-      results.innerHTML = '<div class="swap-preview empty">No days match "' + escapeHtml(q) + '".</div>';
+      results.innerHTML = `<div class="swap-preview empty">No days match "${escapeHtml(q)}".</div>`;
       return;
     }
-    results.innerHTML = matches.map((d) => {
-      const idx = getRoster().findIndex((r) => r.date === d.date);
-      return `<div class="swap-day-chip" data-idx="${idx}">
-        <span>${monthsName} ${d.date.split('-')[1]} <span class="swap-chip-role">• ${d.day}</span></span>
-        <span class="upcoming-badge type-${d.type}">${escapeHtml(d.title)}</span>
+    results.innerHTML = matches.map(({ d, matched }) => {
+      const idx = roster.findIndex((r) => r.date === d.date);
+      const swapsHtml = getSwaps()[d.date] && getSwaps()[d.date].now
+        ? `${getSwaps()[d.date].original} → ${getSwaps()[d.date].now}` : '';
+      const notesHtml = notesDB[d.date] ? '📝' : '';
+      const hoursHtml = srHours(d);
+      const matchHtml = matched.map((m) =>
+        `<span class="sr-match"><span class="sr-match-label">${m.label}</span> <b>${highlight(m.value, q)}</b></span>`
+      ).join('');
+      return `<div class="swap-day-chip sr-chip" data-idx="${idx}">
+        <div class="sr-head">
+          <span class="sr-date">${monthsName} ${d.date.split('-')[1]} <span class="swap-chip-role">• ${d.day}</span></span>
+          <span class="upcoming-badge type-${d.type}">${highlight(d.title, q)}</span>
+        </div>
+        ${matchHtml ? `<div class="sr-matches">${matchHtml}</div>` : ''}
+        <div class="sr-foot"><span>${hoursHtml}</span>${notesHtml ? '<span>📝 note</span>' : ''}${swapsHtml ? `<span class="sr-swap">⇄ ${swapsHtml}</span>` : ''}</div>
       </div>`;
     }).join('');
     results.querySelectorAll('.swap-day-chip').forEach((chip) => chip.addEventListener('click', () => {

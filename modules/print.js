@@ -13,26 +13,26 @@ function typeLabel(t) {
 
 function dutyDetailsHtml(d) {
   const swaps = getSwaps();
-  const parts = [];
   const map = [
     { key: 'ward', label: 'ER/Ward' },
     { key: 'nicu', label: 'NICU' },
     { key: 'picu', label: 'PICU' },
     { key: 'er', label: 'Day ER' },
     { key: 'second', label: '2nd Call' },
-    { key: 'nagarHospital', label: 'Nagar Hospital' },
+    { key: 'nagarHospital', label: 'Nagar' },
   ];
-  const shown = [];
+  const items = [];
   for (const m of map) {
     const v = d[m.key];
     if (!v || !String(v).trim() || v === '—') continue;
-    const sw = swaps[d.date] && swaps[d.date].field === m.key ? ` (was ${escapeHtml(swaps[d.date].original)})` : '';
-    shown.push(`<div><span class="pc-detail-label">${m.label}:</span> <span class="pc-detail-name">${escapeHtml(v)}</span>${sw ? `<span style="color:#d97706; font-weight:800;">${sw}</span>` : ''}</div>`);
+    const sw = swaps[d.date] && swaps[d.date].field === m.key
+      ? ` <i class="pc-sw">was ${escapeHtml(swaps[d.date].original)}</i>` : '';
+    items.push(`<span class="pc-item"><i class="pc-detail-label">${m.label}</i> <b>${escapeHtml(v)}</b>${sw}</span>`);
   }
   if (d.opd && String(d.opd).trim()) {
-    shown.push(`<div><span class="pc-detail-label">OPD:</span> <span class="pc-detail-name">${escapeHtml(d.opd)}</span></div>`);
+    items.push(`<span class="pc-item"><i class="pc-detail-label">OPD</i> <b>${escapeHtml(d.opd)}</b></span>`);
   }
-  return shown.join('');
+  return items.join(' ');
 }
 
 export function printRoster(realTodayIndex) {
@@ -60,12 +60,13 @@ export function printRoster(realTodayIndex) {
       const c = TYPE_COLORS[d.type] || TYPE_COLORS.opd;
       const dateNum = d.date.split('-')[1];
       const isToday = i === todayIdx;
+      const rowCls = `pt-${d.type}${d.day === 'Sat' || d.day === 'Sun' ? ' weekend' : ''}${isToday ? ' today' : ''}`;
       rows.push(`
-        <tr class="${d.day === 'Sat' || d.day === 'Sun' ? 'weekend' : ''}${isToday ? ' today' : ''}">
-          <td class="pc-day">${dateNum}${notesDB[d.date] ? '<span class="pc-note">*</span>' : ''}</td>
+        <tr class="${rowCls}">
+          <td class="pc-day" style="background:${c.bg}; color:${c.tx};">${dateNum}${notesDB[d.date] ? '<span class="pc-note">*</span>' : ''}</td>
           <td class="pc-weekday">${d.day}</td>
           <td class="pc-type" style="background:${c.bg}; color:${c.tx};">${escapeHtml(d.title)}</td>
-          <td class="pc-details">${dutyDetailsHtml(d) || '—'}</td>
+          <td class="pc-details ${d.type}">${dutyDetailsHtml(d) || '—'}</td>
         </tr>`);
     }
     return `
@@ -79,13 +80,13 @@ export function printRoster(realTodayIndex) {
         </div>
         <div class="print-legend">${legend}</div>
         <table class="print-table">
-          <colgroup><col style="width:10%"><col style="width:10%"><col style="width:18%"><col style="width:62%"></colgroup>
+          <colgroup><col style="width:9%"><col style="width:8%"><col style="width:15%"><col style="width:68%"></colgroup>
           <thead>
             <tr><th>Date</th><th>Day</th><th>Posting</th><th>Details</th></tr>
           </thead>
           <tbody>${rows.join('')}</tbody>
         </table>
-        <div class="print-footer">Dr. Mrinal Duty App · Blue band = today · Shaded = weekend · * = note attached · Colors = duty palette</div>
+        <div class="print-footer">Dr. Mrinal Duty App · Blue band = today · Shaded = weekend · * = note · Colors = duty palette</div>
       </div>`;
   }).join('');
 

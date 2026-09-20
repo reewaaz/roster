@@ -8,6 +8,7 @@ import { getSwaps } from './swaps.js';
 let realTodayIndex = 0;
 let currentIndex = 0;
 let expandMountFor = -1;
+let mountOrigin = null;  // { x, y } percentages — where the new card should expand from
 
 function loadNotes() {
   try {
@@ -239,16 +240,29 @@ export function openScrollDay(idx) {
   const mini = area.querySelector(`.upcoming-card[data-index="${idx}"]`);
   const main = document.getElementById('dailyCardElement');
   if (mini && mini.scrollIntoView) mini.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+  /* Aim the collapse/expand at the tapped mini card so the big card appears to
+     grow out of the small row (and shrink back into it on the way out). */
+  if (main && mini) {
+    const mr = main.getBoundingClientRect();
+    const ir = mini.getBoundingClientRect();
+    const cx = mr.width ? ((ir.left + ir.width / 2) - mr.left) / mr.width * 100 : 50;
+    const cy = mr.height ? ((ir.top + ir.height / 2) - mr.top) / mr.height * 100 : 50;
+    mountOrigin = { x: Math.max(0, Math.min(100, cx)), y: Math.max(0, Math.min(100, cy)) };
+  } else {
+    mountOrigin = null;
+  }
   if (main) main.classList.add('iso-collapse');
   if (mini) mini.classList.add('iso-lift');
   expandMountFor = idx;
   setTimeout(() => {
     currentIndex = idx;
     renderScrollView();
+    mountOrigin = null;
   }, 230);
 }
 
-export function renderScrollView() {
+export function renderScrollView(dir) {
   const area = document.getElementById('daily-render-area');
   if (!area) return;
   const roster = getRoster();
@@ -262,10 +276,17 @@ export function renderScrollView() {
       </div>`;
   }
   const mon = meta.month.split(' ')[0];
+  let mounted = false;
   roster.forEach((d, i) => {
     if (i === currentIndex) {
-      const mountCls = expandMountFor === i ? ' iso-mount' : '';
-      expandMountFor = -1;
+      let mountCls = '';
+      if (expandMountFor === i) {
+        mountCls = ' iso-mount';
+        expandMountFor = -1;
+      } else if (dir === 'right' || dir === 'left') {
+        mountCls = dir === 'right' ? ' enter-right' : ' enter-left';
+      }
+      mounted = true;
       html += mainCardHtml(d, mountCls);
       return;
     }
@@ -283,6 +304,13 @@ export function renderScrollView() {
       </div>`;
   });
   area.innerHTML = html;
+  if (mounted && mountOrigin) {
+    const mainEl = document.getElementById('dailyCardElement');
+    if (mainEl) {
+      mainEl.style.setProperty('--iso-origin-x', mountOrigin.x + '%');
+      mainEl.style.setProperty('--iso-origin-y', mountOrigin.y + '%');
+    }
+  }
   markPillOverflow(area);
   updateTodayPill(area);
   centerScrollOnCurrent(area);
@@ -410,24 +438,52 @@ export function saveNote() {
 export function changeDay(step) {
   const roster = getRoster();
   const newIndex = currentIndex + step;
-  if (newIndex >= 0 && newIndex < roster.length) {
-    currentIndex = newIndex;
-    triggerHaptic(30);
-    if (!document.getElementById('view-daily').classList.contains('active')) {
-      switchTab('daily');
-    } else {
-      renderScrollView(step > 0 ? 'right' : 'left');
-    }
-  } else {
+  if (newIndex < 0 || newIndex >= roster.length) {
     triggerHaptic([12, 40, 12]);
+    return;
+  }
+  triggerHaptic(30);
+  if (!document.getElementById('view-daily').classList.contains('active')) {
+    currentIndex = newIndex;
+    switchTab('daily');
+    return;
+  }
+  /* Slide the outgoing card out, then bring the new one in from the other side. */
+  const main = document.getElementById('dailyCardElement');
+  const exitCls = step > 0 ? 'exit-left' : 'exit-right';
+  const enterDir = step > 0 ? 'right' : 'left';
+  if (main) {
+    main.classList.add(exitCls);
+    setTimeout(() => {
+      currentIndex = newIndex;
+      renderScrollView(enterDir);
+    }, 180);
+  } else {
+    currentIndex = newIndex;
+    renderScrollView(enterDir);
   }
 }
 
 export function goToday() {
   triggerHaptic(35);
-  if (currentIndex !== realTodayIndex) {
+  if (currentIndex === realTodayIndex) return;
+  if (!document.getElementById('view-daily').classList.contains('active')) {
     currentIndex = realTodayIndex;
-    renderScrollView();
+    switchTab('daily');
+    return;
+  }
+  const main = document.getElementById('dailyCardElement');
+  const exitCls = realTodayIndex > currentIndex ? 'exit-left' : 'exit-right';
+  const enterDir = realTodayIndex > currentIndex ? 'right' : 'left';
+  if (main) {
+    main.classList.add(exitCls);
+    setTimeout(() => {
+      currentIndex = realTodayIndex;
+      renderScrollView(enterDir);
+    }, 180);
+  } else {
+    currentIndex = realTodayIndex;
+    renderScrollView(enterDir);
   }
 }
 

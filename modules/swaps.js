@@ -68,6 +68,15 @@ function dayByDate(dateKey) {
   return getRoster().find((d) => d.date === dateKey);
 }
 
+/* OPD holds a comma-separated list of names. */
+function opdMembers(day) {
+  return String(day && day.opd || '').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+function opdJoin(arr) {
+  return arr.filter(Boolean).join(', ');
+}
+
 /* Set a person on a day/field, keeping swap history sane. */
 function setPerson(dateKey, field, newVal) {
   const day = dayByDate(dateKey);
@@ -84,20 +93,64 @@ function setPerson(dateKey, field, newVal) {
   saveSwaps();
 }
 
-function isRoleEmpty(day, field) {
-  const v = day[field];
-  return !v || !String(v).trim();
+/* Append one person to a day's OPD list (never deletes existing members). */
+function appendOpd(dateKey, name) {
+  const day = dayByDate(dateKey);
+  if (!day || !name) return;
+  const list = opdMembers(day);
+  if (!list.includes(name)) list.push(name);
+  setPerson(dateKey, 'opd', opdJoin(list));
+}
+
+/* ---- GRID ---- */
+function chipHtml(dateKey, field, value, label) {
+  return `<span class="swap-chip" draggable="true" data-date="${dateKey}" data-field="${field}" data-person="${escapeHtml(value)}"><span class="swap-chip-role">${label}</span> <span class="swap-chip-name">${escapeHtml(value)}</span></span>`;
+}
+
+function allPeople() {
+  const seen = new Set();
+  getRoster().forEach((day) => {
+    for (const f of FIELDS) {
+      if (f.key === 'opd') opdMembers(day).forEach((n) => n && seen.add(n));
+      else {
+        const v = day[f.key];
+        if (v && String(v).trim()) seen.add(String(v).trim());
+      }
+    }
+  });
+  return [...seen].sort((a, b) => a.localeCompare(b));
+}
+
+function addSelectHtml(dateKey, field, labelHint, people, excluded) {
+  const ex = new Set(excluded);
+  const opts = people.filter((n) => !ex.has(n));
+  const placeholder = labelHint ? `＋ ${labelHint}…` : '＋ add…';
+  return `<select class="swap-addsel" data-date="${dateKey}" data-field="${field}">
+    <option value="">${escapeHtml(placeholder)}</option>
+    ${opts.length ? opts.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('') : '<option disabled>No names in roster</option>'}
+  </select>`;
 }
 
 function renderGrid() {
   const meta = getMeta();
   const monthName = meta.month.split(' ')[0];
-  return getRoster().map((day, i) => {
+  const people = allPeople();
+  return getRoster().map((day) => {
     const chips = [];
-    for (const f of getAssignableFields()) {
-      const v = day[f.key];
-      if (!v || !String(v).trim()) continue;
-      chips.push(`<span class="swap-chip" draggable="false" data-date="${day.date}" data-field="${f.key}"><span class="swap-chip-role">${FIELDS_MAP[f.key] || f.label}</span> ${escapeHtml(v)}</span>`);
+    for (const f of FIELDS) {
+      const label = FIELDS_MAP[f.key] || f.label;
+      if (f.key === 'opd') {
+        const members = opdMembers(day);
+        members.forEach((m) => chips.push(chipHtml(day.date, 'opd', m, label)));
+        chips.push(addSelectHtml(day.date, 'opd', 'OPD add', people, members));
+      } else {
+        const v = day[f.key];
+        if (v && String(v).trim()) {
+          chips.push(chipHtml(day.date, f.key, String(v).trim(), label));
+        } else {
+          chips.push(addSelectHtml(day.date, f.key, label, people, []));
+        }
+      }
     }
     return `
       <div class="swap-day-row" data-date="${day.date}">
@@ -110,16 +163,12 @@ function renderGrid() {
   }).join('');
 }
 
-function getAssignableFields() {
-  return FIELDS.filter((f) => f.key !== 'opd');
-}
-
 export function renderSwapModal(container) {
   const meta = getMeta();
   const monthName = meta.month.split(' ')[0];
 
   container.innerHTML = `
-    <div class="swap-hint">👆 <b>Drag</b> a person's chip and <b>drop</b> it onto the same role on another day to swap duties. Drop onto an empty area to move them there.</div>
+    <div class="swap-hint">👆 <b>Drag</b> a person's chip onto another day or role to <b>swap</b> duties — OPD works too. Drop onto an empty area to <b>move</b> them; use the <b>＋ dropdowns</b> to add people to empty roles.</div>
     <div class="swap-grid" id="swap-grid">${renderGrid()}</div>
     <button class="swap-small-toggle" id="swap-show-form">＋ Manual swap (pick day &amp; role)</button>
     <div id="swap-manual" style="display:none;" class="swap-layout">
@@ -149,6 +198,9 @@ export function renderSwapModal(container) {
       ${Object.keys(swaps).length ? renderActiveSwaps() : '<div class="swap-preview empty">No swaps yet — drag a person onto another day above.</div>'}
     </div>
   `;
+
+  /* ---- ADD VIA DROPDOWN ---- */
+  bindAddSelects(container);
 
   /* ---- DRAG + DROP ---- */
   initDragAndDrop(container);
@@ -209,11 +261,31 @@ export function renderSwapModal(container) {
   });
 }
 
+function bindAddSelects(container) {
+  const grid = container.querySelector('#swap-grid');
+  if (!grid) return;
+  grid.querySelectorAll('.swap-addsel').forEach((sel) => {
+    sel.addEventListener('change', () => {
+      const val = sel.value;
+      if (!val) return;
+      sel.value = '';
+      const field = sel.dataset.field;
+      if (field === 'opd') appendOpd(sel.dataset.date, val);
+      else setPerson(sel.dataset.date, field, val);
+      triggerHaptic(20);
+      const fLabel = FIELDS.find((f) => f.key === field)?.label || field;
+      showToast(`＋ ${val} on ${sel.dataset.date.split('-')[1]} → ${fLabel}`);
+      refreshSwapUI(container);
+      dispatchEvent(new CustomEvent('roster-changed'));
+    });
+  });
+}
+
 function initDragAndDrop(container) {
   const grid = container.querySelector('#swap-grid');
   if (!grid) return;
 
-  let drag = null;      // { dateKey, field, name }
+  let drag = null;      // { dateKey, field, name, person }
   let ghost = null;
 
   const makeGhost = (name) => {
@@ -236,7 +308,7 @@ function initDragAndDrop(container) {
     const el = document.elementFromPoint(x, y);
     if (el) {
       const chip = el.closest('.swap-chip');
-      if (chip && chip.dataset.field === drag.field && chip.dataset.date !== drag.dateKey) {
+      if (chip && !(chip.dataset.date === drag.dateKey && chip.dataset.field === drag.field)) {
         chip.classList.add('candrop');
         return;
       }
@@ -252,7 +324,7 @@ function initDragAndDrop(container) {
     const el = document.elementFromPoint(x, y);
     if (!el) return null;
     const chip = el.closest('.swap-chip');
-    if (chip) return { kind: 'chip', dateKey: chip.dataset.date, field: chip.dataset.field };
+    if (chip) return { kind: 'chip', dateKey: chip.dataset.date, field: chip.dataset.field, person: chip.dataset.person };
     const roles = el.closest('.swap-day-roles');
     if (roles) return { kind: 'roles', dateKey: roles.dataset.date };
     return null;
@@ -263,12 +335,16 @@ function initDragAndDrop(container) {
     const t = e.changedTouches ? e.changedTouches[0] : e;
     const target = getDropTarget(t.clientX, t.clientY);
     if (target) {
-      if (target.kind === 'chip' && target.dateKey !== drag.dateKey && target.field === drag.field) {
-        doSwapChips(drag.dateKey, drag.field, target.dateKey, target.field);
+      if (target.kind === 'chip') {
+        if (target.dateKey === drag.dateKey && target.field === drag.field) {
+          showToast('That chip is already in place');
+        } else {
+          doSwapChips(drag, target);
+        }
       } else if (target.kind === 'roles' && target.dateKey !== drag.dateKey) {
-        doMoveToDay(drag.dateKey, drag.field, target.dateKey);
+        doMoveToDay(drag, target.dateKey);
       } else {
-        showToast('Drop on the same role of another day');
+        showToast('Drop onto another day to move them there');
       }
     }
     if (ghost) { ghost.remove(); ghost = null; }
@@ -288,9 +364,9 @@ function initDragAndDrop(container) {
     const chip = e.target.closest('.swap-chip');
     if (!chip) return;
     e.preventDefault();
-    const name = chip.textContent.replace(/^\s*\S+\s+/, '').trim();
-    drag = { dateKey: chip.dataset.date, field: chip.dataset.field, name };
-    makeGhost(name);
+    const person = chip.dataset.person || chip.textContent.replace(/^\s*\S+\s+/, '').trim();
+    drag = { dateKey: chip.dataset.date, field: chip.dataset.field, name: person, person };
+    makeGhost(person);
     triggerHaptic(15);
     chip.classList.add('dragging');
     grid.classList.add('swap-dragging');
@@ -302,33 +378,89 @@ function initDragAndDrop(container) {
   });
 }
 
-function doSwapChips(aDate, field, bDate, bField) {
-  const aVal = dayByDate(aDate)[field];
-  const bVal = dayByDate(bDate)[bField];
-  if (!aVal || !String(aVal).trim()) { showToast('Nothing to swap from that chip'); return; }
-  setPerson(aDate, field, bVal);
-  setPerson(bDate, bField, aVal);
-  triggerHaptic(30);
-  showToast(`⇄ Swapped: ${aVal} ↔ ${bVal || '—'}`);
-  refreshSwapUI();
+/* Swap a dragged person/chip with a target person/chip, OPD-aware. */
+function doSwapChips(drag, target) {
+  const aOpd = drag.field === 'opd';
+  const bOpd = target.field === 'opd';
+
+  if (aOpd && bOpd) {
+    /* Exchange two named OPD members between their days' OPD lists. */
+    const aList = opdMembers(dayByDate(drag.dateKey)).filter((n) => n !== drag.person);
+    const bList = opdMembers(dayByDate(target.dateKey)).filter((n) => n !== target.person);
+    if (target.person) aList.push(target.person);
+    if (drag.person) bList.push(drag.person);
+    setPerson(drag.dateKey, 'opd', opdJoin(aList));
+    setPerson(target.dateKey, 'opd', opdJoin(bList));
+    triggerHaptic(30);
+    showToast(`⇄ ${drag.person} ↔ ${target.person || '—'} (OPD)`);
+  } else if (aOpd) {
+    /* Dragged OPD member takes target role; target person moves into source day's OPD list. */
+    const aList = opdMembers(dayByDate(drag.dateKey)).filter((n) => n !== drag.person);
+    const bVal = String(dayByDate(target.dateKey)[target.field] || '').trim();
+    swapOpdOutToRole(aList, bVal, drag, target);
+  } else if (bOpd) {
+    /* Dragged person takes target OPD member's spot; that member takes the dragged role. */
+    const bList = opdMembers(dayByDate(target.dateKey)).filter((n) => n !== target.person);
+    if (drag.person) bList.push(drag.person);
+    setPerson(drag.dateKey, drag.field, target.person || '');
+    setPerson(target.dateKey, 'opd', opdJoin(bList));
+    triggerHaptic(30);
+    showToast(`⇄ ${drag.person} ↔ ${target.person || '-'} (OPD)`);
+  } else {
+    /* Plain whole-value swap between two (day, field) pairs — same or different roles. */
+    const aVal = dayByDate(drag.dateKey)[drag.field];
+    const bVal = dayByDate(target.dateKey)[target.field];
+    if (!aVal || !String(aVal).trim()) { showToast('Nothing to swap from that chip'); return; }
+    setPerson(drag.dateKey, drag.field, bVal);
+    setPerson(target.dateKey, target.field, aVal);
+    triggerHaptic(30);
+    showToast(`⇄ Swapped: ${aVal} ↔ ${bVal || '—'}`);
+  }
+  refreshSwapUI(querySwapContainer());
   dispatchEvent(new CustomEvent('roster-changed'));
 }
 
-function doMoveToDay(aDate, field, bDate) {
-  const aVal = dayByDate(aDate)[field];
-  if (!aVal || !String(aVal).trim()) { showToast('Nothing to move from that chip'); return; }
-  setPerson(aDate, field, '');
-  setPerson(bDate, field, aVal);
+function swapOpdOutToRole(aList, bVal, drag, target) {
+  /* aList = source day OPD without the dragged member (already built). */
+  if (bVal) aList.push(bVal);
+  setPerson(drag.dateKey, 'opd', opdJoin(aList));
+  setPerson(target.dateKey, target.field, drag.person);
   triggerHaptic(30);
-  showToast(`→ Moved ${aVal} to ${bDate.split('-')[1]}`);
-  refreshSwapUI();
+  showToast(`⇄ ${drag.person} ↔ ${bVal || '—'}`);
+}
+
+function doMoveToDay(drag, bDate) {
+  if (drag.field === 'opd') {
+    /* Remove dragged member from source OPD, append to target OPD. */
+    const aList = opdMembers(dayByDate(drag.dateKey)).filter((n) => n !== drag.person);
+    setPerson(drag.dateKey, 'opd', opdJoin(aList));
+    appendOpd(bDate, drag.person);
+    triggerHaptic(30);
+    showToast(`→ ${drag.person} moved to OPD on ${bDate.split('-')[1]}`);
+  } else {
+    const aVal = dayByDate(drag.dateKey)[drag.field];
+    if (!aVal || !String(aVal).trim()) { showToast('Nothing to move from that chip'); return; }
+    setPerson(drag.dateKey, drag.field, '');
+    setPerson(bDate, drag.field, aVal);
+    triggerHaptic(30);
+    showToast(`→ Moved ${aVal} to ${bDate.split('-')[1]}`);
+  }
+  refreshSwapUI(querySwapContainer());
   dispatchEvent(new CustomEvent('roster-changed'));
 }
 
-function refreshSwapUI() {
-  const grid = document.getElementById('swap-grid');
-  if (grid) grid.innerHTML = renderGrid();
-  renderSwapListRefresh(document.getElementById('swap-body') || document);
+function querySwapContainer() {
+  return document.getElementById('swap-body') || document;
+}
+
+function refreshSwapUI(container) {
+  container = container || querySwapContainer();
+  const grid = container.querySelector('#swap-grid');
+  if (grid) {
+    grid.innerHTML = renderGrid();
+    bindAddSelects(container);
+  }
+  renderSwapListRefresh(container);
   const count = swapCount();
   const settingsBody = document.getElementById('settings-body');
   if (settingsBody) {
@@ -360,7 +492,7 @@ function renderSwapListRefresh(container) {
       triggerHaptic(20);
       showToast('Swap undone');
       renderSwapListRefresh(container);
-      refreshSwapUI();
+      refreshSwapUI(container);
       dispatchEvent(new CustomEvent('roster-changed'));
     });
   });
