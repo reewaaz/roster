@@ -9,7 +9,7 @@ const ALERT_TYPES = [
   { type: 'picu-day', label: 'PICU Day' },
   { type: 'picu-24', label: 'PICU 24h' },
   { type: 'opd', label: 'OPD' },
-  { type: 'er-day', label: 'Day ER' },
+  { type: 'er-day', label: 'ER Day' },
 ];
 let alertTimer = null;
 

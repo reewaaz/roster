@@ -98,10 +98,10 @@ header {
 #view-daily { display: none; flex-direction: column; touch-action: pan-y; }
 #view-daily.active { display: flex; }
 
-#daily-render-area { gap: 12px; scroll-snap-type: y proximity; scroll-behavior: smooth; padding-bottom: 8px; scroll-padding-top: 12px; }
+#daily-render-area { gap: 12px; scroll-behavior: smooth; padding-bottom: 8px; scroll-padding-top: 12px; }
 #daily-render-area .card.today, #daily-render-area .upcoming-card { flex-shrink: 0; }
-#daily-render-area .card.today { scroll-snap-align: start; animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-.upcoming-card { scroll-snap-align: none; touch-action: manipulation; }
+#daily-render-area .card.today { animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.upcoming-card { touch-action: manipulation; }
 .upcoming-card.scroll-past { opacity: 0.72; }
 .upcoming-card.iso-lift {
   transform: scale(1.06); box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18);
@@ -140,15 +140,6 @@ header {
   overscroll-behavior: contain;
 }
 #daily-render-area::-webkit-scrollbar { display: none; }
-
-/* Springy Scroll Effect - overscroll glow at top/bottom */
-#daily-render-area::before {
-  content: ''; position: sticky; top: -4px; height: 6px; flex-shrink: 0;
-  background: linear-gradient(to bottom, rgba(2,132,199,0.18), transparent);
-  opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 5;
-}
-.springy-top { box-shadow: inset 0 10px 14px -12px rgba(2, 132, 199, 0.5) !important; }
-#daily-render-area.springy-top::before { opacity: 1; }
 
 /* Natural Card Layout */
 .card.today {
@@ -557,25 +548,52 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   font-size: 12.5px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px;
 }
 .swap-day-roles { display: flex; flex-wrap: wrap; gap: 6px; min-height: 26px; }
+/* Role-tinted chips: color follows the duty (ward/nicu/picu/er/…). */
 .swap-chip {
+  --rc-bg: #ffffff; --rc-bd: rgba(0, 0, 0, 0.08); --rc-tx: var(--text-muted);
   display: inline-flex; align-items: center; gap: 5px;
   padding: 6px 12px; border-radius: 11px; font-size: 13.5px; font-weight: 800;
-  background: white; color: var(--text-main); cursor: grab;
-  border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  background: var(--rc-bg); color: var(--text-main); cursor: grab;
+  border: 1px solid var(--rc-bd); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   touch-action: none; user-select: none; -webkit-user-select: none;
 }
-:root[data-theme="dark"] .swap-chip { background: #1e293b; }
-.swap-chip .swap-chip-role { font-size: 10px; font-weight: 900; text-transform: uppercase; color: var(--text-muted); letter-spacing: .3px; }
+.swap-chip[data-field="ward"] { --rc-bg: #fff3e2; --rc-bd: #f8cfa0; --rc-tx: #b25e24; }
+.swap-chip[data-field="nicu"] { --rc-bg: #e7f7ee; --rc-bd: #a9e2c1; --rc-tx: #1e7a48; }
+.swap-chip[data-field="picu"] { --rc-bg: #ffe4e8; --rc-bd: #f4a7b5; --rc-tx: #c2255c; }
+.swap-chip[data-field="er"] { --rc-bg: #fff8dc; --rc-bd: #edda90; --rc-tx: #a16207; }
+.swap-chip[data-field="second"] { --rc-bg: #eef2ff; --rc-bd: #c7d2fe; --rc-tx: #4338ca; }
+.swap-chip[data-field="opd"] { --rc-bg: #e0f2fe; --rc-bd: #a5d9fb; --rc-tx: #0369a1; }
+.swap-chip[data-field="nagarHospital"] { --rc-bg: #f3e8ff; --rc-bd: #d8b4fe; --rc-tx: #7e22ce; }
+:root[data-theme="dark"] .swap-chip { --rc-bg: #243044; --rc-bd: #3a4a63; }
+:root[data-theme="dark"] .swap-chip[data-field="ward"] { --rc-bg: #34281a; --rc-bd: #6a4b2c; }
+:root[data-theme="dark"] .swap-chip[data-field="nicu"] { --rc-bg: #142a1e; --rc-bd: #27573c; }
+:root[data-theme="dark"] .swap-chip[data-field="picu"] { --rc-bg: #311a22; --rc-bd: #6b3347; }
+:root[data-theme="dark"] .swap-chip[data-field="er"] { --rc-bg: #332b12; --rc-bd: #6b5620; }
+:root[data-theme="dark"] .swap-chip[data-field="second"] { --rc-bg: #1d2135; --rc-bd: #3d4466; }
+:root[data-theme="dark"] .swap-chip[data-field="opd"] { --rc-bg: #102b3d; --rc-bd: #1f5775; }
+:root[data-theme="dark"] .swap-chip[data-field="nagarHospital"] { --rc-bg: #251a33; --rc-bd: #4c3263; }
+.swap-chip .swap-chip-role { font-size: 10px; font-weight: 900; text-transform: uppercase; color: var(--rc-tx); letter-spacing: .3px; }
 .swap-chip.dragging { opacity: 0.35; }
 .swap-chip.candrop { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(2,132,199,0.25); }
+/* 🧹 Leave — drag a chip here to release the person from that duty. */
+.swap-leave {
+  margin: 2px 0 10px; padding: 10px 12px; border-radius: 13px;
+  border: 2px dashed #fca5a5; background: #fff1f2; color: #be123c;
+  font-size: 12.5px; font-weight: 800; text-align: center;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+:root[data-theme="dark"] .swap-leave { background: #331019; border-color: #7f2d3f; color: #fda4af; }
+.swap-leave.drag-over { background: #fee2e2; border-color: #ef4444; transform: scale(1.02); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18); }
+:root[data-theme="dark"] .swap-leave.drag-over { background: #4c1d2d; }
 .swap-addsel {
   display: inline-flex; align-items: center;
   padding: 6px 10px; border-radius: 11px; font-size: 12.5px; font-weight: 800;
-  font-family: 'Nunito', sans-serif; cursor: pointer;
+  font-family: 'Nunito', sans-serif; cursor: text; height: 33px;
   background: rgba(226, 232, 240, 0.5); color: var(--text-muted);
-  border: 1.5px dashed #cbd5e1; outline: none; max-width: 170px;
+  border: 1.5px dashed #cbd5e1; outline: none; max-width: 170px; min-width: 96px;
 }
 :root[data-theme="dark"] .swap-addsel { background: rgba(41, 55, 79, 0.45); color: #a5b4cb; border-color: #29374f; }
+.swap-addsel:focus { border-color: var(--accent); color: var(--text-main); }
 .swap-ghost {
   position: fixed; z-index: 1000; pointer-events: none;
   padding: 8px 14px; border-radius: 11px; background: var(--accent); color: #fff;

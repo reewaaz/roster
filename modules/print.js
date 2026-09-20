@@ -42,10 +42,10 @@ function namesInline(v, cls = 'pr-p') {
 /* SIMPLE — daily list, rows = days (print1 format)                   */
 /* ------------------------------------------------------------------ */
 const SIMPLE_COLS = [
-  { key: 'ward', cls: 'pr-ward', label: 'Ward / ER', small: '24 hr' },
+  { key: 'ward', cls: 'pr-ward', label: 'Ward/ER', small: '24 hr' },
   { key: 'nicu', cls: 'pr-nicu', label: 'NICU', small: '24 hr' },
   { key: 'picu', cls: 'pr-picu', label: 'PICU', small: '24 hr' },
-  { key: 'er', cls: 'pr-er', label: 'ER day', small: '' },
+  { key: 'er', cls: 'pr-er', label: 'ER Day', small: '' },
   { key: 'second', cls: 'pr-second', label: '2nd on call', small: '' },
   { key: 'opd', cls: 'pr-opd', label: 'OPD team', small: '' },
 ];
@@ -139,7 +139,7 @@ const ROLE_CELL = {
   ward:   { label: '24h Ward/ER', line: ['24h', 'Ward'], cls: 'k-ward24' },
   nicu:   { label: '24h NICU',    line: ['24h', 'NICU'], cls: 'k-nicu24' },
   picu:   { label: '24h PICU',    line: ['24h', 'PICU'], cls: 'k-picu24' },
-  er:     { label: 'Day ER',      line: ['Day', 'ER'],   cls: 'k-dayer' },
+  er:     { label: 'ER Day',      line: ['Day', 'ER'],   cls: 'k-dayer' },
   opd:    { label: 'OPD',         line: ['OPD'],         cls: 'k-opd' },
   nagarHospital: { label: 'Nagar Hosp', line: ['Nagar'], cls: 'k-nagar' },
   second: { label: '2nd call',    line: ['2nd', 'call'], cls: 'k-second' },
@@ -208,7 +208,7 @@ function collectPeople(roster) {
 
 function legend() {
   const chips = [
-    ['k-picuday', 'PICU Day'], ['k-dayer', 'Day ER'], ['k-opd', 'OPD'],
+    ['k-picuday', 'PICU Day'], ['k-dayer', 'ER Day'], ['k-opd', 'OPD'],
     ['k-picu24', '24h PICU'], ['k-nicu24', '24h NICU'], ['k-ward24', '24h Ward/ER'],
     ['k-post', 'Post-duty'], ['k-nagar', 'Nagar Hospital'], ['k-off', 'Sat/Holiday OFF'], ['k-second', '2nd call'],
   ].map(([cls, txt]) => `<span class="pr-chip ${cls}">${txt}</span>`).join('');

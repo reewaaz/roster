@@ -101,10 +101,10 @@ function mainCardHtml(data, mountCls = '') {
         </div>`;
     }
     let rows = [];
-    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward / ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swaps[data.date] && swaps[data.date].field === 'ward' ? swapBadge(data.date, 'ward') : ''}</span></div>`);
+    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward/ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swaps[data.date] && swaps[data.date].field === 'ward' ? swapBadge(data.date, 'ward') : ''}</span></div>`);
     if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swaps[data.date] && swaps[data.date].field === 'nicu' ? swapBadge(data.date, 'nicu') : ''}</span></div>`);
     if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swaps[data.date] && swaps[data.date].field === 'picu' ? swapBadge(data.date, 'picu') : ''}</span></div>`);
-    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">Day ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swaps[data.date] && swaps[data.date].field === 'er' ? swapBadge(data.date, 'er') : ''}</span></div>`);
+    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">ER Day</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swaps[data.date] && swaps[data.date].field === 'er' ? swapBadge(data.date, 'er') : ''}</span></div>`);
     detailsHtml = `
       <div>
         <div class="team-label">Duty Assignments & Team</div>
@@ -135,10 +135,10 @@ function mainCardHtml(data, mountCls = '') {
       </div>`;
   } else {
     let rows = [];
-    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward / ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swapBadge(data.date, 'ward')}</span></div>`);
+    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward/ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swapBadge(data.date, 'ward')}</span></div>`);
     if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swapBadge(data.date, 'nicu')}</span></div>`);
     if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swapBadge(data.date, 'picu')}</span></div>`);
-    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">Day ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swapBadge(data.date, 'er')}</span></div>`);
+    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">ER Day</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swapBadge(data.date, 'er')}</span></div>`);
     detailsHtml = `
       <div>
         <div class="team-label">Duty Assignments & Team</div>
@@ -199,7 +199,8 @@ function mainCardHtml(data, mountCls = '') {
 function swapBadge(dateKey, field) {
   const s = getSwaps()[dateKey];
   if (s && s.field === field) {
-    return `<span class="swap-badge">⇄ ${escapeHtml(s.original)} → ${escapeHtml(s.now)}</span>`;
+    const now = String(s.now || '').trim() ? s.now : 'Leave';
+    return `<span class="swap-badge">⇄ ${escapeHtml(s.original)} → ${escapeHtml(now)}</span>`;
   }
   return '';
 }
@@ -277,7 +278,7 @@ export function openScrollDay(idx) {
      collapse has visually started so the whole morph feels instant. */
   setTimeout(() => {
     currentIndex = idx;
-    renderScrollView();
+    renderScrollView(undefined, 'center');
     mountOrigin = null;
   }, 110);
 }
@@ -333,7 +334,11 @@ export function renderScrollView(dir, align) {
   }
   markPillOverflow(area);
   updateTodayPill(area);
-  alignCurrentCard(area, align === 'top' ? 'top' : 'center');
+  /* Only auto-scroll on deliberate navigation (dir = arrow/prev/next, align = top/center).
+     Incidental re-renders (swap, note, alert timers) must NOT yank the user back to
+     the current day's card — they can scroll up to the start of the month freely. */
+  if (dir && !align) align = 'center';
+  if (align) alignCurrentCard(area, align);
 }
 
 /* ---- MONTH VIEW ---- */
@@ -569,26 +574,10 @@ export function reRenderAll() {
   renderMonthView();
 }
 
-/* ---- SPRINGY SCROLL (overscroll bounce feedback) ---- */
-function initSpringyScroll() {
-  const area = document.getElementById('daily-render-area');
-  if (!area) return;
-  let timer = null;
-  const applyBounce = () => {
-    const atTop = area.scrollTop <= 2;
-    const atBottom = area.scrollTop + area.clientHeight >= area.scrollHeight - 2;
-    area.classList.toggle('springy-top', atTop);
-    clearTimeout(timer);
-    timer = setTimeout(() => area.classList.remove('springy-top'), atTop ? 900 : 0);
-  };
-  area.addEventListener('scroll', applyBounce, { passive: true });
-}
-
 export function initRendering() {
   realTodayIndex = recomputeToday();
   currentIndex = realTodayIndex;
   renderScrollView(undefined, 'top');
   renderMonthView();
   updateTodayPill(document.getElementById('daily-render-area'));
-  initSpringyScroll();
 }

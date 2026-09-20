@@ -1,4 +1,4 @@
-/* Built-in default roster: Asoj (Ashwin) 2083 — synced from 208306.json.
+/* Built-in default roster: Ashwin 2083 — synced 1:1 from rosters/208306.json.
    Shipping it as a JS module (not .json) means the raw source tree also runs on
    static hosts (GitHub Pages) — browsers reject native .json ES-module imports. */
 export default {
@@ -81,7 +81,7 @@ export default {
       "nicu": "Subas",
       "picu": "Kabita",
       "er": "Deepmala",
-      "second": "Roop Raj",
+      "second": "Pusp Raj",
       "opd": "Devaki, Kshitiz, Shikha, Pritha, Mrinal",
       "nagarHospital": ""
     },
@@ -144,7 +144,7 @@ export default {
       "title": "PICU Day",
       "ward": "Pritha",
       "nicu": "Shikha",
-      "picu": "Kabita",
+      "picu": "Kshitiz",
       "er": "Aayoush",
       "second": "Saurav Stha",
       "opd": "Prerana, Salina, Deepmala, Sinda, Devaki, Samichhya",
@@ -169,10 +169,10 @@ export default {
       "type": "picu-day",
       "title": "PICU Day",
       "ward": "Samichhya",
-      "nicu": "Mrinal",
-      "picu": "Kshitiz",
+      "nicu": "Kshitiz",
+      "picu": "Mrinal",
       "er": "Devaki",
-      "second": "Roop Raj",
+      "second": "Pusp Raj",
       "opd": "Pritha, Nischal, Shikha, Madan, Kabita, Prerana",
       "nagarHospital": ""
     },
@@ -186,7 +186,7 @@ export default {
       "picu": "Aayoush",
       "er": "Salina",
       "second": "Dilip",
-      "opd": "Sinda, Madan, Shikha, Srijana, Sinda",
+      "opd": "Sinda, Madan, Shikha, Srijana",
       "nagarHospital": "Pritha"
     },
     {
@@ -234,7 +234,7 @@ export default {
       "type": "picu-day",
       "title": "PICU Day",
       "ward": "Salina",
-      "nicu": "Subas",
+      "nicu": "Kshitiz",
       "picu": "Devaki",
       "er": "Subas",
       "second": "Saurav Stha",
@@ -263,7 +263,7 @@ export default {
       "nicu": "Sinda",
       "picu": "Srijana",
       "er": "Samichhya",
-      "second": "Roop Raj",
+      "second": "Pusp Raj",
       "opd": "Salina, Subas, Kshitiz, Devaki, Mrinal",
       "nagarHospital": ""
     },
@@ -273,7 +273,7 @@ export default {
       "type": "picu-day",
       "title": "PICU Day",
       "ward": "Samichhya",
-      "nicu": "Madan",
+      "nicu": "Shikha",
       "picu": "Kabita",
       "er": "Kshitiz",
       "second": "Dilip",
@@ -290,7 +290,7 @@ export default {
       "picu": "Prerana",
       "er": "Srijana",
       "second": "Prerana",
-      "opd": "Salina, Pritha, Saurav Singh, Kshitiz, Aayoush, Kabita",
+      "opd": "Salina, Pritha, Saurav Singh, Kshitiz, Aayoush, Subas",
       "nagarHospital": ""
     },
     {
@@ -312,10 +312,10 @@ export default {
       "type": "off",
       "title": "Saturday OFF",
       "ward": "Salina",
-      "nicu": "Shikha",
-      "picu": "Mrinal",
+      "nicu": "Kshitiz",
+      "picu": "Aayoush",
       "er": "",
-      "second": "Roop Raj",
+      "second": "Pusp Raj",
       "opd": "",
       "nagarHospital": ""
     },
@@ -329,7 +329,7 @@ export default {
       "picu": "Mrinal",
       "er": "",
       "second": "Saurav Stha",
-      "opd": "",
+      "opd": "GHATASTHAPANA",
       "nagarHospital": ""
     },
     {
@@ -352,9 +352,9 @@ export default {
       "title": "PICU Day",
       "ward": "Samichhya",
       "nicu": "Madan",
-      "picu": "Sinda",
-      "er": "Prerana",
-      "second": "Roop Raj",
+      "picu": "Srijana",
+      "er": "Sinda",
+      "second": "Pusp Raj",
       "opd": "Salina, Deepmala, Shikha, Kshitiz, Srijana",
       "nagarHospital": ""
     },
@@ -364,7 +364,7 @@ export default {
       "type": "picu-day",
       "title": "PICU Day",
       "ward": "Nischal",
-      "nicu": "Shikha",
+      "nicu": "Kshitiz",
       "picu": "Devaki",
       "er": "Aayoush",
       "second": "Dilip",
@@ -380,7 +380,7 @@ export default {
       "nicu": "Subas",
       "picu": "Prerana",
       "er": "Srijana",
-      "second": "Prerana",
+      "second": "Pusp Raj",
       "opd": "Pritha, Samichhya, Saurav Singh, Sinda, Aayoush",
       "nagarHospital": ""
     },
@@ -390,9 +390,9 @@ export default {
       "type": "picu-day",
       "title": "PICU Day",
       "ward": "Deepmala",
-      "nicu": "Sinda",
-      "picu": "Kshitiz",
-      "er": "",
+      "nicu": "Shikha",
+      "picu": "Mrinal",
+      "er": "Pritha",
       "second": "Saurav Singh",
       "opd": "Kabita, Kshitiz, Devaki, Srijana, Nischal",
       "nagarHospital": ""

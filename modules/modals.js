@@ -339,10 +339,10 @@ export function closeCloudModal() {
 /* ---- SEARCH ---- */
 const SEARCH_FIELDS = [
   { key: 'title', label: 'Posting' },
-  { key: 'ward', label: 'ER/Ward' },
+  { key: 'ward', label: 'Ward/ER' },
   { key: 'nicu', label: 'NICU' },
   { key: 'picu', label: 'PICU' },
-  { key: 'er', label: 'Day ER' },
+  { key: 'er', label: 'ER Day' },
   { key: 'second', label: '2nd Call' },
   { key: 'opd', label: 'OPD' },
   { key: 'nagarHospital', label: 'Nagar Hospital' },
@@ -418,8 +418,9 @@ function runSearch() {
   const peopleWord = people.size ? ` · ${people.size} ${people.size === 1 ? 'person' : 'people'}` : '';
   results.innerHTML = matches.map(({ d, matched }) => {
     const idx = roster.findIndex((r) => r.date === d.date);
-    const swapsHtml = getSwaps()[d.date] && getSwaps()[d.date].now
-      ? `${getSwaps()[d.date].original} → ${getSwaps()[d.date].now}` : '';
+    const sw = getSwaps()[d.date];
+    const swapsHtml = sw && sw.now != null
+      ? `${sw.original} → ${String(sw.now).trim() ? sw.now : 'Leave'}` : '';
     const notesHtml = notesDB[d.date] ? '📝' : '';
     const hoursHtml = srHours(d);
     const matchHtml = matched.map((m) =>

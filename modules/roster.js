@@ -7,10 +7,10 @@ export const ROSTER_KEY = 'mrinalRosterData';
 export const VALID_TYPES = ['picu-day', 'picu-24', 'opd', 'er-day', 'off', 'post-off'];
 export const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const FIELDS = [
-  { key: 'ward', label: 'ER/Ward 24h' },
+  { key: 'ward', label: 'Ward/ER 24h' },
   { key: 'nicu', label: 'NICU 24h' },
   { key: 'picu', label: 'PICU 24h' },
-  { key: 'er', label: 'Day ER' },
+  { key: 'er', label: 'ER Day' },
   { key: 'second', label: '2nd On Call' },
   { key: 'opd', label: 'OPD' },
   { key: 'nagarHospital', label: 'Nagar Hospital' },
@@ -36,11 +36,11 @@ Use exactly this shape:
       "date": "MM-DD",
       "day": "Sun | Mon | Tue | Wed | Thu | Fri | Sat",
       "type": "picu-day | picu-24 | opd | er-day | off | post-off",
-      "title": "PICU Day | 24hr PICU | OPD | Day ER | Saturday OFF | Post 24h OFF | <Festival Name>",
-      "ward": "Person on ER/Ward 24h duty or empty string",
+      "title": "PICU Day | 24hr PICU | OPD | ER Day | Saturday OFF | Post 24h OFF | <Festival Name>",
+      "ward": "Person on Ward/ER 24h duty or empty string",
       "nicu": "Person on NICU 24h duty or empty string",
       "picu": "Person on PICU 24h duty or empty string",
-      "er": "Person on Day ER or empty string",
+      "er": "Person on ER Day duty or empty string",
       "second": "2nd on call or empty string",
       "opd": "Comma-separated OPD names or empty string",
       "nagarHospital": "Person posted at Nagar Hospital or empty string"
@@ -49,8 +49,8 @@ Use exactly this shape:
 }
 
 RULES
-- The roster image may have columns: Date, Day, ER/Ward, NICU 24h, PICU 24h, Day ER, 2nd On Call, OPD, Nagar Hospital.
-- Map ER/Ward column -> "ward", NICU 24h -> "nicu", PICU 24h -> "picu", Day ER -> "er", 2nd On Call -> "second", OPD -> "opd", Nagar Hospital -> "nagarHospital".
+- The roster image may have columns: Date, Day, Ward/ER, NICU 24h, PICU 24h, ER Day, 2nd On Call, OPD, Nagar Hospital.
+- Map Ward/ER column -> "ward", NICU 24h -> "nicu", PICU 24h -> "picu", ER Day -> "er", 2nd On Call -> "second", OPD -> "opd", Nagar Hospital -> "nagarHospital".
 - date uses the month number and day number you see in the image, e.g. "06-01".
 - day must match the real weekday of that calendar date.
 - For Saturday / public holidays use type "off". For a day after a 24h shift use type "post-off".
@@ -179,10 +179,10 @@ export function getHandover(idx) {
 export function getOffDutyPeople(day) {
   const roles = [];
   const map = [
-    { key: 'ward', label: 'ER/Ward' },
+    { key: 'ward', label: 'Ward/ER' },
     { key: 'nicu', label: 'NICU' },
     { key: 'picu', label: 'PICU' },
-    { key: 'er', label: 'Day ER' },
+    { key: 'er', label: 'ER Day' },
     /* 'second' is intentionally omitted here — the day card already shows the
        "2nd On Call" person in the bottom .second-call block, so listing it again
        under "People On Duty" would duplicate the same information. */
