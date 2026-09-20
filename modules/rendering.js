@@ -7,16 +7,16 @@ import { getSwaps } from './swaps.js';
 
 /* Dr. Mrinal's day chip — same colour language as the print references. */
 const MRINAL_DUTY = {
-  ward:   { label: 'Ward/ER 24h', cls: 'd-ward24' },
-  nicu:   { label: 'NICU 24h',    cls: 'd-nicu24' },
-  picu:   { label: 'PICU 24h',    cls: 'd-picu24' },
-  er:     { label: 'ER Day',      cls: 'd-dayer' },
-  opd:    { label: 'OPD',         cls: 'd-opd' },
-  nagarHospital: { label: 'Nagar Hospital', cls: 'd-nagar' },
-  second: { label: '2nd call',    cls: 'd-second' },
-  postOff: { label: 'Post 24h OFF', cls: 'd-post' },
-  off:    { label: 'OFF',         cls: 'd-off' },
-  picuDay: { label: 'PICU Day',   cls: 'd-picuday' },
+  ward:   { label: 'Ward/ER 24h', cls: 'd-ward24', tint: 'mrd-ward24' },
+  nicu:   { label: 'NICU 24h',    cls: 'd-nicu24', tint: 'mrd-nicu24' },
+  picu:   { label: 'PICU 24h',    cls: 'd-picu24', tint: 'mrd-picu24' },
+  er:     { label: 'ER Day',      cls: 'd-dayer',  tint: 'mrd-dayer' },
+  opd:    { label: 'OPD',         cls: 'd-opd',    tint: 'mrd-opd' },
+  nagarHospital: { label: 'Nagar Hospital', cls: 'd-nagar', tint: 'mrd-nagar' },
+  second: { label: '2nd call',    cls: 'd-second', tint: 'mrd-second' },
+  postOff: { label: 'Post 24h OFF', cls: 'd-post', tint: 'mrd-post' },
+  off:    { label: 'OFF',         cls: 'd-off',    tint: 'mrd-off' },
+  picuDay: { label: 'PICU Day',   cls: 'd-picuday', tint: 'mrd-picuday' },
 };
 
 const MRINAL_NOTES = {
@@ -24,17 +24,21 @@ const MRINAL_NOTES = {
   postOff: 'Rest day after a 24h shift',
 };
 
-function mrinalDutyOf(data) {
+function mrinalDutyAt(idx) {
   const roster = getRoster();
-  const idx = roster.findIndex((r) => r.date === data.date);
-  if (idx < 0) return null;
+  if (!roster || idx < 0 || idx >= roster.length) return null;
   const r = dayRole(roster, idx, 'Mrinal');
   const d = MRINAL_DUTY[r.key];
-  return { key: r.key, label: d.label, cls: d.cls, note: MRINAL_NOTES[r.key] || '' };
+  return { key: r.key, label: d.label, cls: d.cls, tint: d.tint, note: MRINAL_NOTES[r.key] || '' };
 }
 
-function mrinalDutyBannerHtml(data) {
-  const m = mrinalDutyOf(data);
+function mrinalDutyOf(data) {
+  if (!data) return null;
+  const roster = getRoster();
+  return mrinalDutyAt(roster.findIndex((r) => r.date === data.date));
+}
+
+function mrinalDutyBannerHtml(m) {
   if (!m) return '';
   return `
     <div class="mrinal-duty">
@@ -209,8 +213,14 @@ function mainCardHtml(data, mountCls = '') {
     ? `<div class="card-note-badge">Note Attached</div>`
     : '';
 
+  /* Cardiac identity = Dr. Mrinal's actual duty placement: the badge label and
+     the card's background tint follow her duty (not the raw roster title). */
+  const m = mrinalDutyOf(data);
+  const mTint = m ? m.tint : 'mrd-off';
+  const mLabel = m ? m.label : '';
+
   return `
-    <div class="card today type-${data.type}${mountCls}" id="dailyCardElement" data-date="${data.date}">
+    <div class="card today type-${data.type} ${mTint}${mountCls}" id="dailyCardElement" data-date="${data.date}">
       <div class="card-header">
         <div>
           <span class="card-label">Selected Roster Day</span>
@@ -218,13 +228,13 @@ function mainCardHtml(data, mountCls = '') {
           <span class="day-name">${data.day}</span>
         </div>
         <div class="card-header-right">
-          <div class="badge type-${data.type}">${escapeHtml(data.title)}</div>
+          <div class="badge type-${data.type} ${mTint}">${escapeHtml(mLabel || data.title)}</div>
           ${noteBadgeHtml}
         </div>
       </div>
 
       <div class="card-body-content">
-        ${mrinalDutyBannerHtml(data)}
+        ${mrinalDutyBannerHtml(m)}
         ${handoverHtml}
         ${hoursHtml}
         ${detailsHtml}
@@ -355,13 +365,16 @@ export function renderScrollView(dir, align) {
     const noteMark = notesDB[d.date] ? '<span class="scroll-note">*</span>' : '';
     const sw = getSwaps()[d.date];
     const swapMark = sw ? `<span class="swap-badge">⇄</span>` : '';
+    const m = mrinalDutyAt(i);
+    const mTint = m ? m.tint : 'mrd-off';
+    const mLabel = m ? m.label : '';
     html += `
-      <div class="upcoming-card type-${d.type}${past}" data-index="${i}" data-date="${d.date}" onclick="window.__openScrollDay(${i})">
+      <div class="upcoming-card type-${d.type} ${mTint}${past}" data-index="${i}" data-date="${d.date}" onclick="window.__openScrollDay(${i})">
         <div class="upcoming-date-info">
           <span class="upcoming-day">${mon} ${d.date.split('-')[1]}${noteMark}${swapMark}</span>
           <span class="upcoming-weekday">• ${d.day}</span>
         </div>
-        <div class="upcoming-badge type-${d.type}">${escapeHtml(d.title)}</div>
+        <div class="upcoming-badge type-${d.type} ${mTint}">${escapeHtml(mLabel || d.title)}</div>
       </div>`;
   });
   area.innerHTML = html;
@@ -402,16 +415,16 @@ export function renderMonthView() {
     const hasNoteClass = hasNote ? 'has-note' : '';
     const isTodayClass = index === realTodayIndex ? 'is-today' : '';
     const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
-    const m = mrinalDutyOf(day);
-    const mrd = m
-      ? `<span class="cal-mrduty ${m.cls}" title="Dr. Mrinal — ${escapeHtml(m.label)}">${escapeHtml(m.label)}</span>`
-      : '';
+    /* Calendar cells are tinted purely by Dr. Mrinal's duty placement —
+       no text label needed under the date. */
+    const m = mrinalDutyAt(index);
+    const mTint = m ? m.tint : 'mrd-off';
     html += `
-      <div class="cal-cell type-${day.type} ${hasNoteClass} ${isTodayClass}"
+      <div class="cal-cell ${mTint} ${hasNoteClass} ${isTodayClass}"
            data-index="${index}" data-date="${day.date}"
+           title="Dr. Mrinal — ${escapeHtml(m ? m.label : 'OFF')}"
            style="animation-delay: ${(index + startDay) * 18}ms;">
         <span class="cal-date">${day.date.split('-')[1]}${asteriskHtml}</span>
-        ${mrd}
       </div>`;
   });
   grid.innerHTML = html;
