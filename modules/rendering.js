@@ -4,7 +4,7 @@ import {
   findHandoverName, getOffDutyPeople, dayRole, WEEKDAYS,
 } from './roster.js';
 import { getSwaps } from './swaps.js';
-import { listStoreRosters, parseMonthYear, loadRosterCachedOrStore, coversDate, getLocalRosterCache } from './rosters.js';
+import { listStoreRosters, parseMonthYear, loadRosterCachedOrStore, coversDate, getLocalRosterCache, rosterFileName } from './rosters.js';
 
 /* Dr. Mrinal's day chip — same colour language as the print references. */
 const MRINAL_DUTY = {
@@ -41,6 +41,9 @@ let expandMountFor = -1;
 let mountOrigin = null;  // { x, y } percentages — where the new card should expand from
 let suppressScrollDayUntil = 0;  // timestamp; ignore ghost clicks right after a view switch
 let browsingNonCurrent = false; // true when calendar arrows moved to a month that doesn't contain today
+let todayAnchor = null;         // { name, meta, days } — the roster that actually contains today,
+                                // captured whenever a month covering today is rendered; the Today
+                                // pill bounces back to this month from any other browsed month
 
 function loadNotes() {
   try {
@@ -67,18 +70,6 @@ export function replaceNotes(notes) {
   Object.keys(notesDB).forEach((k) => delete notesDB[k]);
   if (notes && typeof notes === 'object') Object.assign(notesDB, notes);
   saveNotes();
-}
-
-/* ---- DUTY HOURS ---- */
-function getDutyHours(data) {
-  if (!data) return '';
-  if (data.type === 'off') return '';
-  if (data.type === 'post-off') return 'Off Day';
-  if (data.type === 'picu-24') return '9 AM – 9 AM (24h duty)';
-  const wd = data.day;
-  if (wd === 'Fri') return '9 AM – 3 PM';
-  if (wd === 'Wed') return '9 AM – 1 PM';
-  return '9 AM – 5 PM';
 }
 
 /* ---- MAIN CARD HTML ---- */
@@ -204,13 +195,20 @@ function mainCardHtml(data, mountCls = '') {
     : '';
 
   /* Who's on the OPD team this day — shown on every expanded card (not just OPD
-     days), so the OPD roster is always visible alongside the duty details. */
+     days) as a labelled chip list, so the OPD roster reads clearly alongside the
+     duty details. */
   const opdTeamHtml = (data.type !== 'opd' && data.opd && String(data.opd).trim())
-    ? `<div class="opd-row"><span class="opd-label">🏥 OPD Team</span><span class="opd-name">${escapeHtml(String(data.opd).trim())}</span></div>`
-    : '';
-
-  const hoursHtml = (!hideDutyMeta && getDutyHours(data))
-    ? `<div class="hours-row"><span class="hours-label">🕘 Duty Hours</span><span class="hours-value">${getDutyHours(data)}</span></div>`
+    ? (() => {
+        const names = String(data.opd).split(/,\s*/).map((n) => n.trim()).filter(Boolean);
+        return `
+      <div class="opd-row">
+        <div class="opd-head">
+          <span class="opd-label">🏥 OPD Team</span>
+          <span class="opd-count">${names.length}</span>
+        </div>
+        <div class="opd-pills">${names.map((n) => `<span class="opd-pill">${escapeHtml(n)}</span>`).join('')}</div>
+      </div>`;
+      })()
     : '';
 
   const savedNote = notesDB[data.date];
@@ -238,7 +236,6 @@ function mainCardHtml(data, mountCls = '') {
 
       <div class="card-body-content">
         ${handoverHtml}
-        ${hoursHtml}
         ${detailsHtml}
         ${opdTeamHtml}
         ${secondCallHtml}
@@ -269,7 +266,12 @@ function updateTodayPill(area) {
   const pill = document.getElementById('today-pill');
   if (!pill) return;
   const dailyActive = document.getElementById('view-daily').classList.contains('active');
-  const show = dailyActive && currentIndex !== realTodayIndex;
+  /* In a browsed month that has no real today (calendar arrows moved past the
+     current month), the pill stays visible so the user can always bounce back
+     to today's actual card. Inside the current month it shows only when the
+     open card isn't today's. */
+  const hasRealToday = coversDate({ startDate: getMeta().startDate, days: getRoster() });
+  const show = dailyActive && (!hasRealToday || currentIndex !== realTodayIndex);
   if (pill.classList.contains('visible') !== show) {
     pill.classList.toggle('visible', show);
   }
@@ -467,10 +469,20 @@ export function renderMonthView() {
     html += `<div class="cal-cell empty"></div>`;
   }
 
+  /* Today's Gregorian key — exactly ONE cell across all months may match. The old
+     index==realTodayIndex test highlighted the first/last cell of adjacent months
+     (index clamps), so prev/next months showed a fake "today". */
+  const t = new Date();
+  const todayKey = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+  const startMs = getStart().getTime();
+  const DAY_MS = 86400000;
+
   roster.forEach((day, index) => {
     const hasNote = !!notesDB[day.date];
     const hasNoteClass = hasNote ? 'has-note' : '';
-    const isTodayClass = index === realTodayIndex ? 'is-today' : '';
+    const cell = new Date(startMs + index * DAY_MS);
+    const cellKey = `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`;
+    const isTodayClass = cellKey === todayKey ? 'is-today' : '';
     const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
     /* Calendar cells are tinted purely by Dr. Mrinal's duty placement —
        no text label needed under the date. */
@@ -610,8 +622,25 @@ export function changeDay(step) {
   }
 }
 
-export function goToday() {
+export async function goToday() {
   triggerHaptic(35);
+
+  /* Browsing a different month (calendar ⇄ arrows): first return to the month that
+     actually contains today, so the Today pill always lands on today's real card. */
+  if (!coversDate({ startDate: getMeta().startDate, days: getRoster() }) && todayAnchor) {
+    try {
+      await loadRosterCachedOrStore(todayAnchor.name);
+      realTodayIndex = recomputeToday();
+      currentIndex = realTodayIndex;
+      browsingNonCurrent = false;
+      reRenderAll();
+      updateTodayPill(document.getElementById('daily-render-area'));
+      import('./alerts.js').then((m) => m.scheduleDutyAlerts()).catch(() => {});
+    } catch (e) {
+      /* Anchor unavailable — stay where we are; the basic jump below still applies. */
+    }
+  }
+
   if (currentIndex === realTodayIndex) {
     /* Already on today's card — still make sure it reveals at the top. */
     const area = document.getElementById('daily-render-area');
@@ -685,13 +714,30 @@ export function renderDailyView() {
   renderScrollView();
 }
 
+/* Remember the roster month that actually contains today — the anchor the Today
+   pill bounces back to after the user browses other months with the calendar
+   arrows. Re-captured on every re-render, so it always tracks the current month. */
+function captureTodayAnchor() {
+  try {
+    const meta = getMeta();
+    if (coversDate({ startDate: meta.startDate, days: getRoster() })) {
+      const name = rosterFileName(meta);
+      if (name) {
+        todayAnchor = { name, meta: { month: meta.month, startDate: meta.startDate }, days: getRoster() };
+      }
+    }
+  } catch (e) { /* non-fatal */ }
+}
+
 /* ---- RE-RENDER AFT drafter.changes ---- */
 export function reRenderAll() {
+  captureTodayAnchor();
   renderScrollView();
   renderMonthView();
 }
 
 export function initRendering() {
+  captureTodayAnchor();
   realTodayIndex = recomputeToday();
   currentIndex = realTodayIndex;
   renderScrollView(undefined, 'top');
