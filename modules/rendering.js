@@ -27,7 +27,8 @@ const MRINAL_NOTES = {
 function mrinalDutyAt(idx) {
   const roster = getRoster();
   if (!roster || idx < 0 || idx >= roster.length) return null;
-  const r = dayRole(roster, idx, 'Mrinal');
+  const prevDay = idx === 0 ? (window.__prevDayData && window.__prevDayData.day) : null;
+  const r = dayRole(roster, idx, 'Mrinal', prevDay);
   const d = MRINAL_DUTY[r.key];
   return { key: r.key, label: d.label, cls: d.cls, tint: d.tint, note: MRINAL_NOTES[r.key] || '' };
 }

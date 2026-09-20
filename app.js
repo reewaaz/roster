@@ -5,7 +5,7 @@ import {
   getRealTodayIndex, getCurrentIndex, openNoteModal, closeNoteModal as closeNoteMod,
   jumpToDate, goToday, changeDay, switchTab, openScrollDay, saveNote as saveNoteMod, notesDB,
 } from './modules/rendering.js';
-import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, openCloudModal, openSearchModal, closeSearchModal, openPrintModal, closePrintModal, closeAllModals as closeAll } from './modules/modals.js';
+import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, clearAppState, openCloudModal, openSearchModal, closeSearchModal, openPrintModal, closePrintModal, closeAllModals as closeAll } from './modules/modals.js';
 import { initDutyAlerts, openAlertModal, closeAlertModal, saveAlertSettings, sendTestNotification } from './modules/alerts.js';
 import { printRoster, setNotesDB } from './modules/print.js';
 import { autoSelectRoster } from './modules/rosters.js';
@@ -38,6 +38,7 @@ window.closeRosterModal = closeRosterModal;
 window.copyRosterTemplate = copyRosterTemplate;
 window.validateAndSaveRoster = validateAndSaveRoster;
 window.resetRoster = resetRoster;
+window.__clearAppState = () => { clearAppState(); return true; };
 window.openCloudModal = openCloudModal;
 window.openSettingsModal = openSettingsModal;
 window.openSearchModal = openSearchModal;

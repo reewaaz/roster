@@ -139,7 +139,9 @@ export async function listStoreRosters(force = false) {
 }
 
 /* Fetch + validate one roster file's JSON: { month, startDate, days }.
-   Tries rosters/ first, then the repo root. */
+   Tries rosters/ first, then the repo root; for private repos (or when raw is
+   blocked) falls back to the API contents endpoint, which honours the PAT the
+   user saved in Settings → Cloud Sync. */
 export async function fetchStoreRoster(name) {
   const cached = contentCache.get(name);
   if (cached && Date.now() - cached.at < 30 * 60000) return cached.data;
@@ -158,6 +160,26 @@ export async function fetchStoreRoster(name) {
     if (validation) throw new Error(`Invalid roster ${name}: ${validation}`);
     contentCache.set(name, { at: Date.now(), data });
     return data;
+  }
+  /* Private repo fallback via the API (only when a PAT is configured). */
+  if (getToken()) {
+    const url = `${cfg.apiBase}/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.folder}/${encodeURIComponent(name)}`;
+    try {
+      const res = await fetch(url, { headers: apiHeaders(false) });
+      if (!res.ok) { lastErr = new Error(`GitHub ${res.status}`); }
+      else {
+        const j = await res.json();
+        const text = atob(String(j.content || '').replace(/\s+/g, ''));
+        const data = JSON.parse(text);
+        const validation = validateRosterData(data);
+        if (validation) throw new Error(`Invalid roster ${name}: ${validation}`);
+        contentCache.set(name, { at: Date.now(), data });
+        return data;
+      }
+    } catch (e) {
+      if (e instanceof SyntaxError) throw new Error(`Invalid roster ${name}: JSON parse failed`);
+      lastErr = e;
+    }
   }
   throw lastErr || new Error(`Not found: ${name}`);
 }
@@ -265,6 +287,23 @@ export async function deleteStoreRoster(fileName) {
   return true;
 }
 
+/* Best-effort cross-month handover: remember the previous month's last day so day 1
+   of the current month can become "Post 24h OFF" when its person was on a 24h shift
+   the previous night. Returns true when a previous roster was resolved. */
+async function attachPreviousMonthData(data) {
+  try {
+    const prev = await findPreviousMonthRoster(data);
+    if (prev) {
+      window.__prevDayData = {
+        meta: { month: prev.data.month, startDate: prev.data.startDate },
+        day: prev.data.days[prev.data.days.length - 1],
+      };
+      return true;
+    }
+  } catch (e) { /* keep existing prevDay */ }
+  return false;
+}
+
 /* Load a stored roster into the app (validate, save, set cross-month handover). */
 export async function loadRosterFromStore(fileName) {
   const data = await fetchStoreRoster(fileName);
@@ -273,21 +312,15 @@ export async function loadRosterFromStore(fileName) {
   const wasCurrent = getMeta().month === meta.month;
   saveRoster(meta, data.days);
   // Cross-month handover for day 1: previous month's last day from the store.
-  try {
-    const prev = await findPreviousMonthRoster(meta);
-    if (prev) {
-      window.__prevDayData = {
-        meta: { month: prev.data.month, startDate: prev.data.startDate },
-        day: prev.data.days[prev.data.days.length - 1],
-      };
-    }
-  } catch (e) { /* keep existing prevDay */ }
+  await attachPreviousMonthData(data);
   return { meta, days: data.days, loaded: true, wasCurrent };
 }
 
-/* Boot-time auto-select: if the currently loaded roster is NOT user-generated and a
-   stored roster covers today, load the stored one so the app always shows the current
-   month. Respects rosters the user generated in-app. */
+/* Boot-time auto-select: the /rosters/ GitHub file for the current month is the
+   authoritative source, so whenever a stored roster covers today and differs from
+   the cached local roster, load the stored one. Swaps/notes are stored separately
+   and survive the reload. Only when the store is unreachable/empty does the app
+   keep whatever is cached locally (or the bundled fallback). */
 export async function autoSelectRoster() {
   try {
     const local = getMeta();
@@ -297,24 +330,19 @@ export async function autoSelectRoster() {
 
     /* Can't reach the store or nothing stored → keep what we have. */
     if (!storeCurrent) return { loaded: false, reason: 'no-store' };
-    const sameMonth = storeCurrent.data.month === local.month;
-    const userGenerated = !!(local.meta && local.meta.userGenerated);
 
-    /* Already showing the current month — only adopt the store copy when the app is
-       on the plain built-in and the stored data differs (e.g. a correction release).
-       A user-generated same-month roster always wins. */
-    if (sameMonth && localCovers) {
-      if (userGenerated) return { loaded: false, reason: 'local' };
-      const localHash = JSON.stringify({ meta: { month: local.month, startDate: local.startDate }, days: getRoster() });
-      const storeHash = JSON.stringify({ meta: { month: storeCurrent.data.month, startDate: storeCurrent.data.startDate }, days: storeCurrent.data.days });
-      if (localHash === storeHash) return { loaded: false, reason: 'identical' };
-    } else if (localCovers) {
-      /* Local roster covers today but is a DIFFERENT month than the store's current
-         one — trust the local roster (user may be previewing ahead). */
-      return { loaded: false, reason: 'local-covers' };
+    /* The month's file is authoritative: adopt it whenever it differs from the
+       cached local copy (a user-generated same-month roster no longer wins). */
+    const localHash = JSON.stringify({ meta: { month: local.month, startDate: local.startDate }, days: getRoster() });
+    const storeHash = JSON.stringify({ meta: { month: storeCurrent.data.month, startDate: storeCurrent.data.startDate }, days: storeCurrent.data.days });
+    if (localHash === storeHash) {
+      /* Keep the identical local copy, but still resolve cross-month handover so
+         day 1 of a new month can show "Post 24h OFF" right after a fresh load. */
+      const prevReady = await attachPreviousMonthData(storeCurrent.data);
+      if (prevReady && window.__recomputeAndRender) window.__recomputeAndRender();
+      return { loaded: false, reason: 'identical' };
     }
-    /* Local roster is stale/past (or plain built-in with corrected store data):
-       adopt the stored current month. */
+
     const { meta, days } = await loadRosterFromStore(storeCurrent.name);
     if (window.__recomputeAndRender) window.__recomputeAndRender();
     return { loaded: true, name: storeCurrent.name, meta, days };

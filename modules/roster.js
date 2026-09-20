@@ -185,11 +185,14 @@ function personIn(v, person) {
      1. any explicit placement wins — ward/nicu/picu = 24h, er = Day ER, opd,
         nagarHospital, second (a second-on-call person who also holds a main
         role reports hasSecond);
-     2. else the day after a 24h shift is "postOff" (recovery day);
+     2. else the day after a 24h shift is "postOff" (recovery day) — for day 1 of
+        a month this looks at the previous month's last day (prevDayExtra, e.g.
+        the last day of 208305.json) so Mrinal is Post 24h OFF when she was on a
+        24h shift the night before the new month started;
      3. else off days (Saturdays / public holidays / JSON post-off) are "off";
      4. else a resident defaults to "picuDay" (Day PICU duty).
    Shared by the day cards, month calendar and the print matrices. */
-export function dayRole(roster, i, person) {
+export function dayRole(roster, i, person, prevDayExtra = null) {
   const d = roster[i];
   if (!d) return { key: 'off', hasSecond: false };
   const fields = ['picu', 'nicu', 'ward', 'er', 'opd', 'nagarHospital', 'second'];
@@ -200,7 +203,7 @@ export function dayRole(roster, i, person) {
   if (roles.length) {
     return { key: roles[0], hasSecond: roles.includes('second') && roles[0] !== 'second' };
   }
-  const prev = roster[i - 1];
+  const prev = i > 0 ? roster[i - 1] : (prevDayExtra || null);
   if (prev && (personIn(prev.ward, person) || personIn(prev.nicu, person) || personIn(prev.picu, person))) {
     return { key: 'postOff', hasSecond: false };
   }

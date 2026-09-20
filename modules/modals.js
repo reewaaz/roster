@@ -563,14 +563,31 @@ async function pushToCloudSilently(meta, days) {
   catch (e) { console.warn('Roster store upload failed', e); }
 }
 
+/* Local-only keys wiped by a full reset. The GitHub PAT, store config, theme and
+   the cloud-sync history gist intentionally survive a reset. */
+const RESET_KEYS = [
+  'mrinalRosterData',       // cached roster
+  'mrinalDutySwaps',        // OPD/leave swaps
+  'mrinalDutyNotes',        // per-day notes
+  'mrinalDutyAlerts',       // scheduled duty alerts
+  'mrinalDutyAlertSettings',// alert pill/lead-time settings
+];
+
+export function clearAppState() {
+  RESET_KEYS.forEach((k) => localStorage.removeItem(k));
+}
+
 export function resetRoster() {
   triggerHaptic(30);
-  resetToDefault();
-  window.__recomputeAndRender();
+  clearAppState();
+  resetToDefault();              /* instant bundled fallback so the UI is never blank */
   window.__prevDayData = null;
-  closeRosterModal();
+  window.__recomputeAndRender();
   setRosterStatus('', true);
-  scheduleAlerts();
+  closeRosterModal();
+  /* "Built-in" is now the /rosters/ GitHub folder: reload so autoSelectRoster pulls
+     the current month's file (falls back to the bundled copy when offline). */
+  location.reload();
 }
 
 export function scheduleAlerts() {

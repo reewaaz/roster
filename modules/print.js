@@ -164,7 +164,8 @@ const ROLE_CELL = {
 /* One coloured chip per person-day. */
 
 function dayCell(roster, i, person, isResident) {
-  const r = dayRole(roster, i, person);
+  const prevDay = i === 0 ? (window.__prevDayData && window.__prevDayData.day) : null;
+  const r = dayRole(roster, i, person, prevDay);
   if (r.key === 'picuDay' || r.key === 'off') {
     if (!isResident) return null;
     return { cell: ROLE_CELL[r.key], tag: '' };
