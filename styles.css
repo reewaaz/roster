@@ -665,6 +665,17 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
 .github-btn:active { transform: scale(0.98); }
 :root[data-theme="dark"] .github-btn { background: #1e293b; }
 
+/* ROSTER STORE LIST */
+.store-file-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px solid rgba(100,120,150,0.18); }
+.store-file-row:last-child { border-bottom: none; }
+.store-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.store-row-actions .modal-btn { padding: 7px 12px; font-size: 12px; }
+.store-badge { display: inline-block; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 999px; vertical-align: middle; }
+.store-badge.today { background: #e3fbef; color: #2fb872; }
+.store-badge.loaded { background: #e6f4ff; color: #32a4e1; }
+:root[data-theme="dark"] .store-badge.today { background: #143b2a; color: #2fb872; }
+:root[data-theme="dark"] .store-badge.loaded { background: #12314a; color: #32a4e1; }
+
 /* ---- ANIMATIONS ---- */
 @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
 @keyframes fadeUp   { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }

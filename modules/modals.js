@@ -6,6 +6,10 @@ import {
 import {
   setToken, getToken, getLastSync, persistCurrentRoster, fetchMonthRoster, loadHistory,
 } from './storage.js';
+import {
+  listStoreRosters, fetchStoreRoster, loadRosterFromStore, uploadCurrentRoster,
+  deleteStoreRoster, coversDate,
+} from './rosters.js';
 import { renderSwapModal, clearSwaps, swapCount, getSwaps } from './swaps.js';
 import { openAlertModal, saveAlertSettings, sendTestNotification, scheduleDutyAlerts } from './alerts.js';
 import { printRoster } from './print.js';
@@ -92,12 +96,12 @@ function buildSettingsContent() {
         <span style="color:var(--text-muted);">›</span>
       </div>
 
-      <div class="settings-section-title">Cloud Sync</div>
+      <div class="settings-section-title">Roster Store</div>
       <div class="settings-item" data-action="cloud">
         <div class="settings-item-icon">☁️</div>
         <div style="flex:1;">
-          <div class="settings-item-label">GitHub Backup</div>
-          <div class="settings-item-sub">${tokenConfigured ? 'Connected · ' + (lastSync ? `last sync ${new Date(lastSync).toLocaleDateString()}` : 'set up') : 'Add PAT to back up rosters'}</div>
+          <div class="settings-item-label">GitHub Rosters</div>
+          <div class="settings-item-sub">${tokenConfigured ? 'Connected · ' + (lastSync ? `last sync ${new Date(lastSync).toLocaleDateString()}` : 'set up') : 'Add PAT — upload, load & delete stored rosters'}</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
@@ -160,27 +164,28 @@ export function closeSwapModal() {
   document.getElementById('swap-modal').classList.remove('show');
 }
 
-/* ---- CLOUD MODAL ---- */
+/* ---- CLOUD MODAL (GitHub roster store) ---- */
 export function openCloudModal() {
   triggerHaptic(20);
   const modal = document.getElementById('cloud-modal');
   if (!modal) return;
   const body = document.getElementById('cloud-body');
   const token = getToken();
-  const sync = getLastSync();
-  const hasHistory = sync || getToken();
 
   body.innerHTML = `
     <div class="github-row">
       <div class="setting-label">GitHub Personal Access Token</div>
-      <div class="setting-sub">Create one at github.com/settings/tokens with <b>gist</b> scope. Stored only on this device.</div>
+      <div class="setting-sub">Create one at github.com/settings/tokens with <b>repo</b> scope (Contents R/W). Stored only on this device.</div>
       <input type="password" class="github-token-input" id="cloud-token" value="${escapeHtml(token)}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
     </div>
-    <div class="modal-actions">
-      <button class="modal-btn btn-cancel" id="cloud-save-btn">Save Token</button>
-      <button class="modal-btn btn-save" id="cloud-sync-btn">Sync Now</button>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button class="modal-btn btn-save" id="cloud-save-btn">Save Token</button>
+      <button class="modal-btn" id="cloud-upload-btn" style="flex:1;">⬆️ Upload Current Roster</button>
+      <button class="modal-btn btn-cancel" id="cloud-refresh-btn">Refresh</button>
     </div>
-    <div class="github-status" id="cloud-status">${hasHistory ? 'Last sync: ' + (sync ? new Date(sync).toLocaleString() : 'not yet') : 'No backup yet — sync to safeguard your roster.'}</div>
+    <div class="github-status" id="cloud-status"></div>
+    <div class="setting-sub" style="margin:10px 0 6px;font-weight:600;color:var(--text);">Stored rosters on GitHub</div>
+    <div class="swap-days-list" id="cloud-roster-list" style="max-height:240px;overflow:auto;">Loading…</div>
   `;
 
   body.querySelector('#cloud-save-btn').addEventListener('click', () => {
@@ -189,31 +194,107 @@ export function openCloudModal() {
     showToast(val ? 'Token saved' : 'Token cleared');
   });
 
-  body.querySelector('#cloud-sync-btn').addEventListener('click', async () => {
-    const btn = body.querySelector('#cloud-sync-btn');
+  body.querySelector('#cloud-upload-btn').addEventListener('click', async () => {
+    const btn = body.querySelector('#cloud-upload-btn');
     const status = body.querySelector('#cloud-status');
     const val = body.querySelector('#cloud-token').value.trim();
     if (val) setToken(val);
-    btn.disabled = true; btn.textContent = 'Syncing…';
-    status.textContent = 'Pushing current roster to GitHub…';
+    btn.disabled = true;
+    status.textContent = 'Uploading current roster…';
     status.className = 'github-status';
     try {
-      const meta = getMeta();
-      const rosterData = getRoster();
-      const { key } = await persistCurrentRoster(meta, rosterData);
-      const when = new Date().toLocaleString();
+      const { fileName, result } = await uploadCurrentRoster();
       status.className = 'github-status ok';
-      status.textContent = `✓ ${key} backed up at ${when}`;
-      showToast('Roster backed up to GitHub ☁️');
+      status.textContent = `✓ ${fileName} ${result === 'updated' ? 'updated' : 'created'} on GitHub`;
+      showToast('Roster uploaded to GitHub ☁️');
+      renderRosterStoreList(body);
     } catch (e) {
       status.className = 'github-status error';
-      status.textContent = '✗ ' + (e.message || 'Sync failed');
+      status.textContent = '✗ ' + (e.message || 'Upload failed');
     } finally {
-      btn.disabled = false; btn.textContent = 'Sync Now';
+      btn.disabled = false;
     }
   });
 
+  body.querySelector('#cloud-refresh-btn').addEventListener('click', () => renderRosterStoreList(body));
+
+  renderRosterStoreList(body);
   modal.classList.add('show');
+}
+
+async function renderRosterStoreList(body) {
+  const list = body.querySelector('#cloud-roster-list');
+  if (!list) return;
+  list.innerHTML = 'Loading…';
+  const files = await listStoreRosters(true);
+  if (!files.length) { list.innerHTML = '<div class="swap-preview empty">No rosters stored yet — upload the current month to start.</div>'; return; }
+
+  /* Resolve each file's meta + today badge in parallel; tolerate failures. */
+  const rows = await Promise.all(files.map(async (f) => {
+    let meta = null, invalid = false;
+    try {
+      const data = await fetchStoreRoster(f.name);
+      meta = { month: data.month, startDate: data.startDate, days: data.days };
+    } catch (e) { invalid = true; }
+    return { f, meta, invalid };
+  }));
+
+  list.innerHTML = rows.map(({ f, meta, invalid }) => {
+    const label = meta ? escapeHtml(meta.month) : '<span style="opacity:.6">(unreadable)</span>';
+    const today = meta && coversDate(meta) ? ' <span class="store-badge today">Today</span>' : '';
+    const loaded = meta && getMeta().month === meta.month ? ' <span class="store-badge loaded">Loaded</span>' : '';
+    const date = meta ? `<span class="sr-foot" style="opacity:.7;font-size:11px;">${escapeHtml(meta.startDate)}</span>` : '';
+    return `<div class="store-file-row" data-name="${escapeHtml(f.name)}">
+      <div style="flex:1;min-width:0;">
+        <div class="sr-head">
+          <span class="sr-date">☁️ ${escapeHtml(f.name)}</span>${today}${loaded}
+        </div>
+        <div class="sr-foot">${label} &nbsp; ${date}</div>
+      </div>
+      <div class="store-row-actions">
+        <button class="modal-btn store-load-btn" data-action="load">Load</button>
+        <button class="modal-btn btn-cancel store-del-btn" data-action="del" title="Delete from GitHub">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.store-load-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const name = btn.closest('.store-file-row').dataset.name;
+    const status = body.querySelector('#cloud-status');
+    status.className = 'github-status';
+    status.textContent = `Loading ${name}…`;
+    try {
+      const { meta } = await loadRosterFromStore(name);
+      if (window.__recomputeAndRender) window.__recomputeAndRender();
+      status.className = 'github-status ok';
+      status.textContent = `✓ Loaded ${meta.month}`;
+      showToast(`Loaded ${meta.month} from GitHub`);
+      renderRosterStoreList(body);
+    } catch (e) {
+      status.className = 'github-status error';
+      status.textContent = '✗ ' + (e.message || 'Load failed');
+    }
+  }));
+
+  list.querySelectorAll('.store-del-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const name = btn.closest('.store-file-row').dataset.name;
+    const status = body.querySelector('#cloud-status');
+    if (!confirm(`Delete ${name} from GitHub?`)) return;
+    status.className = 'github-status';
+    status.textContent = `Deleting ${name}…`;
+    btn.disabled = true;
+    try {
+      await deleteStoreRoster(name);
+      status.className = 'github-status ok';
+      status.textContent = `✓ Deleted ${name}`;
+      showToast(`Deleted ${name}`);
+      renderRosterStoreList(body);
+    } catch (e) {
+      status.className = 'github-status error';
+      status.textContent = '✗ ' + (e.message || 'Delete failed');
+      btn.disabled = false;
+    }
+  }));
 }
 
 export function closeCloudModal() {
@@ -378,7 +459,7 @@ export async function validateAndSaveRoster() {
   const err = validateRosterData(data);
   if (err) { setRosterStatus(err, false); return; }
 
-  const meta = { month: data.month.trim(), startDate: data.startDate };
+  const meta = { month: data.month.trim(), startDate: data.startDate, userGenerated: true };
   const days = data.days;
   saveRoster(meta, days);
   window.__recomputeAndRender();
@@ -406,6 +487,8 @@ async function pushToCloudSilently(meta, days) {
   if (!getToken()) return;
   try { await persistCurrentRoster(meta, days); }
   catch (e) { console.warn('Cloud sync failed', e); }
+  try { await uploadCurrentRoster(); }
+  catch (e) { console.warn('Roster store upload failed', e); }
 }
 
 export function resetRoster() {

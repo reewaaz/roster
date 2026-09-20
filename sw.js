@@ -1,6 +1,6 @@
 /* Bump this on every deploy so installed clients re-run install() and
    drop the stale cached app JS (Cache-First SW never revalidates assets). */
-const CACHE_NAME = 'duty-app-v10';
+const CACHE_NAME = 'duty-app-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   './modules/utils.js',
   './modules/roster.js',
   './modules/storage.js',
+  './modules/rosters.js',
   './modules/alerts.js',
   './modules/swaps.js',
   './modules/rendering.js',
@@ -40,6 +41,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const request = event.request;
+
+  /* Roster store reads must always hit the network (Cache-First would serve a stale
+     GitHub listing / raw roster JSON forever, so new months would never appear). */
+  const host = (request.url && /^https?:\/\//.test(request.url) ? new URL(request.url).hostname : '');
+  if (host === 'api.github.com' || host === 'raw.githubusercontent.com') {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(

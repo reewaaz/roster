@@ -8,6 +8,7 @@ import {
 import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, openCloudModal, openSearchModal, closeSearchModal, closeAllModals as closeAll } from './modules/modals.js';
 import { initDutyAlerts, openAlertModal, closeAlertModal, saveAlertSettings, sendTestNotification } from './modules/alerts.js';
 import { printRoster, setNotesDB } from './modules/print.js';
+import { autoSelectRoster } from './modules/rosters.js';
 
 /* Wire the global functions the HTML uses */
 window.__openScrollDay = (i) => openScrollDay(i);
@@ -59,6 +60,12 @@ document.addEventListener('roster-changed', () => {
   reRenderAll();
 });
 
+/* After a store roster is auto-loaded: re-sync today pill + reschedule duty alerts. */
+function scheduleAfterAutoSelect() {
+  updateTodayPill();
+  import('./modules/alerts.js').then((m) => m.scheduleDutyAlerts()).catch(() => {});
+}
+
 function updateTodayPill() {
   const pill = document.getElementById('today-pill');
   if (!pill) return;
@@ -100,6 +107,15 @@ window.addEventListener('DOMContentLoaded', () => {
   initDutyAlerts();
   initInstallPrompt();
   registerSW();
+
+  /* Auto-pull the current month's roster from the GitHub roster store (best-effort,
+     non-blocking). Swaps/alerts re-schedule if the month changed. */
+  autoSelectRoster().then((r) => {
+    if (r && r.loaded) {
+      showToast(`Loaded ${r.meta.month} roster from GitHub ☁️`);
+      scheduleAfterAutoSelect();
+    }
+  }).catch(() => {});
 
   /* parse URL query for PWA shortcuts */
   const params = new URLSearchParams(location.search);
