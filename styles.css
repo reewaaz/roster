@@ -1019,7 +1019,9 @@ mark { background: #fde047; color: #422006; border-radius: 4px; padding: 0 2px; 
   .pr-nagar span.pr-p { font-size: 11pt; white-space: nowrap; }
 
   /* ---- MATRIX (name first / date first) ---- */
-  .pr-mx { width: 100%; flex-shrink: 1; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+  /* flex: 1 makes the matrix fill the sheet height so no big blank band
+     collects below the rows (date-first previously left ~80mm empty). */
+  .pr-mx { width: 100%; flex: 1; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
   .pr-mx col.pr-c0 { width: 64mm; }
   .pr-mx col.pr-cg { width: 6mm; }
   .pr-mx td.pr-c { border: 0.3mm solid #f1f5f9; text-align: center; padding: 0.9mm 0.5mm;

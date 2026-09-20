@@ -18,7 +18,24 @@ let notesDB = {};
 export function setNotesDB(notes) { notesDB = notes || {}; }
 
 const MONTH_ABB = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const CHUNK = 11; /* days per page */
+const CHUNK = 11; /* max days per page — pages are balanced below so the final page is never a sparse stub full of white space */
+
+/* Split the month into balanced page runs: every page gets ~total/pages days
+   (never more than CHUNK), so a 31-day month prints 11/10/10 rather than
+   11/11/9 and a 28-day month prints 10/9/9 instead of 11/11/6. */
+function pageBounds(total) {
+  const pages = Math.max(1, Math.ceil(total / CHUNK));
+  const base = Math.floor(total / pages);
+  const extra = total % pages;
+  const bounds = [];
+  let at = 0;
+  for (let p = 0; p < pages; p++) {
+    const n = base + (p < extra ? 1 : 0);
+    bounds.push([at, at + n - 1]);
+    at += n;
+  }
+  return bounds;
+}
 
 function adLabel(start, i) {
   const d = new Date(start.getTime() + i * 86400000);
@@ -126,11 +143,11 @@ function simpleHead() {
 }
 
 function renderSimple(roster, meta, start) {
-  const total = Math.ceil(roster.length / CHUNK);
+  const bounds = pageBounds(roster.length);
+  const total = bounds.length;
   const pages = [];
   for (let p = 0; p < total; p++) {
-    const from = p * CHUNK;
-    const to = Math.min(from + CHUNK - 1, roster.length - 1);
+    const [from, to] = bounds[p];
     const rows = [];
     for (let i = from; i <= to; i++) rows.push(simpleRow(roster[i], i, start));
     pages.push(`<section class="pr-page">
@@ -242,11 +259,11 @@ function matrixCellHtml(name, i, isResident, roster, twoLine) {
 function renderNameFirst(roster, meta, start) {
   const { residents, consultants } = collectPeople(roster);
   const people = residents.concat(consultants);
-  const total = Math.ceil(roster.length / CHUNK);
+  const bounds = pageBounds(roster.length);
+  const total = bounds.length;
   const pages = [];
   for (let p = 0; p < total; p++) {
-    const from = p * CHUNK;
-    const to = Math.min(from + CHUNK - 1, roster.length - 1);
+    const [from, to] = bounds[p];
     const heads = [];
     for (let i = from; i <= to; i++) {
       const d = roster[i];
@@ -287,13 +304,13 @@ function renderNameFirst(roster, meta, start) {
 /* ------------------------------------------------------------------ */
 function renderDateFirst(roster, meta, start) {
   const { residents, consultants } = collectPeople(roster);
-  const total = Math.ceil(roster.length / CHUNK);
+  const bounds = pageBounds(roster.length);
+  const total = bounds.length;
   const gapCol = consultants.length ? '<col class="pr-cg">' : '';
   const gapCell = consultants.length ? '<th class="pr-gapcol"></th>' : '';
   const pages = [];
   for (let p = 0; p < total; p++) {
-    const from = p * CHUNK;
-    const to = Math.min(from + CHUNK - 1, roster.length - 1);
+    const [from, to] = bounds[p];
     const pn = (name) => `<th class="pr-pn${isMe(name) ? ' pr-me' : ''}"><div>${escapeHtml(name)}</div></th>`;
     const headRow = `<tr class="pr-grhead"><th></th><th colspan="${residents.length}">Residents</th>${gapCell}<th colspan="${consultants.length}">Consultants &amp; on-call</th></tr>
       <tr><th class="pr-corner">Date</th>${residents.map(pn).join('')}${gapCell}${consultants.map(pn).join('')}</tr>`;

@@ -354,10 +354,13 @@ export function openScrollDay(idx) {
      collapse has visually started so the whole morph feels instant. */
   setTimeout(() => {
     currentIndex = idx;
-    /* Expand in place — never scroll. The big card grows out of the tapped mini
-       row at exactly the spot where the user tapped. */
+    /* Grow the new card out of the tapped mini row, then pull it up so it becomes
+       the FIRST card in view, parked just under the frosted header — the same
+       'top' treatment the Today pill applies. */
     renderScrollView();
     mountOrigin = null;
+    const area2 = document.getElementById('daily-render-area');
+    if (area2) alignCurrentCard(area2, 'top');
   }, 120);
 }
 
