@@ -10,8 +10,7 @@ export default {
     {
       "date": "06-01",
       "day": "Thu",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Nischal",
       "nicu": "Krishna",
       "picu": "Aayoush",
@@ -23,8 +22,7 @@ export default {
     {
       "date": "06-02",
       "day": "Fri",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Salina",
       "nicu": "Sinda",
       "picu": "Srijana",
@@ -36,8 +34,7 @@ export default {
     {
       "date": "06-03",
       "day": "Sat",
-      "type": "off",
-      "title": "Saturday OFF",
+      "title": "Constitution Day",
       "ward": "Deepmala",
       "nicu": "Subas",
       "picu": "Devaki",
@@ -49,8 +46,7 @@ export default {
     {
       "date": "06-04",
       "day": "Sun",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Pritha",
       "nicu": "Kshitiz",
       "picu": "Mrinal",
@@ -62,8 +58,7 @@ export default {
     {
       "date": "06-05",
       "day": "Mon",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Samichhya",
       "nicu": "Madan",
       "picu": "Aayoush",
@@ -75,8 +70,7 @@ export default {
     {
       "date": "06-06",
       "day": "Tue",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Nischal",
       "nicu": "Subas",
       "picu": "Kabita",
@@ -88,8 +82,7 @@ export default {
     {
       "date": "06-07",
       "day": "Wed",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Salina",
       "nicu": "Shikha",
       "picu": "Srijana",
@@ -101,8 +94,7 @@ export default {
     {
       "date": "06-08",
       "day": "Thu",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Deepmala",
       "nicu": "Sinda",
       "picu": "Devaki",
@@ -114,8 +106,7 @@ export default {
     {
       "date": "06-09",
       "day": "Fri",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Samichhya",
       "nicu": "Madan",
       "picu": "Aayoush",
@@ -127,7 +118,6 @@ export default {
     {
       "date": "06-10",
       "day": "Sat",
-      "type": "off",
       "title": "Saturday OFF",
       "ward": "Nischal",
       "nicu": "Subas",
@@ -140,8 +130,7 @@ export default {
     {
       "date": "06-11",
       "day": "Sun",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Pritha",
       "nicu": "Shikha",
       "picu": "Kshitiz",
@@ -153,8 +142,7 @@ export default {
     {
       "date": "06-12",
       "day": "Mon",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Salina",
       "nicu": "Saurav Stha",
       "picu": "Srijana",
@@ -166,8 +154,7 @@ export default {
     {
       "date": "06-13",
       "day": "Tue",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Samichhya",
       "nicu": "Kshitiz",
       "picu": "Mrinal",
@@ -179,8 +166,7 @@ export default {
     {
       "date": "06-14",
       "day": "Wed",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Deepmala",
       "nicu": "Subas",
       "picu": "Aayoush",
@@ -192,8 +178,7 @@ export default {
     {
       "date": "06-15",
       "day": "Thu",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Nischal",
       "nicu": "Madan",
       "picu": "Devaki",
@@ -205,8 +190,7 @@ export default {
     {
       "date": "06-16",
       "day": "Fri",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Pritha",
       "nicu": "Sinda",
       "picu": "Kabita",
@@ -218,7 +202,6 @@ export default {
     {
       "date": "06-17",
       "day": "Sat",
-      "type": "off",
       "title": "Saturday OFF",
       "ward": "Samichhya",
       "nicu": "Shikha",
@@ -231,8 +214,7 @@ export default {
     {
       "date": "06-18",
       "day": "Sun",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Salina",
       "nicu": "Kshitiz",
       "picu": "Devaki",
@@ -244,8 +226,7 @@ export default {
     {
       "date": "06-19",
       "day": "Mon",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Deepmala",
       "nicu": "Saurav Stha",
       "picu": "Aayoush",
@@ -257,8 +238,7 @@ export default {
     {
       "date": "06-20",
       "day": "Tue",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Pritha",
       "nicu": "Sinda",
       "picu": "Srijana",
@@ -270,8 +250,7 @@ export default {
     {
       "date": "06-21",
       "day": "Wed",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Samichhya",
       "nicu": "Shikha",
       "picu": "Kabita",
@@ -283,8 +262,7 @@ export default {
     {
       "date": "06-22",
       "day": "Thu",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Sinda",
       "nicu": "Madan",
       "picu": "Prerana",
@@ -296,8 +274,7 @@ export default {
     {
       "date": "06-23",
       "day": "Fri",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Nischal",
       "nicu": "Subas",
       "picu": "Devaki",
@@ -309,7 +286,6 @@ export default {
     {
       "date": "06-24",
       "day": "Sat",
-      "type": "off",
       "title": "Saturday OFF",
       "ward": "Salina",
       "nicu": "Kshitiz",
@@ -322,21 +298,19 @@ export default {
     {
       "date": "06-25",
       "day": "Sun",
-      "type": "off",
-      "title": "GHATASTHAPANA",
+      "title": "Ghatasthapana",
       "ward": "Deepmala",
       "nicu": "Sinda",
       "picu": "Mrinal",
       "er": "",
       "second": "Saurav Stha",
-      "opd": "GHATASTHAPANA",
+      "opd": "",
       "nagarHospital": ""
     },
     {
       "date": "06-26",
       "day": "Mon",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Pritha",
       "nicu": "Krishna",
       "picu": "Kabita",
@@ -348,8 +322,7 @@ export default {
     {
       "date": "06-27",
       "day": "Tue",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Samichhya",
       "nicu": "Madan",
       "picu": "Srijana",
@@ -361,8 +334,7 @@ export default {
     {
       "date": "06-28",
       "day": "Wed",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Nischal",
       "nicu": "Kshitiz",
       "picu": "Devaki",
@@ -374,8 +346,7 @@ export default {
     {
       "date": "06-29",
       "day": "Thu",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Salina",
       "nicu": "Subas",
       "picu": "Prerana",
@@ -387,8 +358,7 @@ export default {
     {
       "date": "06-30",
       "day": "Fri",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Deepmala",
       "nicu": "Shikha",
       "picu": "Mrinal",
@@ -400,7 +370,6 @@ export default {
     {
       "date": "06-31",
       "day": "Sat",
-      "type": "off",
       "title": "Saturday OFF",
       "ward": "Pritha",
       "nicu": "Madan",

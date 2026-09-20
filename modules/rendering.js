@@ -225,12 +225,16 @@ function mainCardHtml(data, mountCls = '') {
     ? `<div class="card-note-badge">Note Attached</div>`
     : '';
 
+  const festNote = (data.title && !/off/i.test(String(data.title).trim()))
+    ? `<div class="fest-note">🎉 ${escapeHtml(String(data.title).trim())}</div>`
+    : '';
   return `
     <div class="card today type-${data.type} ${mTint}${mountCls}" id="dailyCardElement" data-date="${data.date}">
       <div class="card-header">
         <div>
           <span class="date-num">${escapeHtml(meta.month.split(' ')[0])} ${data.date.split('-')[1]}${savedNote ? '<span class="scroll-note">*</span>' : ''}</span>
           <span class="day-name">${fullDayName(data.day)}</span>
+          ${festNote}
           ${fromToHtml}
         </div>
         <div class="card-header-right">

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pediatrics Duty Roster – Ashwin 2083 (daily list)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  :root {
+    --ink:#1e293b; --crimson:#be185d; --dow:#64748b; --line:#e5e9f0;
+    --font:"Plus Jakarta Sans", Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body { font-family:var(--font); color:var(--ink); background:#d9dde3; }
+
+  .page {
+    width:297mm; height:210mm; margin:8mm auto; background:#fff; padding:7mm 8mm 5mm;
+    display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 2px 14px rgba(0,0,0,.18); break-after:page; page-break-after:always;
+  }
+  .page:last-child { break-after:auto; page-break-after:auto; }
+
+  .top { display:flex; justify-content:space-between; align-items:flex-end;
+         padding-bottom:2.4mm; border-bottom:1mm solid var(--crimson); margin-bottom:2.2mm; }
+  .title { font-size:21pt; font-weight:800; letter-spacing:-.3px; line-height:1; }
+  .sub { font-size:10.5pt; font-weight:700; color:var(--dow); margin-top:1.4mm; }
+  .range { text-align:right; display:flex; flex-direction:column; gap:.8mm; }
+  .range b { font-size:15pt; font-weight:800; color:var(--crimson); }
+  .range span { font-size:9pt; font-weight:700; color:#94a3b8; }
+
+  table { width:100%; flex:1; table-layout:fixed; border-collapse:separate; border-spacing:0; }
+  col.cd { width:37mm; }
+  col.co { width:80mm; }
+
+  th.hd { font-size:11.5pt; font-weight:800; padding:2.2mm 2mm; text-align:left; height:11mm; }
+  th.hd small { font-size:8pt; font-weight:700; margin-left:1.5mm; opacity:.75; }
+  th.hd:first-child { border-radius:2.4mm 0 0 2.4mm; }
+  th.hd:last-child { border-radius:0 2.4mm 2.4mm 0; }
+  th.hdate { background:#f1f1ee; color:var(--dow); padding-left:3.5mm; }
+  .h-opd    { background:#dff0fd; color:#0369a1; }
+  .h-nicu   { background:#fbd0ea; color:#a3196f; }
+  .h-picu   { background:#ffdfe3; color:#dc2646; }
+  .h-ward   { background:#b9ece2; color:#0f766e; }
+  .h-er     { background:#fff0a8; color:#92400e; }
+  .h-second { background:#334155; color:#fff; }
+
+  tbody tr { height:auto; }
+  td, th.dt { border-bottom:.35mm solid var(--line); vertical-align:middle; padding:0 2mm; }
+  th.dt { text-align:left; padding-left:3.5mm; }
+  tr.offrow th.dt { background:#e6f7ec; }
+  .dl { display:flex; align-items:baseline; gap:2mm; white-space:nowrap; }
+  .dl b { font-size:17pt; font-weight:800; color:var(--crimson); line-height:1.1; }
+  .dl span { font-size:12pt; font-weight:700; color:var(--dow); }
+  .ad .offb { margin-left:2mm; font-style:normal; font-size:8pt; font-weight:800; background:#bbf7d0; color:#166534; padding:.4mm 1.8mm; border-radius:99px; }
+  .ad { font-size:9pt; font-weight:600; color:#94a3b8; line-height:1.2; }
+  th.dt em { display:block; font-style:normal; font-size:8.5pt; font-weight:800; color:#166534; line-height:1.2; }
+
+  td.opd    { background:#f6fbff; }
+  td.nicu   { background:#fff7fc; }
+  td.picu   { background:#fff7f8; }
+  td.ward   { background:#f5fcfa; }
+  td.er     { background:#fffce9; }
+  td.second { background:#f4f6f9; }
+  td.opd.offcell { background:#e6f7ec; }
+
+  .names { display:flex; flex-wrap:wrap; gap:.8mm 2.6mm; font-size:12.5pt; font-weight:700; line-height:1.25; }
+  .p { white-space:nowrap; }
+  .p:not(:last-child)::after { content:","; margin-left:-.4mm; color:#94a3b8; font-weight:600; }
+  .me { color:var(--crimson); font-weight:800; background:#fde7f1; border-radius:1mm; padding:0 1.2mm; }
+  .none { color:#cbd5e1; font-weight:600; }
+  .off { color:#15803d; font-weight:700; font-size:11pt; }
+  .nagar { margin-top:1.1mm; display:flex; align-items:baseline; gap:2mm; font-size:11pt; font-weight:700; color:#4338ca; }
+  .nagar b { font-size:8.5pt; font-weight:800; background:#e0e7ff; padding:.5mm 2mm; border-radius:99px; }
+
+
+  @media print { body { background:#fff; } .page { margin:0; box-shadow:none; } }
+</style>
+</head>
+<body>
+  <section class="page">
+    <header class="top">
+      <div>
+        <div class="title">Pediatrics Duty Roster</div>
+        <div class="sub">Ashwin 2083 · KIOCH-Kathmandu Children’s Hospital</div>
+      </div>
+      <div class="range"><b>06-01 → 06-11</b><span>Page 1 of 3</span></div>
+    </header>
+    <table>
+      <colgroup><col class="cd"><col><col><col><col><col><col class="co"></colgroup>
+      <thead>
+        <tr>
+          <th class="hd hdate">Date</th>
+          <th class="hd h-ward">Ward / ER<small>24 hr</small></th>
+          <th class="hd h-nicu">NICU<small>24 hr</small></th>
+          <th class="hd h-picu">PICU<small>24 hr</small></th>
+          <th class="hd h-er">ER day</th>
+          <th class="hd h-second">2nd on call</th>
+          <th class="hd h-opd">OPD team</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-01</b><span>Thu</span></div><div class="ad">Sep 17</div></th>
+        <td class="ward"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="er"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="second"><div class="names"><span class="p">Prerana</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Saurav Singh</span><span class="p">Prerana</span><span class="p">Sinda</span><span class="p">Pritha</span><span class="p">Devaki</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-02</b><span>Fri</span></div><div class="ad">Sep 18</div></th>
+        <td class="ward"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Singh</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Kabita</span><span class="p">Madan</span><span class="p"><span class="me">Mrinal</span></span><span class="p">Pritha</span><span class="p">Samichhya</span></div></td>
+      </tr>
+      <tr class="offrow">
+        <th class="dt"><div class="dl"><b>06-03</b><span>Sat</span></div><div class="ad">Sep 19<i class="offb">OFF</i></div></th>
+        <td class="ward"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="er"><div class="names"><span class="none">–</span></div></td>
+        <td class="second"><div class="names"><span class="p">Dilip</span></div></td>
+        <td class="opd offcell"><div class="names"></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-04</b><span>Sun</span></div><div class="ad">Sep 20</div></th>
+        <td class="ward"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="picu"><div class="names"><span class="p"><span class="me">Mrinal</span></span></div></td>
+        <td class="er"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Prerana</span><span class="p">Shikha</span><span class="p">Sinda</span><span class="p">Salina</span><span class="p">Nischal</span><span class="p">Srijana</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-05</b><span>Mon</span></div><div class="ad">Sep 21</div></th>
+        <td class="ward"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="er"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="second"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Saurav Singh</span><span class="p">Salina</span><span class="p">Deepmala</span><span class="p">Devaki</span><span class="p">Srijana</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-06</b><span>Tue</span></div><div class="ad">Sep 22</div></th>
+        <td class="ward"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Kabita</span></div></td>
+        <td class="er"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="second"><div class="names"><span class="p">Pusp Raj</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Devaki</span><span class="p">Kshitiz</span><span class="p">Shikha</span><span class="p">Pritha</span><span class="p"><span class="me">Mrinal</span></span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-07</b><span>Wed</span></div><div class="ad">Sep 23</div></th>
+        <td class="ward"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="second"><div class="names"><span class="p">Dilip</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Madan</span><span class="p">Kshitiz</span><span class="p">Samichhya</span><span class="p">Prerana</span><span class="p">Aayoush</span></div><div class="nagar"><b>Nagar Hospital</b><span class="p">Pritha</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-08</b><span>Thu</span></div><div class="ad">Sep 24</div></th>
+        <td class="ward"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="er"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="second"><div class="names"><span class="p">Prerana</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Saurav Singh</span><span class="p">Subas</span><span class="p">Pritha</span><span class="p">Kabita</span><span class="p"><span class="me">Mrinal</span></span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-09</b><span>Fri</span></div><div class="ad">Sep 25</div></th>
+        <td class="ward"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="er"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Singh</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Salina</span><span class="p">Shikha</span><span class="p">Kabita</span><span class="p">Srijana</span><span class="p">Nischal</span></div></td>
+      </tr>
+      <tr class="offrow">
+        <th class="dt"><div class="dl"><b>06-10</b><span>Sat</span></div><div class="ad">Sep 26<i class="offb">OFF</i></div></th>
+        <td class="ward"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="picu"><div class="names"><span class="p"><span class="me">Mrinal</span></span></div></td>
+        <td class="er"><div class="names"><span class="none">–</span></div></td>
+        <td class="second"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="opd offcell"><div class="names"></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-11</b><span>Sun</span></div><div class="ad">Sep 27</div></th>
+        <td class="ward"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="er"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Prerana</span><span class="p">Salina</span><span class="p">Deepmala</span><span class="p">Sinda</span><span class="p">Devaki</span><span class="p">Samichhya</span></div></td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="page">
+    <header class="top">
+      <div>
+        <div class="title">Pediatrics Duty Roster</div>
+        <div class="sub">Ashwin 2083 · KIOCH-Kathmandu Children’s Hospital</div>
+      </div>
+      <div class="range"><b>06-12 → 06-21</b><span>Page 2 of 3</span></div>
+    </header>
+    <table>
+      <colgroup><col class="cd"><col><col><col><col><col><col class="co"></colgroup>
+      <thead>
+        <tr>
+          <th class="hd hdate">Date</th>
+          <th class="hd h-ward">Ward / ER<small>24 hr</small></th>
+          <th class="hd h-nicu">NICU<small>24 hr</small></th>
+          <th class="hd h-picu">PICU<small>24 hr</small></th>
+          <th class="hd h-er">ER day</th>
+          <th class="hd h-second">2nd on call</th>
+          <th class="hd h-opd">OPD team</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-12</b><span>Mon</span></div><div class="ad">Sep 28</div></th>
+        <td class="ward"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="second"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Kabita</span><span class="p">Madan</span><span class="p">Aayoush</span><span class="p">Nischal</span><span class="p">Samichhya</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-13</b><span>Tue</span></div><div class="ad">Sep 29</div></th>
+        <td class="ward"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="picu"><div class="names"><span class="p"><span class="me">Mrinal</span></span></div></td>
+        <td class="er"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="second"><div class="names"><span class="p">Pusp Raj</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Pritha</span><span class="p">Nischal</span><span class="p">Shikha</span><span class="p">Madan</span><span class="p">Kabita</span><span class="p">Prerana</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-14</b><span>Wed</span></div><div class="ad">Sep 30</div></th>
+        <td class="ward"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="er"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="second"><div class="names"><span class="p">Dilip</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Sinda</span><span class="p">Madan</span><span class="p">Shikha</span><span class="p">Srijana</span></div><div class="nagar"><b>Nagar Hospital</b><span class="p">Pritha</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-15</b><span>Thu</span></div><div class="ad">Oct 1</div></th>
+        <td class="ward"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="er"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="second"><div class="names"><span class="p">Prerana</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Saurav Singh</span><span class="p">Kabita</span><span class="p">Salina</span><span class="p">Samichhya</span><span class="p">Kshitiz</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-16</b><span>Fri</span></div><div class="ad">Oct 2</div></th>
+        <td class="ward"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Kabita</span></div></td>
+        <td class="er"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Singh</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Subas</span><span class="p"><span class="me">Mrinal</span></span><span class="p">Aayoush</span><span class="p">Deepmala</span><span class="p">Kshitiz</span></div></td>
+      </tr>
+      <tr class="offrow">
+        <th class="dt"><div class="dl"><b>06-17</b><span>Sat</span></div><div class="ad">Oct 3<i class="offb">OFF</i></div></th>
+        <td class="ward"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="er"><div class="names"><span class="none">–</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Singh</span></div></td>
+        <td class="opd offcell"><div class="names"></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-18</b><span>Sun</span></div><div class="ad">Oct 4</div></th>
+        <td class="ward"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="er"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Kabita</span><span class="p">Prerana</span><span class="p">Pritha</span><span class="p">Nischal</span><span class="p">Sinda</span><span class="p">Madan</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-19</b><span>Mon</span></div><div class="ad">Oct 5</div></th>
+        <td class="ward"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="er"><div class="names"><span class="p"><span class="me">Mrinal</span></span></div></td>
+        <td class="second"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Samichhya</span><span class="p">Nischal</span><span class="p">Saurav Singh</span><span class="p">Shikha</span><span class="p">Srijana</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-20</b><span>Tue</span></div><div class="ad">Oct 6</div></th>
+        <td class="ward"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="second"><div class="names"><span class="p">Pusp Raj</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Salina</span><span class="p">Subas</span><span class="p">Kshitiz</span><span class="p">Devaki</span><span class="p"><span class="me">Mrinal</span></span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-21</b><span>Wed</span></div><div class="ad">Oct 7</div></th>
+        <td class="ward"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Kabita</span></div></td>
+        <td class="er"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="second"><div class="names"><span class="p">Dilip</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Deepmala</span><span class="p">Nischal</span><span class="p">Subas</span><span class="p">Aayoush</span><span class="p">Prerana</span></div><div class="nagar"><b>Nagar Hospital</b><span class="p">Pritha</span></div></td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="page">
+    <header class="top">
+      <div>
+        <div class="title">Pediatrics Duty Roster</div>
+        <div class="sub">Ashwin 2083 · KIOCH-Kathmandu Children’s Hospital</div>
+      </div>
+      <div class="range"><b>06-22 → 06-31</b><span>Page 3 of 3</span></div>
+    </header>
+    <table>
+      <colgroup><col class="cd"><col><col><col><col><col><col class="co"></colgroup>
+      <thead>
+        <tr>
+          <th class="hd hdate">Date</th>
+          <th class="hd h-ward">Ward / ER<small>24 hr</small></th>
+          <th class="hd h-nicu">NICU<small>24 hr</small></th>
+          <th class="hd h-picu">PICU<small>24 hr</small></th>
+          <th class="hd h-er">ER day</th>
+          <th class="hd h-second">2nd on call</th>
+          <th class="hd h-opd">OPD team</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-22</b><span>Thu</span></div><div class="ad">Oct 8</div></th>
+        <td class="ward"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Prerana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="second"><div class="names"><span class="p">Prerana</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Salina</span><span class="p">Pritha</span><span class="p">Saurav Singh</span><span class="p">Kshitiz</span><span class="p">Aayoush</span><span class="p">Subas</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-23</b><span>Fri</span></div><div class="ad">Oct 9</div></th>
+        <td class="ward"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="er"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Singh</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Pritha</span><span class="p">Samichhya</span><span class="p">Sinda</span><span class="p">Srijana</span><span class="p">Devaki</span></div></td>
+      </tr>
+      <tr class="offrow">
+        <th class="dt"><div class="dl"><b>06-24</b><span>Sat</span></div><div class="ad">Oct 10<i class="offb">OFF</i></div></th>
+        <td class="ward"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="er"><div class="names"><span class="none">–</span></div></td>
+        <td class="second"><div class="names"><span class="p">Pusp Raj</span></div></td>
+        <td class="opd offcell"><div class="names"></div></td>
+      </tr>
+      <tr class="offrow">
+        <th class="dt"><div class="dl"><b>06-25</b><span>Sun</span></div><div class="ad">Oct 11<i class="offb">OFF</i></div><em>Ghatasthapana</em></th>
+        <td class="ward"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="picu"><div class="names"><span class="p"><span class="me">Mrinal</span></span></div></td>
+        <td class="er"><div class="names"><span class="none">–</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="opd offcell"><div class="names"></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-26</b><span>Mon</span></div><div class="ad">Oct 12</div></th>
+        <td class="ward"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Kabita</span></div></td>
+        <td class="er"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="second"><div class="names"><span class="p">Krishna</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Madan</span><span class="p">Salina</span><span class="p">Nischal</span><span class="p">Saurav Singh</span><span class="p">Kshitiz</span><span class="p">Aayoush</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-27</b><span>Tue</span></div><div class="ad">Oct 13</div></th>
+        <td class="ward"><div class="names"><span class="p">Samichhya</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Sinda</span></div></td>
+        <td class="second"><div class="names"><span class="p">Pusp Raj</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Salina</span><span class="p">Deepmala</span><span class="p">Shikha</span><span class="p">Kshitiz</span><span class="p">Srijana</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-28</b><span>Wed</span></div><div class="ad">Oct 14</div></th>
+        <td class="ward"><div class="names"><span class="p">Nischal</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Kshitiz</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Devaki</span></div></td>
+        <td class="er"><div class="names"><span class="p">Aayoush</span></div></td>
+        <td class="second"><div class="names"><span class="p">Dilip</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Prerana</span><span class="p">Sinda</span><span class="p">Shikha</span><span class="p"><span class="me">Mrinal</span></span><span class="p">Subas</span></div><div class="nagar"><b>Nagar Hospital</b><span class="p">Pritha</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-29</b><span>Thu</span></div><div class="ad">Oct 15</div></th>
+        <td class="ward"><div class="names"><span class="p">Salina</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Subas</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Prerana</span></div></td>
+        <td class="er"><div class="names"><span class="p">Srijana</span></div></td>
+        <td class="second"><div class="names"><span class="p">Pusp Raj</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Pritha</span><span class="p">Samichhya</span><span class="p">Saurav Singh</span><span class="p">Sinda</span><span class="p">Aayoush</span></div></td>
+      </tr>
+      <tr class="">
+        <th class="dt"><div class="dl"><b>06-30</b><span>Fri</span></div><div class="ad">Oct 16</div></th>
+        <td class="ward"><div class="names"><span class="p">Deepmala</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Shikha</span></div></td>
+        <td class="picu"><div class="names"><span class="p"><span class="me">Mrinal</span></span></div></td>
+        <td class="er"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Singh</span></div></td>
+        <td class="opd"><div class="names"><span class="p">Kabita</span><span class="p">Kshitiz</span><span class="p">Devaki</span><span class="p">Srijana</span><span class="p">Nischal</span></div></td>
+      </tr>
+      <tr class="offrow">
+        <th class="dt"><div class="dl"><b>06-31</b><span>Sat</span></div><div class="ad">Oct 17<i class="offb">OFF</i></div></th>
+        <td class="ward"><div class="names"><span class="p">Pritha</span></div></td>
+        <td class="nicu"><div class="names"><span class="p">Madan</span></div></td>
+        <td class="picu"><div class="names"><span class="p">Kabita</span></div></td>
+        <td class="er"><div class="names"><span class="none">–</span></div></td>
+        <td class="second"><div class="names"><span class="p">Saurav Stha</span></div></td>
+        <td class="opd offcell"><div class="names"></div></td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

@@ -35,8 +35,7 @@ Use exactly this shape:
     {
       "date": "MM-DD",
       "day": "Sun | Mon | Tue | Wed | Thu | Fri | Sat",
-      "type": "picu-day | picu-24 | opd | er-day | off | post-off",
-      "title": "PICU Day | 24hr PICU | OPD | ER Day | Saturday OFF | Post 24h OFF | <Festival Name>",
+      "title": "<\"\" for a normal working day | \"Saturday OFF\" | <Festival Name>>",
       "ward": "Person on Ward/ER 24h duty or empty string",
       "nicu": "Person on NICU 24h duty or empty string",
       "picu": "Person on PICU 24h duty or empty string",
@@ -53,8 +52,12 @@ RULES
 - Map Ward/ER column -> "ward", NICU 24h -> "nicu", PICU 24h -> "picu", ER Day -> "er", 2nd On Call -> "second", OPD -> "opd", Nagar Hospital -> "nagarHospital".
 - date uses the month number and day number you see in the image, e.g. "06-01".
 - day must match the real weekday of that calendar date.
-- For Saturday / public holidays use type "off". For a day after a 24h shift use type "post-off".
-- If a festival or occasion is written instead of a shift label (e.g. Ghatasthapana, Dashain), keep it as the title.
+- There is NO "type" field — never output one. The app derives it automatically.
+- "title" describes the DAY, not a shift:
+  - a normal working day gets the empty string "";
+  - a Saturday gets "Saturday OFF";
+  - a public holiday or festival written in the image (e.g. Constitution Day, Ghatasthapana, Dashain) keeps that exact name as the title.
+- Holidays (Saturday or festival) have no OPD postings — set "opd" to "" on those days.
 - Empty cells become "". OPD names are a comma + space separated list.
 - Keep every name spelled exactly as it appears in the image. Do not invent or correct names.
 - Include EVERY day of the month in order, starting at day 01.
@@ -67,14 +70,25 @@ EXAMPLE — follow this exact shape (replace the values):
     {
       "date": "06-01",
       "day": "Thu",
-      "type": "picu-day",
-      "title": "PICU Day",
+      "title": "",
       "ward": "Nischal",
       "nicu": "Krishna",
       "picu": "Aayoush",
       "er": "Salina",
       "second": "Prerana",
       "opd": "Saurav Singh, Prerana, Sinda, Pritha, Devaki",
+      "nagarHospital": ""
+    },
+    {
+      "date": "06-03",
+      "day": "Sat",
+      "title": "Constitution Day",
+      "ward": "Deepmala",
+      "nicu": "Subas",
+      "picu": "Devaki",
+      "er": "",
+      "second": "Dilip",
+      "opd": "",
       "nagarHospital": ""
     }
   ]
@@ -88,12 +102,12 @@ export function loadRoster() {
     const raw = JSON.parse(localStorage.getItem(ROSTER_KEY));
     if (raw && raw.meta && raw.meta.month && raw.meta.startDate && Array.isArray(raw.days) && raw.days.length > 0) {
       rosterMeta = raw.meta;
-      roster = raw.days;
+      roster = normalizeRosterTypes(raw.days);
       return { meta: rosterMeta, days: roster };
     }
   } catch (e) { /* ignore */ }
   rosterMeta = { month: defaultRosterData.meta.month, startDate: defaultRosterData.meta.startDate };
-  roster = defaultRosterData.days.slice();
+  roster = normalizeRosterTypes(defaultRosterData.days.slice());
   return { meta: rosterMeta, days: roster };
 }
 
@@ -116,7 +130,7 @@ export function dateKeyToIndex(dateKey) {
 }
 
 export function saveRoster(meta, days) {
-  localStorage.setItem(ROSTER_KEY, JSON.stringify({ meta, days }));
+  localStorage.setItem(ROSTER_KEY, JSON.stringify({ meta, days: normalizeRosterTypes(days) }));
   rosterMeta = meta;
   roster = days;
 }
@@ -124,7 +138,7 @@ export function saveRoster(meta, days) {
 export function resetToDefault() {
   localStorage.removeItem(ROSTER_KEY);
   rosterMeta = { month: defaultRosterData.meta.month, startDate: defaultRosterData.meta.startDate };
-  roster = defaultRosterData.days.slice();
+  roster = normalizeRosterTypes(defaultRosterData.days.slice());
   return { meta: rosterMeta, days: roster };
 }
 
@@ -149,8 +163,8 @@ export function validateRosterData(data) {
     const expectedWeekday = WEEKDAYS[(base.getDay() + i) % 7];
     if (typeof d.day !== 'string' || !WEEKDAYS.includes(d.day)) return `${label}: invalid "day" "${d.day}".`;
     if (d.day !== expectedWeekday) return `${label}: weekday mismatch — the calendar says ${expectedWeekday}, you wrote ${d.day}.`;
-    if (!VALID_TYPES.includes(d.type)) return `${label}: invalid "type" "${d.type}" (allowed: ${VALID_TYPES.join(', ')}).`;
-    if (typeof d.title !== 'string' || !d.title.trim()) return `${label}: missing "title".`;
+    if (d.type !== undefined && !VALID_TYPES.includes(d.type)) return `${label}: invalid "type" "${d.type}" (allowed: ${VALID_TYPES.join(', ')}).`;
+    if (d.title !== undefined && typeof d.title !== 'string') return `${label}: "title" must be a string.`;
     if (d.nagarHospital !== undefined && typeof d.nagarHospital !== 'string') return `${label}: "nagarHospital" must be a string.`;
   }
   return null;
@@ -180,6 +194,46 @@ function personIn(v, person) {
   return String(v).split(/,\s*/).some((s) => s.trim() === person);
 }
 
+/* Roster JSONs no longer store a per-day "type" — it is derived. A day counts
+   as an OFF day only when ALL of these hold:
+     • it carries a holiday/festival title (Saturday or otherwise), and
+     • it has no OPD postings that day (holidays have none — unless the source
+       scribbled the festival name into the OPD cell instead of people), and
+     • Dr. Mrinal is not on a 24h duty (Ward/ER, NICU or PICU).
+   Every other day is a normal working day. */
+export function deriveDayType(d) {
+  if (!d) return 'picu-day';
+  const hasTitle = !!(d.title && String(d.title).trim());
+  if (!hasTitle) return 'picu-day';
+  if (hasOpdPostings(d)) return 'picu-day';
+  if (personIn(d.ward, 'Mrinal') || personIn(d.nicu, 'Mrinal') || personIn(d.picu, 'Mrinal')) return 'picu-day';
+  return 'off';
+}
+
+/* True when a day's OPD cell lists actual people. A holiday file sometimes
+   repeats the festival name into the OPD column instead of names — that is not
+   an OPD posting. */
+function hasOpdPostings(d) {
+  const v = d ? d.opd : null;
+  if (!v || !String(v).trim() || v === '—') return false;
+  const t = d.title ? String(d.title).trim().toUpperCase() : '';
+  return String(v).split(/,\s*/).some((n) => {
+    const name = n.trim().toUpperCase();
+    return name && name !== t;
+  });
+}
+
+/* Backfill a derived day type onto every day (mutates in place, returns the
+   array). New-format rosters omit "type" entirely; older files carry a legacy
+   one we always recompute so every consumer sees the same rule. */
+export function normalizeRosterTypes(days) {
+  if (!Array.isArray(days)) return days;
+  for (const d of days) {
+    if (d && typeof d === 'object') d.type = deriveDayType(d);
+  }
+  return days;
+}
+
 /* The duty a person actually performs on a given day, using the same rules as
    the reference print2/print3 matrices:
      1. any explicit placement wins — ward/nicu/picu = 24h, er = Day ER, opd,
@@ -207,7 +261,8 @@ export function dayRole(roster, i, person, prevDayExtra = null) {
   if (prev && (personIn(prev.ward, person) || personIn(prev.nicu, person) || personIn(prev.picu, person))) {
     return { key: 'postOff', hasSecond: false };
   }
-  if (d.type === 'off' || d.type === 'post-off') return { key: 'off', hasSecond: false };
+  const dayType = (d.type && VALID_TYPES.includes(d.type)) ? d.type : deriveDayType(d);
+  if (dayType === 'off' || dayType === 'post-off') return { key: 'off', hasSecond: false };
   return { key: 'picuDay', hasSecond: false };
 }
 

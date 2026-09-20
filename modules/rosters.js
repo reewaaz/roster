@@ -9,7 +9,7 @@
    the PAT the user saves in Settings → Cloud Sync (needs "repo" scope for classic
    tokens, or fine-grained Contents "read and write"). */
 
-import { saveRoster, validateRosterData, getMeta, getRoster, getStart, getEnd } from './roster.js';
+import { saveRoster, validateRosterData, getMeta, getRoster, getStart, getEnd, normalizeRosterTypes } from './roster.js';
 import { getToken } from './storage.js';
 
 const STORE_KEY = 'mrinalRosterStoreCfg';
@@ -177,6 +177,7 @@ export async function fetchStoreRoster(name) {
     const data = await res.json();
     const validation = validateRosterData(data);
     if (validation) throw new Error(`Invalid roster ${name}: ${validation}`);
+    normalizeRosterTypes(data.days);
     contentCache.set(name, { at: Date.now(), data });
     return data;
   }
@@ -192,6 +193,7 @@ export async function fetchStoreRoster(name) {
         const data = JSON.parse(text);
         const validation = validateRosterData(data);
         if (validation) throw new Error(`Invalid roster ${name}: ${validation}`);
+        normalizeRosterTypes(data.days);
         contentCache.set(name, { at: Date.now(), data });
         return data;
       }
