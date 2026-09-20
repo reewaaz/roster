@@ -253,7 +253,7 @@ export function openScrollDay(idx) {
   const area = document.getElementById('daily-render-area');
   const mini = area.querySelector(`.upcoming-card[data-index="${idx}"]`);
   const main = document.getElementById('dailyCardElement');
-  if (mini && mini.scrollIntoView) mini.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  if (mini && mini.scrollIntoView) mini.scrollIntoView({ block: 'center', behavior: 'auto' });
 
   /* Aim the collapse/expand at the tapped mini card so the big card appears to
      grow out of the small row (and shrink back into it on the way out). */
@@ -273,11 +273,13 @@ export function openScrollDay(idx) {
   if (main) main.classList.add('iso-collapse');
   if (mini) mini.classList.add('iso-lift');
   expandMountFor = idx;
+  /* Keep the collapse → expand handoff tight: render the new card as soon as the
+     collapse has visually started so the whole morph feels instant. */
   setTimeout(() => {
     currentIndex = idx;
     renderScrollView();
     mountOrigin = null;
-  }, 240);
+  }, 110);
 }
 
 export function renderScrollView(dir, align) {

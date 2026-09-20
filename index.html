@@ -167,7 +167,7 @@
           <span>🔍 Search Roster</span>
           <span class="modal-close-x" onclick="closeSearchModal()">✕</span>
         </div>
-        <input type="search" class="modal-textarea" id="search-input" placeholder="Search by person or duty (e.g. Mrinal, PICU, ER)…" style="height:52px;">
+        <input type="search" class="modal-textarea" id="search-input" style="height:52px;">
         <div id="search-results" class="swap-days-list" style="margin-top:10px;"></div>
       </div>
     </div>
@@ -191,6 +191,17 @@
           <button class="modal-btn btn-cancel" onclick="resetRoster()">Reset to Built-in</button>
           <button class="modal-btn btn-save" onclick="validateAndSaveRoster()">Validate &amp; Save</button>
         </div>
+      </div>
+    </div>
+
+    <!-- PRINT MODAL -->
+    <div class="modal-overlay" id="print-modal">
+      <div class="modal-card settings-card">
+        <div class="modal-header">
+          <span>🖨️ Print Roster</span>
+          <span class="modal-close-x" onclick="closePrintModal()">✕</span>
+        </div>
+        <div id="print-style-body"></div>
       </div>
     </div>
   </div>

@@ -5,7 +5,7 @@ import {
   getRealTodayIndex, getCurrentIndex, openNoteModal, closeNoteModal as closeNoteMod,
   jumpToDate, goToday, changeDay, switchTab, openScrollDay, saveNote as saveNoteMod, notesDB,
 } from './modules/rendering.js';
-import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, openCloudModal, openSearchModal, closeSearchModal, closeAllModals as closeAll } from './modules/modals.js';
+import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, openCloudModal, openSearchModal, closeSearchModal, openPrintModal, closePrintModal, closeAllModals as closeAll } from './modules/modals.js';
 import { initDutyAlerts, openAlertModal, closeAlertModal, saveAlertSettings, sendTestNotification } from './modules/alerts.js';
 import { printRoster, setNotesDB } from './modules/print.js';
 import { autoSelectRoster } from './modules/rosters.js';
@@ -23,7 +23,9 @@ window.sendTestNotification = () => sendTestNotification(getRealTodayIndex());
 window.addReminderRow = () => import('./modules/alerts.js').then(m => m.addReminderRow());
 window.saveNote = () => saveNoteMod();
 window.closeNoteModal = () => closeNoteMod();
-window.printRoster = () => printRoster(getRealTodayIndex());
+window.printRoster = (style) => printRoster(getRealTodayIndex(), style);
+window.openPrintModal = openPrintModal;
+window.closePrintModal = closePrintModal;
 window.switchTab = switchTab;
 window.goToday = goToday;
 window.changeDay = changeDay;

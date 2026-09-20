@@ -12,8 +12,8 @@ import {
 } from './rosters.js';
 import { renderSwapModal, clearSwaps, swapCount, getSwaps } from './swaps.js';
 import { openAlertModal, saveAlertSettings, sendTestNotification, scheduleDutyAlerts } from './alerts.js';
-import { printRoster } from './print.js';
-import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, notesDB, closeNoteModal as closeNoteModalFromRendering } from './rendering.js';
+import { printRoster, PRINT_STYLES } from './print.js';
+import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, getRealTodayIndex, notesDB, closeNoteModal as closeNoteModalFromRendering } from './rendering.js';
 
 export function openSettingsModal() {
   triggerHaptic(20);
@@ -25,6 +25,41 @@ export function openSettingsModal() {
 
 export function closeSettingsModal() {
   document.getElementById('settings-modal').classList.remove('show');
+}
+
+/* ---- PRINT STYLE CHOOSER ---- */
+export function openPrintModal() {
+  triggerHaptic(20);
+  const modal = document.getElementById('print-modal');
+  if (!modal) return;
+  const body = document.getElementById('print-style-body');
+  if (body) {
+    body.innerHTML = `
+      <div class="print-style-hint">Choose a layout for the ${escapeHtml(getMeta().month)} print — each renders as crisp A4 landscape pages.</div>
+      <div class="settings-list">
+        ${PRINT_STYLES.map((s) => `
+          <div class="settings-item" data-style="${s.id}">
+            <div class="settings-item-icon">${s.icon}</div>
+            <div style="flex:1;">
+              <div class="settings-item-label">${s.label}</div>
+              <div class="settings-item-sub">${s.sub}</div>
+            </div>
+            <span style="color:var(--text-muted);">›</span>
+          </div>`).join('')}
+      </div>`;
+    body.querySelectorAll('.settings-item[data-style]').forEach((item) => {
+      item.addEventListener('click', () => {
+        closePrintModal();
+        printRoster(getRealTodayIndex(), item.dataset.style);
+      });
+    });
+  }
+  modal.classList.add('show');
+}
+
+export function closePrintModal() {
+  const m = document.getElementById('print-modal');
+  if (m) m.classList.remove('show');
 }
 
 function buildSettingsContent() {
@@ -65,7 +100,7 @@ function buildSettingsContent() {
         <div class="settings-item-icon">🖨️</div>
         <div style="flex:1;">
           <div class="settings-item-label">Print Roster</div>
-          <div class="settings-item-sub">Beautiful 2-page A4 PDF of ${escapeHtml(meta.month)}</div>
+          <div class="settings-item-sub">Print ${escapeHtml(meta.month)} as crisp A4 sheets — Simple, Name-first or Date-first</div>
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
@@ -114,7 +149,7 @@ function buildSettingsContent() {
       if (action === 'theme') return; // handled by switch
       closeSettingsModal();
       if (action === 'generate') openRosterModal();
-      else if (action === 'print') { printRoster(); }
+      else if (action === 'print') { openPrintModal(); }
       else if (action === 'swap') { openSwapModal(); }
       else if (action === 'swap-clear') { clearSwaps(); showToast('All swaps reverted'); dispatchEvent(new CustomEvent('roster-changed')); }
       else if (action === 'alerts') openAlertModal();
@@ -331,6 +366,99 @@ function srHours(d) {
   return '🕘 9AM–5PM';
 }
 
+const searchEmptyState = '<div class="swap-preview empty">🔍 Search the whole month — any person, posting, ward or day.</div>';
+
+/* Search every placement and every person: the query must match at least one field
+   value, then every matching field is highlighted in the day chip below. */
+function runSearch() {
+  const input = document.getElementById('search-input');
+  const results = document.getElementById('search-results');
+  if (!input || !results) return;
+  const q = (input.value || '').trim().toLowerCase();
+  if (!q) {
+    results.innerHTML = searchEmptyState;
+    return;
+  }
+  const meta = getMeta();
+  const monthsName = meta.month.split(' ')[0];
+  const roster = getRoster();
+  const matches = [];
+  roster.forEach((d) => {
+    /* Hay = every placement value plus each duty/field name, so the query can hit
+       any person OR any posting / ward / day label too. */
+    const hay = SEARCH_FIELDS
+      .filter((f) => d[f.key] && String(d[f.key]).trim() && d[f.key] !== '—')
+      .map((f) => `${f.label}:${d[f.key]}`)
+      .join(' | ').toLowerCase();
+    if (!hay.includes(q)) return;
+    const matched = [];
+    for (const f of SEARCH_FIELDS) {
+      const v = d[f.key];
+      if (!v || !String(v).trim() || v === '—') continue;
+      if (String(v).toLowerCase().includes(q) || f.label.toLowerCase().includes(q)) {
+        matched.push({ label: f.label, value: String(v) });
+      }
+    }
+    matches.push({ d, matched });
+  });
+  if (!matches.length) {
+    results.innerHTML = `<div class="swap-preview empty">No person or posting matches "${escapeHtml(q)}".</div>`;
+    return;
+  }
+  /* Count the distinct people found so searching a name shows every placement. */
+  const people = new Set();
+  matches.forEach(({ matched }) => {
+    matched.forEach((m) => {
+      if (m.label !== 'Posting' && m.label !== 'Day') {
+        String(m.value).split(/,\s*/).forEach((n) => { if (n.trim()) people.add(n.trim()); });
+      }
+    });
+  });
+  const daysWord = matches.length === 1 ? 'day' : 'days';
+  const peopleWord = people.size ? ` · ${people.size} ${people.size === 1 ? 'person' : 'people'}` : '';
+  results.innerHTML = matches.map(({ d, matched }) => {
+    const idx = roster.findIndex((r) => r.date === d.date);
+    const swapsHtml = getSwaps()[d.date] && getSwaps()[d.date].now
+      ? `${getSwaps()[d.date].original} → ${getSwaps()[d.date].now}` : '';
+    const notesHtml = notesDB[d.date] ? '📝' : '';
+    const hoursHtml = srHours(d);
+    const matchHtml = matched.map((m) =>
+      `<span class="sr-match"><span class="sr-match-label">${m.label}</span> <b>${highlight(m.value, q)}</b></span>`
+    ).join('');
+    return `<div class="swap-day-chip sr-chip" data-idx="${idx}">
+      <div class="sr-head">
+        <span class="sr-date">${monthsName} ${d.date.split('-')[1]} <span class="swap-chip-role">• ${d.day}</span></span>
+        <span class="upcoming-badge type-${d.type}">${highlight(d.title, q)}</span>
+      </div>
+      ${matchHtml ? `<div class="sr-matches">${matchHtml}</div>` : ''}
+      <div class="sr-foot"><span>${hoursHtml}</span>${notesHtml ? '<span>📝 note</span>' : ''}${swapsHtml ? `<span class="sr-swap">⇄ ${swapsHtml}</span>` : ''}</div>
+    </div>`;
+  }).join('');
+  const intro = `<div class="sr-summary">${matches.length} matching ${daysWord}${peopleWord}</div>`;
+  results.innerHTML = intro + results.innerHTML;
+  results.querySelectorAll('.swap-day-chip').forEach((chip) => chip.addEventListener('click', () => {
+    closeSearchModal();
+    window.__jumpToIndex(parseInt(chip.dataset.idx, 10));
+  }));
+}
+
+/* Wire the input once so reopening the modal never stacks duplicate listeners. */
+let searchBound = false;
+function bindSearchInput() {
+  if (searchBound) return;
+  searchBound = true;
+  const input = document.getElementById('search-input');
+  if (!input) return;
+  input.addEventListener('input', runSearch);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const results = document.getElementById('search-results');
+      const chip = results && results.querySelector('.swap-day-chip');
+      if (chip) chip.click();
+    }
+  });
+}
+
 export function openSearchModal() {
   triggerHaptic(20);
   const modal = document.getElementById('search-modal');
@@ -338,67 +466,10 @@ export function openSearchModal() {
   const input = document.getElementById('search-input');
   const results = document.getElementById('search-results');
   if (input) input.value = '';
-  if (results) results.innerHTML = '<div class="swap-preview empty">🔍 Type a name or duty to search the whole month.</div>';
+  if (results) results.innerHTML = searchEmptyState;
+  bindSearchInput();
   modal.classList.add('show');
-  setTimeout(() => input && input.focus(), 250);
-
-  const run = () => {
-    const q = (input.value || '').trim().toLowerCase();
-    if (!q) {
-      results.innerHTML = '<div class="swap-preview empty">🔍 Type a name or duty to search the whole month.</div>';
-      return;
-    }
-    const meta = getMeta();
-    const monthsName = meta.month.split(' ')[0];
-    const roster = getRoster();
-    const matches = [];
-    roster.forEach((d) => {
-      const hay = [d.title, d.ward, d.nicu, d.picu, d.er, d.second, d.opd, d.nagarHospital, d.day]
-        .join(' | ').toLowerCase();
-      if (!hay.includes(q)) return;
-      const matched = [];
-      for (const f of SEARCH_FIELDS) {
-        const v = d[f.key];
-        if (!v || !String(v).trim() || v === '—') continue;
-        if (String(v).toLowerCase().includes(q)) matched.push({ label: f.label, value: String(v) });
-      }
-      matches.push({ d, matched });
-    });
-    if (!matches.length) {
-      results.innerHTML = `<div class="swap-preview empty">No days match "${escapeHtml(q)}".</div>`;
-      return;
-    }
-    results.innerHTML = matches.map(({ d, matched }) => {
-      const idx = roster.findIndex((r) => r.date === d.date);
-      const swapsHtml = getSwaps()[d.date] && getSwaps()[d.date].now
-        ? `${getSwaps()[d.date].original} → ${getSwaps()[d.date].now}` : '';
-      const notesHtml = notesDB[d.date] ? '📝' : '';
-      const hoursHtml = srHours(d);
-      const matchHtml = matched.map((m) =>
-        `<span class="sr-match"><span class="sr-match-label">${m.label}</span> <b>${highlight(m.value, q)}</b></span>`
-      ).join('');
-      return `<div class="swap-day-chip sr-chip" data-idx="${idx}">
-        <div class="sr-head">
-          <span class="sr-date">${monthsName} ${d.date.split('-')[1]} <span class="swap-chip-role">• ${d.day}</span></span>
-          <span class="upcoming-badge type-${d.type}">${highlight(d.title, q)}</span>
-        </div>
-        ${matchHtml ? `<div class="sr-matches">${matchHtml}</div>` : ''}
-        <div class="sr-foot"><span>${hoursHtml}</span>${notesHtml ? '<span>📝 note</span>' : ''}${swapsHtml ? `<span class="sr-swap">⇄ ${swapsHtml}</span>` : ''}</div>
-      </div>`;
-    }).join('');
-    results.querySelectorAll('.swap-day-chip').forEach((chip) => chip.addEventListener('click', () => {
-      closeSearchModal();
-      window.__jumpToIndex(parseInt(chip.dataset.idx, 10));
-    }));
-  };
-
-  input.addEventListener('input', run);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const chip = results.querySelector('.swap-day-chip');
-      if (chip) chip.click();
-    }
-  });
+  setTimeout(() => input && input.focus(), 200);
 }
 
 export function closeSearchModal() {
@@ -509,7 +580,7 @@ export function closeAllModals() {
   closeNoteModalFromRendering?.();
   const im = document.getElementById('install-modal');
   if (im && im.classList.contains('show')) im.classList.remove('show');
-  ['note-modal', 'alert-modal', 'roster-modal', 'settings-modal', 'swap-modal', 'cloud-modal', 'search-modal'].forEach(id => {
+  ['note-modal', 'alert-modal', 'roster-modal', 'settings-modal', 'swap-modal', 'cloud-modal', 'search-modal', 'print-modal'].forEach(id => {
     const m = document.getElementById(id);
     if (m) m.classList.remove('show');
   });
