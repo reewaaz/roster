@@ -1,7 +1,18 @@
-const CACHE_NAME = 'duty-app-v5';
+const CACHE_NAME = 'duty-app-v6';
 const ASSETS = [
   './',
   './index.html',
+  './styles.css',
+  './app.js',
+  './modules/utils.js',
+  './modules/roster.js',
+  './modules/storage.js',
+  './modules/alerts.js',
+  './modules/swaps.js',
+  './modules/rendering.js',
+  './modules/modals.js',
+  './modules/print.js',
+  './data/roster.json',
   './manifest.webmanifest',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
@@ -10,7 +21,8 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS).catch((err) => console.warn('SW cache addAll partial failure:', err)))
   );
   self.skipWaiting();
 });
@@ -45,11 +57,15 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
-      return fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        return response;
-      });
+      return fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html'));
     })
   );
 });

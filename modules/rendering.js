@@ -1,0 +1,497 @@
+import { triggerHaptic, showToast, escapeHtml } from './utils.js';
+import {
+  getRoster, getMeta, getStart, getEnd, isExpired, recomputeToday,
+  findHandoverName, getOffDutyPeople, WEEKDAYS,
+} from './roster.js';
+import { getSwaps } from './swaps.js';
+
+let realTodayIndex = 0;
+let currentIndex = 0;
+let expandMountFor = -1;
+
+export const notesDB = JSON.parse(localStorage.getItem('mrinalDutyNotes')) || {};
+export function getNotes() { return notesDB; }
+export function setRealTodayIndex(v) { realTodayIndex = v; }
+export function getRealTodayIndex() { return realTodayIndex; }
+export function getCurrentIndex() { return currentIndex; }
+export function setCurrentIndex(v) { currentIndex = v; }
+
+function saveNotes() {
+  localStorage.setItem('mrinalDutyNotes', JSON.stringify(notesDB));
+}
+
+/* ---- DUTY HOURS ---- */
+function getDutyHours(data) {
+  if (!data) return '';
+  if (data.type === 'off') return '';
+  if (data.type === 'post-off') return 'Off Day';
+  if (data.type === 'picu-24') return '9 AM – 9 AM (24h duty)';
+  const wd = data.day;
+  if (wd === 'Fri') return '9 AM – 3 PM';
+  if (wd === 'Wed') return '9 AM – 1 PM';
+  return '9 AM – 5 PM';
+}
+
+/* ---- MAIN CARD HTML ---- */
+function mainCardHtml(data, mountCls = '') {
+  if (!data) return '';
+  const swaps = getSwaps();
+  const meta = getMeta();
+  const roster = getRoster();
+
+  let handoverHtml = '';
+  let detailsHtml = '';
+  const idx = roster.findIndex((r) => r.date === data.date);
+
+  if (data.type === 'opd') {
+    const opdTeammates = data.opd
+      ? data.opd.split(', ')
+          .map(m => m.trim())
+          .filter(m => m.toLowerCase() !== 'mrinal')
+      : [];
+    const pills = opdTeammates.length > 0
+      ? opdTeammates.map(m => `<span class="pill">${escapeHtml(m)}</span>`).join('')
+      : '<span class="pill">None</span>';
+    detailsHtml = `
+      <div>
+        <div class="team-label">OPD Teammates</div>
+        <div class="pills">${pills}</div>
+      </div>`;
+    if (data.nagarHospital && String(data.nagarHospital).trim()) {
+      detailsHtml += `
+        <div class="nagar-row">
+          <span class="nagar-label">🏥 Nagar Hospital</span>
+          <span class="nagar-name">${escapeHtml(data.nagarHospital)}</span>
+        </div>`;
+    }
+  } else if (data.type === 'picu-24') {
+    /* Handover: who was on duty 1 day prior (PICU 24h), supports cross-month for day 1 */
+    let handoverName = null;
+    let prevDayDetail = null;
+    if (idx > 0) {
+      const prevDay = roster[idx - 1];
+      prevDayDetail = prevDay;
+      handoverName = prevDay && (prevDay.type === 'picu-24' || prevDay.picu) ? prevDay.picu : null;
+    } else {
+      /* First day of roster — check previous month's last day (from cloud history) */
+      const prev = window.__prevDayData && window.__prevDayData.day;
+      if (prev && (prev.type === 'picu-24' || prev.picu)) {
+        handoverName = prev.picu;
+        prevDayDetail = prev;
+      }
+    }
+    if (handoverName) {
+      const prevDateNum = prevDayDetail.date ? prevDayDetail.date.split('-')[1] : '—';
+      const prevDayName = prevDayDetail.day ? prevDayDetail.day : '';
+      handoverHtml = `
+        <div class="handover-row">
+          <span class="handover-label">🔄 On duty yesterday</span>
+          <span class="handover-name">${escapeHtml(handoverName)} (${prevDateNum} ${prevDayName})</span>
+        </div>`;
+    }
+    let rows = [];
+    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward / ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swaps[data.date] && swaps[data.date].field === 'ward' ? swapBadge(data.date, 'ward') : ''}</span></div>`);
+    if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swaps[data.date] && swaps[data.date].field === 'nicu' ? swapBadge(data.date, 'nicu') : ''}</span></div>`);
+    if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swaps[data.date] && swaps[data.date].field === 'picu' ? swapBadge(data.date, 'picu') : ''}</span></div>`);
+    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">Day ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swaps[data.date] && swaps[data.date].field === 'er' ? swapBadge(data.date, 'er') : ''}</span></div>`);
+    detailsHtml = `
+      <div>
+        <div class="team-label">Duty Assignments & Team</div>
+        <div class="duty-list">${rows.join('')}</div>
+      </div>`;
+    if (data.nagarHospital && String(data.nagarHospital).trim()) {
+      detailsHtml += `
+        <div class="nagar-row">
+          <span class="nagar-label">🏥 Nagar Hospital</span>
+          <span class="nagar-name">${escapeHtml(data.nagarHospital)}</span>
+        </div>`;
+    }
+  } else if (data.type === 'off' || data.type === 'post-off') {
+    const statusText = data.type === 'off' ? 'Public Holiday / Off' : 'Post 24h Duty OFF';
+    const bgCol = data.type === 'off' ? '#dcfce7' : '#f1f5f9';
+    const txtCol = data.type === 'off' ? '#15803d' : '#475569';
+    const people = getOffDutyPeople(data);
+    const peopleRows = people.map(p => `
+      <div class="duty-row">
+        <span class="duty-k">${escapeHtml(p.label)}</span>
+        <span class="duty-v">${escapeHtml(p.value)}</span>
+      </div>`).join('');
+    detailsHtml = `
+      <div>
+        <div class="team-label">Duty Status</div>
+        <div class="pills"><span class="pill" style="background:${bgCol}; color:${txtCol}; width:100%; text-align:center;">${statusText}</span></div>
+        ${people.length ? `<div class="team-label" style="margin-top:8px;">People On Duty</div><div class="duty-list">${peopleRows}</div>` : ''}
+      </div>`;
+  } else {
+    let rows = [];
+    if (data.ward) rows.push(`<div class="duty-row"><span class="duty-k">Ward / ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'ward' ? 'swapped' : ''}">${escapeHtml(data.ward)}${swapBadge(data.date, 'ward')}</span></div>`);
+    if (data.nicu) rows.push(`<div class="duty-row"><span class="duty-k">NICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'nicu' ? 'swapped' : ''}">${escapeHtml(data.nicu)}${swapBadge(data.date, 'nicu')}</span></div>`);
+    if (data.picu) rows.push(`<div class="duty-row"><span class="duty-k">PICU</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'picu' ? 'swapped' : ''}">${escapeHtml(data.picu)}${swapBadge(data.date, 'picu')}</span></div>`);
+    if (data.er) rows.push(`<div class="duty-row"><span class="duty-k">Day ER</span><span class="duty-v ${swaps[data.date] && swaps[data.date].field === 'er' ? 'swapped' : ''}">${escapeHtml(data.er)}${swapBadge(data.date, 'er')}</span></div>`);
+    detailsHtml = `
+      <div>
+        <div class="team-label">Duty Assignments & Team</div>
+        <div class="duty-list">${rows.join('')}</div>
+      </div>`;
+    if (data.nagarHospital && String(data.nagarHospital).trim()) {
+      detailsHtml += `
+        <div class="nagar-row">
+          <span class="nagar-label">🏥 Nagar Hospital</span>
+          <span class="nagar-name">${escapeHtml(data.nagarHospital)}</span>
+        </div>`;
+    }
+  }
+
+  const secondCallHtml = data.second
+    ? `<div class="second-call"><span class="second-call-label">📞 2nd On Call</span><span class="second-call-name">${escapeHtml(data.second)}</span></div>`
+    : '';
+
+  const hoursHtml = getDutyHours(data)
+    ? `<div class="hours-row"><span class="hours-label">🕘 Duty Hours</span><span class="hours-value">${getDutyHours(data)}</span></div>`
+    : '';
+
+  const savedNote = notesDB[data.date];
+  const noteHtml = savedNote
+    ? `<div class="daily-note"><span style="font-size:10px; text-transform:uppercase; font-family:'Inter',sans-serif; display:block; margin-bottom:1px; opacity:0.8;">Note Attached</span>${escapeHtml(savedNote)}</div>`
+    : '';
+
+  const noteBadgeHtml = savedNote
+    ? `<div class="card-note-badge">Note Attached</div>`
+    : '';
+
+  return `
+    <div class="card today type-${data.type}${mountCls}" id="dailyCardElement" data-date="${data.date}">
+      <div class="card-header">
+        <div>
+          <span class="card-label">Selected Roster Day</span>
+          <span class="date-num">${escapeHtml(meta.month.split(' ')[0])} ${data.date.split('-')[1]}${savedNote ? '<span class="scroll-note">*</span>' : ''}</span>
+          <span class="day-name">${data.day}</span>
+        </div>
+        <div class="card-header-right">
+          <div class="badge type-${data.type}">${escapeHtml(data.title)}</div>
+          ${noteBadgeHtml}
+        </div>
+      </div>
+
+      <div class="card-body-content">
+        ${handoverHtml}
+        ${hoursHtml}
+        ${detailsHtml}
+        ${secondCallHtml}
+      </div>
+
+      ${noteHtml}
+    </div>
+  `;
+}
+
+function swapBadge(dateKey, field) {
+  const s = getSwaps()[dateKey];
+  if (s && s.field === field) {
+    return `<span class="swap-badge">⇄ ${escapeHtml(s.original)} → ${escapeHtml(s.now)}</span>`;
+  }
+  return '';
+}
+
+/* ---- SCROLL VIEW ---- */
+function markPillOverflow(area) {
+  area.querySelectorAll('.pills').forEach(pills => {
+    pills.classList.toggle('has-overflow', pills.scrollHeight > pills.clientHeight);
+  });
+}
+
+function updateTodayPill(area) {
+  const pill = document.getElementById('today-pill');
+  if (!pill) return;
+  const dailyActive = document.getElementById('view-daily').classList.contains('active');
+  const show = dailyActive && currentIndex !== realTodayIndex;
+  if (pill.classList.contains('visible') !== show) {
+    pill.classList.toggle('visible', show);
+  }
+  area = area; // silence unused
+}
+
+function centerScrollOnCurrent(area) {
+  const main = document.getElementById('dailyCardElement');
+  if (!main) return;
+  requestAnimationFrame(() => {
+    const rect = main.getBoundingClientRect();
+    const areaRect = area.getBoundingClientRect();
+    area.scrollTop += (rect.top - areaRect.top) - (area.clientHeight - rect.height) / 2;
+  });
+}
+
+export function openScrollDay(idx) {
+  const roster = getRoster();
+  idx = parseInt(idx, 10);
+  if (isNaN(idx) || idx < 0 || idx >= roster.length || idx === currentIndex) return;
+  triggerHaptic(25);
+  const area = document.getElementById('daily-render-area');
+  const mini = area.querySelector(`.upcoming-card[data-index="${idx}"]`);
+  const main = document.getElementById('dailyCardElement');
+  if (mini && mini.scrollIntoView) mini.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  if (main) main.classList.add('iso-collapse');
+  if (mini) mini.classList.add('iso-lift');
+  expandMountFor = idx;
+  setTimeout(() => {
+    currentIndex = idx;
+    renderScrollView();
+  }, 230);
+}
+
+export function renderScrollView() {
+  const area = document.getElementById('daily-render-area');
+  if (!area) return;
+  const roster = getRoster();
+  const meta = getMeta();
+  let html = '';
+  if (isExpired()) {
+    html += `<div class="expired-card" onclick="window.__openRosterModal && window.__openRosterModal()">
+        <div class="expired-title">✨ Next month's roster not loaded yet</div>
+        <div class="expired-sub">${escapeHtml(meta.month)} ends soon. Generate the next roster.</div>
+        <div class="expired-cta">Generate Roster</div>
+      </div>`;
+  }
+  const mon = meta.month.split(' ')[0];
+  roster.forEach((d, i) => {
+    if (i === currentIndex) {
+      const mountCls = expandMountFor === i ? ' iso-mount' : '';
+      expandMountFor = -1;
+      html += mainCardHtml(d, mountCls);
+      return;
+    }
+    const past = i < currentIndex ? ' scroll-past' : '';
+    const noteMark = notesDB[d.date] ? '<span class="scroll-note">*</span>' : '';
+    const sw = getSwaps()[d.date];
+    const swapMark = sw ? `<span class="swap-badge">⇄</span>` : '';
+    html += `
+      <div class="upcoming-card type-${d.type}${past}" data-index="${i}" data-date="${d.date}" onclick="window.__openScrollDay(${i})">
+        <div class="upcoming-date-info">
+          <span class="upcoming-day">${mon} ${d.date.split('-')[1]}${noteMark}${swapMark}</span>
+          <span class="upcoming-weekday">• ${d.day}</span>
+        </div>
+        <div class="upcoming-badge type-${d.type}">${escapeHtml(d.title)}</div>
+      </div>`;
+  });
+  area.innerHTML = html;
+  markPillOverflow(area);
+  updateTodayPill(area);
+  centerScrollOnCurrent(area);
+}
+
+/* ---- MONTH VIEW ---- */
+export function renderMonthView() {
+  const grid = document.getElementById('calendar-grid');
+  const monthTitle = document.getElementById('cal-month-title');
+  if (!grid) return;
+  const meta = getMeta();
+  const roster = getRoster();
+  if (monthTitle) monthTitle.innerText = meta.month;
+  let html = '';
+
+  /* FIX: compute leading empty cells from startDate's weekday */
+  const startDay = getStart().getDay();
+  for (let i = 0; i < startDay; i++) {
+    html += `<div class="cal-cell empty"></div>`;
+  }
+
+  roster.forEach((day, index) => {
+    const hasNote = !!notesDB[day.date];
+    const hasNoteClass = hasNote ? 'has-note' : '';
+    const isTodayClass = index === realTodayIndex ? 'is-today' : '';
+    const asteriskHtml = hasNote ? `<span class="note-asterisk">*</span>` : '';
+    html += `
+      <div class="cal-cell type-${day.type} ${hasNoteClass} ${isTodayClass}"
+           data-index="${index}" data-date="${day.date}"
+           style="animation-delay: ${(index + startDay) * 18}ms;">
+        <span class="cal-date">${day.date.split('-')[1]}${asteriskHtml}</span>
+      </div>`;
+  });
+  grid.innerHTML = html;
+  attachCalendarInteractions();
+}
+
+export function attachCalendarInteractions() {
+  document.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
+    let pressTimer = null;
+    let isLongPress = false;
+    let startX = 0;
+    let startY = 0;
+    let moved = false;
+
+    const startPress = (e) => {
+      isLongPress = false; moved = false;
+      if (e.type === 'contextmenu') e.preventDefault();
+      cell.classList.add('pressed');
+      const touch = e.touches ? e.touches[0] : e;
+      startX = touch.clientX; startY = touch.clientY;
+
+      pressTimer = setTimeout(() => {
+        isLongPress = true;
+        triggerHaptic(50);
+        openNoteModal(cell.dataset.date);
+      }, 400);
+    };
+
+    const movePress = (e) => {
+      if (!pressTimer) return;
+      const touch = e.touches ? e.touches[0] : e;
+      if (Math.abs(touch.clientX - startX) > 10 || Math.abs(touch.clientY - startY) > 10) {
+        moved = true;
+        clearTimeout(pressTimer); pressTimer = null;
+        cell.classList.remove('pressed');
+      }
+    };
+
+    const endPress = () => {
+      cell.classList.remove('pressed');
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+      if (!isLongPress && !moved) {
+        triggerHaptic(20);
+        jumpToDate(cell.dataset.index);
+      }
+    };
+
+    cell.addEventListener('touchstart', startPress, { passive: true });
+    cell.addEventListener('touchmove', movePress, { passive: true });
+    cell.addEventListener('touchend', endPress);
+    cell.addEventListener('mousedown', startPress);
+    cell.addEventListener('mousemove', movePress);
+    cell.addEventListener('mouseup', endPress);
+    cell.addEventListener('contextmenu', e => e.preventDefault());
+  });
+}
+
+/* ---- NOTES ---- */
+export function openNoteModal(dateKey) {
+  const meta = getMeta();
+  activeNoteDate = dateKey;
+  const titleEl = document.getElementById('modal-title');
+  if (titleEl) titleEl.innerText = `${meta.month.split(' ')[0]} ${dateKey.split('-')[1]} Note`;
+  const inputEl = document.getElementById('modal-input');
+  if (inputEl) {
+    inputEl.value = notesDB[dateKey] || '';
+    inputEl.placeholder = 'Note…';
+  }
+  document.getElementById('note-modal').classList.add('show');
+  setTimeout(() => { const i = document.getElementById('modal-input'); i && i.focus(); }, 300);
+}
+
+let activeNoteDate = null;
+export function getActiveNoteDate() { return activeNoteDate; }
+
+export function closeNoteModal() {
+  triggerHaptic(20);
+  document.getElementById('note-modal').classList.remove('show');
+  activeNoteDate = null;
+}
+
+export function saveNote() {
+  triggerHaptic(40);
+  const val = document.getElementById('modal-input')?.value.trim();
+  if (val === '') { delete notesDB[activeNoteDate]; }
+  else { notesDB[activeNoteDate] = val; }
+  saveNotes();
+  closeNoteModal();
+  renderMonthView();
+  renderScrollView();
+}
+
+/* ---- NAVIGATION ---- */
+export function changeDay(step) {
+  const roster = getRoster();
+  const newIndex = currentIndex + step;
+  if (newIndex >= 0 && newIndex < roster.length) {
+    currentIndex = newIndex;
+    triggerHaptic(30);
+    if (!document.getElementById('view-daily').classList.contains('active')) {
+      switchTab('daily');
+    } else {
+      renderScrollView(step > 0 ? 'right' : 'left');
+    }
+  } else {
+    triggerHaptic([12, 40, 12]);
+  }
+}
+
+export function goToday() {
+  triggerHaptic(35);
+  if (currentIndex !== realTodayIndex) {
+    currentIndex = realTodayIndex;
+    renderScrollView();
+  }
+}
+
+export function jumpToDate(index) {
+  currentIndex = parseInt(index, 10);
+  switchTab('daily');
+}
+
+export function switchTab(tabId, dir) {
+  triggerHaptic(30);
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+  document.getElementById(`view-${tabId}`)?.classList.add('active');
+  document.getElementById(`nav-${tabId}`)?.classList.add('active');
+
+  if (tabId === 'daily') {
+    renderScrollView();
+    updateTodayPill(document.getElementById('daily-render-area'));
+  }
+  if (tabId === 'month') {
+    const pill = document.getElementById('today-pill');
+    if (pill) pill.classList.remove('visible');
+    renderMonthView();
+    if (document.querySelector('.cal-cell.is-today')) {
+      setTimeout(() => {
+        const todayCell = document.querySelector('.cal-cell.is-today');
+        if (todayCell) todayCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }, 120);
+    }
+  }
+  if (dir === 'left' || dir === 'right') animateTabEnter(tabId, dir);
+}
+
+function animateTabEnter(tabId, dir) {
+  const el = document.getElementById(`view-${tabId}`);
+  if (!el) return;
+  el.classList.remove('tab-enter-left', 'tab-enter-right');
+  void el.offsetWidth;
+  el.classList.add(dir === 'left' ? 'tab-enter-right' : 'tab-enter-left');
+  setTimeout(() => el.classList.remove('tab-enter-left', 'tab-enter-right'), 340);
+}
+
+export function renderDailyView() {
+  renderScrollView();
+}
+
+/* ---- RE-RENDER AFT drafter.changes ---- */
+export function reRenderAll() {
+  renderScrollView();
+  renderMonthView();
+}
+
+/* ---- SPRINGY SCROLL (overscroll bounce feedback) ---- */
+function initSpringyScroll() {
+  const area = document.getElementById('daily-render-area');
+  if (!area) return;
+  let timer = null;
+  const applyBounce = () => {
+    const atTop = area.scrollTop <= 2;
+    const atBottom = area.scrollTop + area.clientHeight >= area.scrollHeight - 2;
+    area.classList.toggle('springy-top', atTop);
+    clearTimeout(timer);
+    timer = setTimeout(() => area.classList.remove('springy-top'), atTop ? 900 : 0);
+  };
+  area.addEventListener('scroll', applyBounce, { passive: true });
+}
+
+export function initRendering() {
+  realTodayIndex = recomputeToday();
+  currentIndex = realTodayIndex;
+  renderScrollView();
+  renderMonthView();
+  updateTodayPill(document.getElementById('daily-render-area'));
+  initSpringyScroll();
+}

@@ -23,5 +23,28 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Duty",
+      "short_name": "Today",
+      "description": "Jump straight to today's roster card",
+      "url": "./index.html?view=daily",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Monthly Calendar",
+      "short_name": "Month",
+      "description": "See the full month at a glance",
+      "url": "./index.html?view=month",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Add Note",
+      "short_name": "Note",
+      "description": "Quickly add a note for today",
+      "url": "./index.html?action=note",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
