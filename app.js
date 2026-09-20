@@ -85,9 +85,21 @@ function updateTodayPill() {
   pill.classList.toggle('visible', dailyActive && getCurrentIndex() !== getRealTodayIndex());
 }
 
+/* The frosted header floats over the scroll area (position: absolute); scrollers
+   pad their top by --header-h so cards start below the glass and slide under it.
+   Measure the real rendered height so the padding never drifts (fonts, resize). */
+function syncHeaderLayout() {
+  const header = document.querySelector('header');
+  const container = document.querySelector('.app-container');
+  if (!header || !container) return;
+  const h = Math.round(header.getBoundingClientRect().height);
+  container.style.setProperty('--header-h', `${Math.max(72, h)}px`);
+}
+
 /* Init events */
 window.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  syncHeaderLayout();
   loadRoster();
 
   /* Static hosts (e.g. GitHub Pages) serve the raw source and never get the
@@ -143,6 +155,11 @@ window.addEventListener('DOMContentLoaded', () => {
     else if (e.key === 'ArrowRight') changeDay(1);
   });
 });
+
+/* keep the header-height measurement honest across rotation, resize and font load */
+window.addEventListener('resize', () => syncHeaderLayout());
+window.addEventListener('orientationchange', () => setTimeout(syncHeaderLayout, 150));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => syncHeaderLayout());
 
 function initViewSwipe() {
   const container = document.querySelector('.view-container');

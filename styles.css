@@ -8,6 +8,9 @@
   --text-muted: #64748b;
   --nav-bg: rgba(255, 255, 255, 0.34);
   --accent: #0284c7;
+  /* Frosted header height (measured + kept in sync from JS) — scrollers pad
+     their top by this so content starts below the glass and slides under it. */
+  --header-h: 92px;
 
   /* Color Palette */
   --picu-day-bg: #f6efff; --picu-day-txt: #9a5cf0;
@@ -61,8 +64,10 @@ body {
   background: radial-gradient(circle at top right, #0d1526 0%, #0b1220 50%, #0f1a2e 100%);
 }
 
-/* Fixed Header */
+/* Frosted Glass Header — floats over the scroll area so cards pass underneath
+   and the backdrop blur actually shows (glassmorphic) instead of hard-clipping. */
 header {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 40;
   padding: 26px 20px 12px;
   background: var(--header-bg);
   backdrop-filter: blur(28px) saturate(200%);
@@ -70,7 +75,6 @@ header {
   border-bottom: 1px solid var(--header-border);
   border-bottom-left-radius: 28px;
   border-bottom-right-radius: 28px;
-  flex-shrink: 0;
   box-shadow: 0 4px 20px rgba(2, 132, 199, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 :root[data-theme="dark"] header {
@@ -104,7 +108,7 @@ header {
 .tab-content.tab-enter-right { animation: slideFromRight 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 
 /* DAILY VIEW STYLES */
-#view-daily { display: none; flex-direction: column; touch-action: pan-y; padding-top: 6px; }
+#view-daily { display: none; flex-direction: column; touch-action: pan-y; }
 #view-daily.active { display: flex; }
 
 #daily-render-area { gap: 12px; scroll-behavior: smooth; padding-bottom: calc(96px + env(safe-area-inset-bottom)); scroll-padding-top: 12px; }
@@ -145,6 +149,7 @@ header {
 #daily-render-area {
   width: 100%; display: flex; flex-direction: column;
   flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding-top: calc(var(--header-h, 92px) + 10px);   /* content starts below the frosted header */
   scroll-padding-bottom: calc(24px + env(safe-area-inset-bottom));
   overscroll-behavior: contain;
 }
@@ -400,7 +405,7 @@ header {
 .upcoming-badge.type-post-off { color: var(--post-off-txt); }
 
 /* MONTH VIEW STYLES */
-#view-month { overflow-y: auto; scrollbar-width: none; padding: 16px 0 calc(88px + env(safe-area-inset-bottom)); }
+#view-month { overflow-y: auto; scrollbar-width: none; padding: calc(var(--header-h, 92px) + 16px) 0 calc(88px + env(safe-area-inset-bottom)); }
 #view-month.active { display: flex; flex-direction: column; }
 #view-month::-webkit-scrollbar { display: none; }
 
