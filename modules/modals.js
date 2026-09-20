@@ -13,7 +13,7 @@ import {
 import { renderSwapModal, clearSwaps, swapCount, getSwaps } from './swaps.js';
 import { openAlertModal, saveAlertSettings, sendTestNotification, scheduleDutyAlerts } from './alerts.js';
 import { printRoster, PRINT_STYLES } from './print.js';
-import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, getRealTodayIndex, notesDB, closeNoteModal as closeNoteModalFromRendering } from './rendering.js';
+import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, getRealTodayIndex, notesDB, closeNoteModal as closeNoteModalFromRendering, mrinalDutyAt } from './rendering.js';
 
 export function openSettingsModal() {
   triggerHaptic(20);
@@ -356,17 +356,8 @@ function highlight(text, q) {
   return esc.replace(re, '<mark>$1</mark>');
 }
 
-function srHours(d) {
-  if (!d) return '';
-  if (d.type === 'off') return 'Off';
-  if (d.type === 'post-off') return 'Off Day';
-  if (d.type === 'picu-24') return '🕘 9AM–9AM';
-  if (d.day === 'Fri') return '🕘 9AM–3PM';
-  if (d.day === 'Wed') return '🕘 9AM–1PM';
-  return '🕘 9AM–5PM';
-}
-
-const searchEmptyState = '<div class="swap-preview empty">🔍 Search the whole month — any person, posting, ward or day.</div>';
+/* Empty search state — nothing to show until the user types. */
+const searchEmptyState = '';
 
 /* Search every placement and every person: the query must match at least one field
    value, then every matching field is highlighted in the day chip below. */
@@ -396,7 +387,7 @@ function runSearch() {
       const v = d[f.key];
       if (!v || !String(v).trim() || v === '—') continue;
       if (String(v).toLowerCase().includes(q) || f.label.toLowerCase().includes(q)) {
-        matched.push({ label: f.label, value: String(v) });
+        matched.push({ label: f.label, value: String(v), key: f.key });
       }
     }
     matches.push({ d, matched });
@@ -422,17 +413,22 @@ function runSearch() {
     const swapsHtml = sw && sw.now != null
       ? `${sw.original} → ${String(sw.now).trim() ? sw.now : 'Leave'}` : '';
     const notesHtml = notesDB[d.date] ? '📝' : '';
-    const hoursHtml = srHours(d);
-    const matchHtml = matched.map((m) =>
-      `<span class="sr-match"><span class="sr-match-label">${m.label}</span> <b>${highlight(m.value, q)}</b></span>`
+    /* Tint every result card by Dr. Mrinal's actual placement for that day —
+       the same colour language as the day cards and calendar. */
+    const m = mrinalDutyAt(idx);
+    const mTint = m && m.tint ? m.tint : 'mrd-off';
+    const mLabel = m ? m.label : '';
+    const matchHtml = matched.map((p) =>
+      `<span class="sr-match" data-key="${p.key}"><span class="sr-match-label">${p.label}</span> <b>${highlight(p.value, q)}</b></span>`
     ).join('');
-    return `<div class="swap-day-chip sr-chip" data-idx="${idx}">
+    const foot = [notesHtml ? '<span>📝 note</span>' : '', swapsHtml ? `<span class="sr-swap">⇄ ${swapsHtml}</span>` : ''].filter(Boolean).join('');
+    return `<div class="swap-day-chip sr-chip ${mTint}" data-idx="${idx}">
       <div class="sr-head">
         <span class="sr-date">${monthsName} ${d.date.split('-')[1]} <span class="swap-chip-role">• ${d.day}</span></span>
-        <span class="upcoming-badge type-${d.type}">${highlight(d.title, q)}</span>
+        <span class="upcoming-badge type-${d.type} ${mTint}">${highlight(mLabel || d.title, q)}</span>
       </div>
       ${matchHtml ? `<div class="sr-matches">${matchHtml}</div>` : ''}
-      <div class="sr-foot"><span>${hoursHtml}</span>${notesHtml ? '<span>📝 note</span>' : ''}${swapsHtml ? `<span class="sr-swap">⇄ ${swapsHtml}</span>` : ''}</div>
+      ${foot ? `<div class="sr-foot">${foot}</div>` : ''}
     </div>`;
   }).join('');
   const intro = `<div class="sr-summary">${matches.length} matching ${daysWord}${peopleWord}</div>`;

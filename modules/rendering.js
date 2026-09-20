@@ -19,7 +19,7 @@ const MRINAL_DUTY = {
   picuDay: { label: 'PICU Day',   cls: 'd-picuday', tint: 'mrd-picuday' },
 };
 
-function mrinalDutyAt(idx) {
+export function mrinalDutyAt(idx) {
   const roster = getRoster();
   if (!roster || idx < 0 || idx >= roster.length) return null;
   const prevDay = idx === 0 ? (window.__prevDayData && window.__prevDayData.day) : null;
@@ -291,7 +291,6 @@ export function openScrollDay(idx) {
   const area = document.getElementById('daily-render-area');
   const mini = area.querySelector(`.upcoming-card[data-index="${idx}"]`);
   const main = document.getElementById('dailyCardElement');
-  if (mini && mini.scrollIntoView) mini.scrollIntoView({ block: 'center', behavior: 'auto' });
 
   /* Aim the collapse/expand at the tapped mini card so the big card appears to
      grow out of the small row (and shrink back into it on the way out). */
@@ -315,9 +314,11 @@ export function openScrollDay(idx) {
      collapse has visually started so the whole morph feels instant. */
   setTimeout(() => {
     currentIndex = idx;
-    renderScrollView(undefined, 'center');
+    /* Expand in place — never scroll. The big card grows out of the tapped mini
+       row at exactly the spot where the user tapped. */
+    renderScrollView();
     mountOrigin = null;
-  }, 110);
+  }, 120);
 }
 
 export function renderScrollView(dir, align) {
