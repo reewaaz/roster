@@ -8,12 +8,13 @@ import {
 } from './storage.js';
 import {
   listStoreRosters, fetchStoreRoster, loadRosterFromStore, uploadCurrentRoster,
-  deleteStoreRoster, coversDate,
+  deleteStoreRoster, coversDate, checkAndCacheRosters, getLocalRosterCache,
+  loadRosterCachedOrStore, removeLocalRoster,
 } from './rosters.js';
-import { renderSwapModal, clearSwaps, swapCount, getSwaps } from './swaps.js';
+import { renderSwapModal, clearSwaps, swapCount, getSwaps, setSwaps, applySwapsToDays } from './swaps.js';
 import { openAlertModal, saveAlertSettings, sendTestNotification, scheduleDutyAlerts } from './alerts.js';
 import { printRoster, PRINT_STYLES } from './print.js';
-import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, getRealTodayIndex, notesDB, closeNoteModal as closeNoteModalFromRendering, mrinalDutyAt } from './rendering.js';
+import { renderScrollView, renderMonthView, setRealTodayIndex, setCurrentIndex, getRealTodayIndex, notesDB, closeNoteModal as closeNoteModalFromRendering, mrinalDutyAt, replaceNotes } from './rendering.js';
 
 export function openSettingsModal() {
   triggerHaptic(20);
@@ -140,6 +141,24 @@ function buildSettingsContent() {
         </div>
         <span style="color:var(--text-muted);">›</span>
       </div>
+
+      <div class="settings-item" data-action="sync-rosters">
+        <div class="settings-item-icon">🔄</div>
+        <div style="flex:1;">
+          <div class="settings-item-label">Check for New Rosters</div>
+          <div class="settings-item-sub">Scan GitHub /rosters/ and download new &amp; updated months for offline use</div>
+        </div>
+        <span style="color:var(--text-muted);">›</span>
+      </div>
+
+      <div class="settings-item" data-action="backup">
+        <div class="settings-item-icon">💾</div>
+        <div style="flex:1;">
+          <div class="settings-item-label">Backup / Restore</div>
+          <div class="settings-item-sub">Export or import the roster, notes &amp; swaps as one JSON file</div>
+        </div>
+        <span style="color:var(--text-muted);">›</span>
+      </div>
     </div>
   `;
 
@@ -154,6 +173,8 @@ function buildSettingsContent() {
       else if (action === 'swap-clear') { clearSwaps(); showToast('All swaps reverted'); dispatchEvent(new CustomEvent('roster-changed')); }
       else if (action === 'alerts') openAlertModal();
       else if (action === 'cloud') openCloudModal();
+      else if (action === 'sync-rosters') openRosterSyncModal();
+      else if (action === 'backup') openBackupModal();
     });
   });
 
@@ -334,6 +355,201 @@ async function renderRosterStoreList(body) {
 
 export function closeCloudModal() {
   document.getElementById('cloud-modal').classList.remove('show');
+}
+
+/* ---- ROSTER SYNC MODAL (check + download new rosters locally) ---- */
+export function openRosterSyncModal() {
+  triggerHaptic(20);
+  const modal = document.getElementById('roster-sync-modal');
+  if (!modal) return;
+  const body = document.getElementById('roster-sync-body');
+  body.innerHTML = `
+    <div class="setting-sub">Scans <b>reewaaz/roster → /rosters</b> on GitHub and saves every month file on this device — new months stay readable offline and the calendar ⇄ arrows keep working without a connection.</div>
+    <div class="modal-actions">
+      <button class="modal-btn btn-save" id="roster-sync-run">🔍 Check &amp; Download</button>
+    </div>
+    <div class="github-status" id="roster-sync-status"></div>
+    <div class="setting-sub" style="margin:12px 0 6px;font-weight:600;color:var(--text);">Saved on this device</div>
+    <div class="swap-days-list" id="roster-sync-list" style="max-height:240px;overflow:auto;">${renderLocalCacheList()}</div>
+  `;
+  body.querySelector('#roster-sync-run').addEventListener('click', runRosterSync);
+  bindLocalCacheButtons();
+  modal.classList.add('show');
+}
+
+export function closeRosterSyncModal() {
+  const m = document.getElementById('roster-sync-modal');
+  if (m) m.classList.remove('show');
+}
+
+function renderLocalCacheList() {
+  const cache = getLocalRosterCache();
+  const names = Object.keys(cache.files).sort();
+  if (!names.length) return '<div class="swap-preview empty">Nothing saved locally yet — tap “Check &amp; Download” to fetch the months from GitHub.</div>';
+  return names.map((name) => {
+    const c = cache.files[name] || {};
+    const loaded = getMeta().month === c.month ? ' <span class="store-badge loaded">Loaded</span>' : '';
+    const when = c.fetchedAt ? new Date(c.fetchedAt).toLocaleDateString() : '—';
+    return `<div class="store-file-row" data-name="${escapeHtml(name)}">
+      <div style="flex:1;min-width:0;">
+        <div class="sr-head"><span class="sr-date">💾 ${escapeHtml(name)}</span>${loaded}</div>
+        <div class="sr-foot">${escapeHtml(c.month || '?')} · saved ${escapeHtml(when)}</div>
+      </div>
+      <div class="store-row-actions">
+        <button class="modal-btn store-load-btn" data-action="load-local">Load</button>
+        <button class="modal-btn btn-cancel store-del-btn" data-action="del-local" title="Remove local copy">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function runRosterSync() {
+  const btn = document.getElementById('roster-sync-run');
+  const status = document.getElementById('roster-sync-status');
+  if (!btn || !status) return;
+  btn.disabled = true;
+  status.className = 'github-status';
+  status.textContent = 'Scanning GitHub for rosters…';
+  try {
+    const s = await checkAndCacheRosters();
+    const parts = [];
+    if (s.newFiles.length) parts.push(`${s.newFiles.length} new (${s.newFiles.join(', ')})`);
+    if (s.updated.length) parts.push(`${s.updated.length} updated`);
+    if (s.invalid.length) parts.push(`⚠ ${s.invalid.length} invalid (${s.invalid.join(', ')})`);
+    if (s.adopted) parts.push(`loaded ${s.adopted}`);
+    const msg = parts.length ? parts.join(' · ') : 'nothing new on GitHub';
+    status.className = 'github-status ok';
+    status.textContent = `✓ Checked ${s.total} file${s.total === 1 ? '' : 's'} — ${msg}`;
+    if (s.adopted) showToast(`Updated ${s.adopted} from GitHub`);
+    refreshLocalCacheList();
+  } catch (e) {
+    status.className = 'github-status error';
+    status.textContent = '✗ ' + (e.message || 'Sync failed — are you online?');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function refreshLocalCacheList() {
+  const list = document.getElementById('roster-sync-list');
+  if (!list) return;
+  list.innerHTML = renderLocalCacheList();
+  bindLocalCacheButtons();
+}
+
+function bindLocalCacheButtons() {
+  const list = document.getElementById('roster-sync-list');
+  if (!list) return;
+  list.querySelectorAll('.store-load-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const name = btn.closest('.store-file-row').dataset.name;
+    const status = document.getElementById('roster-sync-status');
+    status.className = 'github-status';
+    status.textContent = `Loading ${name}…`;
+    try {
+      const { meta } = await loadRosterCachedOrStore(name);
+      if (window.__recomputeAndRender) window.__recomputeAndRender();
+      status.className = 'github-status ok';
+      status.textContent = `✓ Loaded ${meta.month} (local copy)`;
+      showToast(`Loaded ${meta.month}`);
+      refreshLocalCacheList();
+    } catch (e) {
+      status.className = 'github-status error';
+      status.textContent = '✗ ' + (e.message || 'Load failed');
+    }
+  }));
+  list.querySelectorAll('.store-del-btn').forEach((btn) => btn.addEventListener('click', () => {
+    const name = btn.closest('.store-file-row').dataset.name;
+    if (!confirm(`Remove the local copy of ${name}? (the GitHub original stays)`)) return;
+    removeLocalRoster(name);
+    refreshLocalCacheList();
+  }));
+}
+
+/* ---- BACKUP / RESTORE MODAL ---- */
+const BACKUP_APP_TAG = 'mrinal-duty-roster';
+const BACKUP_VERSION = 1;
+
+/* Bundle the whole app state (roster + notes + swaps/duty changes) into one object. */
+export function buildBackup() {
+  return {
+    app: BACKUP_APP_TAG,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    roster: { month: getMeta().month, startDate: getMeta().startDate, days: getRoster() },
+    notes: { ...notesDB },
+    swaps: getSwaps(),
+  };
+}
+
+export function exportBackup() {
+  triggerHaptic(40);
+  const data = buildBackup();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `mrinal-roster-backup-${data.roster.startDate}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 800);
+  showToast('Backup exported ✓');
+}
+
+/* Restore a backup object or JSON string; returns the restored month. */
+export async function restoreBackup(json) {
+  const data = typeof json === 'string' ? JSON.parse(json) : json;
+  if (!data || data.app !== BACKUP_APP_TAG) throw new Error('Not a Mrinal roster backup file');
+  if (!data.roster || !data.roster.month || !data.roster.startDate || !Array.isArray(data.roster.days)) throw new Error('Backup has no roster');
+  const validation = validateRosterData({ month: data.roster.month, startDate: data.roster.startDate, days: data.roster.days });
+  if (validation) throw new Error(`Backup roster invalid: ${validation}`);
+  saveRoster({ month: data.roster.month, startDate: data.roster.startDate }, data.roster.days);
+  setSwaps((data.swaps && typeof data.swaps === 'object') ? data.swaps : {});
+  applySwapsToDays();
+  replaceNotes((data.notes && typeof data.notes === 'object') ? data.notes : {});
+  if (window.__recomputeAndRender) window.__recomputeAndRender();
+  return { month: data.roster.month };
+}
+
+export function openBackupModal() {
+  triggerHaptic(20);
+  const modal = document.getElementById('backup-modal');
+  if (!modal) return;
+  const body = document.getElementById('backup-body');
+  body.innerHTML = `
+    <div class="setting-sub">One JSON file holds the active roster plus every day-note, duty swap &amp; reassign. Export it, and Import restores everything in one step.</div>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button class="modal-btn btn-save" id="backup-export-btn">⬇️ Export backup (.json)</button>
+      <button class="modal-btn" id="backup-import-btn">⬆️ Import backup</button>
+    </div>
+    <input type="file" id="backup-file" accept="application/json,.json" style="display:none;">
+    <div class="github-status" id="backup-status"></div>
+  `;
+  body.querySelector('#backup-export-btn').addEventListener('click', exportBackup);
+  body.querySelector('#backup-import-btn').addEventListener('click', () => body.querySelector('#backup-file').click());
+  body.querySelector('#backup-file').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    const status = body.querySelector('#backup-status');
+    status.className = 'github-status';
+    status.textContent = `Reading ${file.name}…`;
+    try {
+      const { month } = await restoreBackup(await file.text());
+      status.className = 'github-status ok';
+      status.textContent = `✓ Restored ${month} — notes & swaps are back`;
+      showToast('Backup restored ✓');
+      closeAllModals();
+    } catch (err) {
+      status.className = 'github-status error';
+      status.textContent = '✗ ' + (err.message || 'Import failed');
+    }
+  });
+  modal.classList.add('show');
+}
+
+export function closeBackupModal() {
+  const m = document.getElementById('backup-modal');
+  if (m) m.classList.remove('show');
 }
 
 /* ---- SEARCH ---- */
@@ -594,7 +810,7 @@ export function closeAllModals() {
   closeNoteModalFromRendering?.();
   const im = document.getElementById('install-modal');
   if (im && im.classList.contains('show')) im.classList.remove('show');
-  ['note-modal', 'alert-modal', 'roster-modal', 'settings-modal', 'swap-modal', 'cloud-modal', 'search-modal', 'print-modal'].forEach(id => {
+  ['note-modal', 'alert-modal', 'roster-modal', 'settings-modal', 'swap-modal', 'cloud-modal', 'roster-sync-modal', 'backup-modal', 'search-modal', 'print-modal'].forEach(id => {
     const m = document.getElementById(id);
     if (m) m.classList.remove('show');
   });

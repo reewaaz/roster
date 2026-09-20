@@ -4,7 +4,7 @@ import {
   findHandoverName, getOffDutyPeople, dayRole, WEEKDAYS,
 } from './roster.js';
 import { getSwaps } from './swaps.js';
-import { listStoreRosters, parseMonthYear, loadRosterFromStore, coversDate } from './rosters.js';
+import { listStoreRosters, parseMonthYear, loadRosterCachedOrStore, coversDate, getLocalRosterCache } from './rosters.js';
 
 /* Dr. Mrinal's day chip — same colour language as the print references. */
 const MRINAL_DUTY = {
@@ -60,6 +60,13 @@ export function setCurrentIndex(v) { currentIndex = v; }
 
 function saveNotes() {
   localStorage.setItem('mrinalDutyNotes', JSON.stringify(notesDB));
+}
+
+/* Replace every note wholesale (Backup/Restore import). */
+export function replaceNotes(notes) {
+  Object.keys(notesDB).forEach((k) => delete notesDB[k]);
+  if (notes && typeof notes === 'object') Object.assign(notesDB, notes);
+  saveNotes();
 }
 
 /* ---- DUTY HOURS ---- */
@@ -412,7 +419,9 @@ async function updateMonthNav() {
   const prevName = neighborFileName(-1);
   const nextName = neighborFileName(1);
   let names = new Set();
-  try { names = new Set((await listStoreRosters()).map((f) => f.name)); } catch (e) { /* offline → leave arrows off */ }
+  try { names = new Set((await listStoreRosters()).map((f) => f.name)); } catch (e) { /* offline → rely on the local cache below */ }
+  /* Locally-cached rosters count too, so the arrows work offline after a sync. */
+  Object.keys(getLocalRosterCache().files).forEach((n) => names.add(n));
   prevBtn.disabled = !prevName || !names.has(prevName);
   nextBtn.disabled = !nextName || !names.has(nextName);
 }
@@ -423,7 +432,7 @@ export async function switchMonth(dir) {
   const name = neighborFileName(dir);
   if (!name) { showToast('Could not identify this month'); return { ok: false, reason: 'unparseable' }; }
   try {
-    const result = await loadRosterFromStore(name);
+    const result = await loadRosterCachedOrStore(name);
     /* Land on a sensible day: today if the month covers it, otherwise the last day
        of a past month or the first day of a future one (recomputeToday clamps). */
     realTodayIndex = recomputeToday();

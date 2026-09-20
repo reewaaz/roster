@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   NEPALI_MONTHS, parseMonthYear, rosterFileName, isRosterFileName, rangeOf, coversDate,
+  getLocalRosterCache, cacheRosterLocally, removeLocalRoster,
+  findPreviousMonthRoster, loadRosterCachedOrStore,
 } from '../modules/rosters.js';
 
 /* Mock localStorage (rosters.js reads it only inside getStoreConfig, not at import). */
@@ -96,5 +98,46 @@ describe('rangeOf / coversDate', () => {
     expect(coversDate(data, new Date(2026, 9, 17))).toBe(true);  // Oct 17 (31st day)
     expect(coversDate(data, new Date(2026, 8, 16))).toBe(false); // day before
     expect(coversDate(data, new Date(2026, 9, 18))).toBe(false); // day after
+  });
+});
+
+/* Build minimal (already-validated) day lists for cache tests. */
+function days(n) {
+  return Array.from({ length: n }, (_, i) => ({ date: `06-${String(i + 1).padStart(2, '0')}` }));
+}
+
+describe('local roster cache', () => {
+  it('starts empty', () => {
+    expect(getLocalRosterCache()).toEqual({ files: {} });
+  });
+
+  it('stores + reads + removes a validated roster copy', () => {
+    const data = { month: 'Kartik 2083', startDate: '2026-10-18', days: days(30) };
+    expect(cacheRosterLocally(data)).toBe('208307.json');
+    const cache = getLocalRosterCache();
+    expect(cache.files['208307.json'].month).toBe('Kartik 2083');
+    expect(cache.files['208307.json'].startDate).toBe('2026-10-18');
+    expect(cache.files['208307.json'].days).toHaveLength(30);
+    expect(removeLocalRoster('208307.json')).toBe(true);
+    expect(getLocalRosterCache().files['208307.json']).toBeUndefined();
+    expect(removeLocalRoster('missing.json')).toBe(false);
+  });
+
+  it('findPreviousMonthRoster resolves from the local cache offline', async () => {
+    cacheRosterLocally({ month: 'Shrawan 2083', startDate: '2026-08-17', days: days(31) }); // ends 2026-09-16
+    const prev = await findPreviousMonthRoster({ month: 'Ashwin 2083', startDate: '2026-09-17' });
+    expect(prev).not.toBeNull();
+    expect(prev.name).toBe('208304.json');
+    expect(prev.data.month).toBe('Shrawan 2083');
+    expect(prev.data.days).toHaveLength(31);
+  });
+
+  it('loadRosterCachedOrStore returns the cached copy without network', async () => {
+    cacheRosterLocally({ month: 'Kartik 2083', startDate: '2026-10-18', days: days(30) });
+    const r = await loadRosterCachedOrStore('208307.json');
+    expect(r.cached).toBe(true);
+    expect(r.meta.month).toBe('Kartik 2083');
+    expect(r.days).toHaveLength(30);
+    expect(JSON.parse(localStorage.getItem('mrinalRosterData')).meta.month).toBe('Kartik 2083');
   });
 });

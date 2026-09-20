@@ -48,6 +48,23 @@ export function clearSwaps() {
   saveSwaps();
 }
 
+/* Replace the whole swap map wholesale (Backup/Restore import). */
+export function setSwaps(next) {
+  swaps = (next && typeof next === 'object' && !Array.isArray(next)) ? next : {};
+  saveSwaps();
+}
+
+/* Re-apply the swap map onto the roster day fields so the current view matches
+   the restored swaps (an empty `now` means the person was moved onto 🧹 Leave). */
+export function applySwapsToDays() {
+  const roster = getRoster();
+  Object.entries(swaps).forEach(([dateKey, s]) => {
+    if (!s || typeof s.field !== 'string') return;
+    const day = roster.find((d) => d.date === dateKey);
+    if (day && day[s.field] !== undefined) day[s.field] = s.now == null ? s.original : s.now;
+  });
+}
+
 /* A swap with an empty `now` means the person was dragged onto 🧹 Leave. */
 function nowLabel(now) {
   return String(now || '').trim() ? now : 'Leave';

@@ -162,6 +162,28 @@
       </div>
     </div>
 
+    <!-- ROSTER SYNC MODAL (check + download rosters locally) -->
+    <div class="modal-overlay" id="roster-sync-modal">
+      <div class="modal-card alert-card">
+        <div class="modal-header">
+          <span>🔄 Check for New Rosters</span>
+          <span class="modal-close-x" onclick="closeRosterSyncModal()">✕</span>
+        </div>
+        <div id="roster-sync-body"></div>
+      </div>
+    </div>
+
+    <!-- BACKUP / RESTORE MODAL -->
+    <div class="modal-overlay" id="backup-modal">
+      <div class="modal-card alert-card">
+        <div class="modal-header">
+          <span>💾 Backup / Restore</span>
+          <span class="modal-close-x" onclick="closeBackupModal()">✕</span>
+        </div>
+        <div id="backup-body"></div>
+      </div>
+    </div>
+
     <!-- SEARCH MODAL -->
     <div class="modal-overlay" id="search-modal">
       <div class="modal-card alert-card">

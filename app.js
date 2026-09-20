@@ -6,7 +6,7 @@ import {
   jumpToDate, goToday, changeDay, switchTab, openScrollDay, saveNote as saveNoteMod, notesDB,
   switchMonth,
 } from './modules/rendering.js';
-import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, clearAppState, openCloudModal, openSearchModal, closeSearchModal, openPrintModal, closePrintModal, closeAllModals as closeAll } from './modules/modals.js';
+import { initTheme, updateThemeIcon, toggleTheme as toggleThemeMod, openSettingsModal, openSwapModal, closeSettingsModal, closeSwapModal, closeCloudModal, openRosterModal, closeRosterModal, copyRosterTemplate, validateAndSaveRoster, resetRoster, clearAppState, openCloudModal, openSearchModal, closeSearchModal, openPrintModal, closePrintModal, openRosterSyncModal, closeRosterSyncModal, openBackupModal, closeBackupModal, buildBackup, restoreBackup, closeAllModals as closeAll } from './modules/modals.js';
 import { initDutyAlerts, openAlertModal, closeAlertModal, saveAlertSettings, sendTestNotification } from './modules/alerts.js';
 import { printRoster, setNotesDB } from './modules/print.js';
 import { autoSelectRoster } from './modules/rosters.js';
@@ -44,6 +44,12 @@ window.openCloudModal = openCloudModal;
 window.openSettingsModal = openSettingsModal;
 window.openSearchModal = openSearchModal;
 window.closeSearchModal = closeSearchModal;
+window.openRosterSyncModal = openRosterSyncModal;
+window.closeRosterSyncModal = closeRosterSyncModal;
+window.openBackupModal = openBackupModal;
+window.closeBackupModal = closeBackupModal;
+window.__buildBackup = buildBackup;
+window.__restoreBackup = restoreBackup;
 
 window.__jumpToIndex = (i) => jumpToDate(i);
 

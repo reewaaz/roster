@@ -211,17 +211,26 @@ export async function findCurrentMonthRoster(date = new Date()) {
   return null;
 }
 
-/* Previous month roster: largest range ending before `meta`'s start (for day-1 handover). */
+/* Previous month roster: largest range ending before `meta`'s start (for day-1 handover).
+   Locally-cached copies are consulted first so the handover works fully offline. */
 export async function findPreviousMonthRoster(meta) {
-  const files = await listStoreRosters();
-  if (!files.length) return null;
   const targetStart = new Date(meta.startDate + 'T00:00:00').getTime();
   let best = null;
+  const consider = (data, name) => {
+    const r = rangeOf(data);
+    if (r.end < targetStart && (!best || r.end > best.range.end)) best = { name, data, range: r };
+  };
+  for (const [name, c] of Object.entries(getLocalRosterCache().files)) {
+    if (c && typeof c.month === 'string' && Array.isArray(c.days) && c.days.length) {
+      consider({ month: c.month, startDate: c.startDate, days: c.days }, name);
+    }
+  }
+  if (best) return { name: best.name, data: best.data };
+  const files = await listStoreRosters();
+  if (!files.length) return null;
   for (const f of files) {
     const data = await fetchStoreRosterSafe(f.name);
-    if (!data) continue;
-    const r = rangeOf(data);
-    if (r.end < targetStart && (!best || r.end > best.range.end)) best = { name: f.name, data, range: r };
+    if (data) consider(data, f.name);
   }
   return best ? { name: best.name, data: best.data } : null;
 }
@@ -327,6 +336,113 @@ export async function loadRosterFromStore(fileName) {
   return { meta, days: data.days, loaded: true, wasCurrent };
 }
 
+/* ---- LOCAL ROSTER CACHE (offline copies) ---- */
+
+const LOCAL_CACHE_KEY = 'mrinalRosterCache';
+
+/* { files: { "208306.json": { month, startDate, days, fetchedAt, sha } } } */
+export function getLocalRosterCache() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || 'null');
+    if (raw && typeof raw === 'object' && raw.files && typeof raw.files === 'object') return raw;
+    return { files: {} };
+  } catch (e) {
+    return { files: {} };
+  }
+}
+
+function saveLocalRosterCache(cache) {
+  try { localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(cache)); }
+  catch (e) { /* quota errors are non-fatal */ }
+}
+
+/* Refresh the locally-cached copy of one roster (data must already be validated). */
+export function cacheRosterLocally(data) {
+  const cache = getLocalRosterCache();
+  const name = rosterFileName({ month: data.month }) || data.startDate;
+  const prev = cache.files[name];
+  cache.files[name] = {
+    month: data.month,
+    startDate: data.startDate,
+    days: data.days,
+    fetchedAt: Date.now(),
+    sha: prev && prev.sha,
+  };
+  saveLocalRosterCache(cache);
+  return name;
+}
+
+export function removeLocalRoster(name) {
+  const cache = getLocalRosterCache();
+  if (cache.files[name]) {
+    delete cache.files[name];
+    saveLocalRosterCache(cache);
+    return true;
+  }
+  return false;
+}
+
+/* "Check for new rosters": scan the GitHub /rosters/ folder, download every month
+   file, validate it and keep a copy on this device. Newly downloaded rosters stay
+   readable offline and keep the calendar ⇄ arrows working without a connection.
+   When the roster covering today changed on GitHub it is adopted immediately. */
+export async function checkAndCacheRosters({ adoptCurrent = true } = {}) {
+  const files = await listStoreRosters(true); /* force a fresh listing */
+  const cache = getLocalRosterCache();
+  const before = cache.files;
+  const s = { total: 0, fetched: [], newFiles: [], updated: [], invalid: [], unchanged: [] };
+  const now = Date.now();
+  for (const f of files) {
+    s.total += 1;
+    let data;
+    try {
+      data = await fetchStoreRoster(f.name); /* validates or throws */
+    } catch (e) {
+      s.invalid.push(f.name);
+      continue;
+    }
+    const prev = before[f.name];
+    const changed = !prev || prev.month !== data.month
+      || JSON.stringify(prev.days) !== JSON.stringify(data.days);
+    cache.files[f.name] = {
+      month: data.month,
+      startDate: data.startDate,
+      days: data.days,
+      fetchedAt: now,
+      sha: f.sha || (prev && prev.sha),
+    };
+    s.fetched.push(f.name);
+    if (!prev) s.newFiles.push(f.name);
+    else if (changed) s.updated.push(f.name);
+    else s.unchanged.push(f.name);
+  }
+  saveLocalRosterCache(cache);
+  /* If the file for the month we're showing just changed on GitHub, adopt it. */
+  if (adoptCurrent) {
+    const currentName = rosterFileName(getMeta());
+    if (currentName && s.updated.includes(currentName)) {
+      await loadRosterFromStore(currentName);
+      if (window.__recomputeAndRender) window.__recomputeAndRender();
+      s.adopted = currentName;
+    }
+  }
+  return s;
+}
+
+/* Load a roster by file name for the calendar arrows: the locally-cached copy
+   wins when present (works offline), otherwise fetch the GitHub file. */
+export async function loadRosterCachedOrStore(fileName) {
+  const c = getLocalRosterCache().files[fileName];
+  if (c && typeof c.month === 'string' && Array.isArray(c.days) && c.days.length) {
+    const meta = { month: c.month, startDate: c.startDate };
+    const wasCurrent = getMeta().month === meta.month;
+    saveRoster(meta, c.days);
+    await attachPreviousMonthData(meta);
+    return { meta, days: c.days, loaded: true, wasCurrent, cached: true };
+  }
+  return loadRosterFromStore(fileName);
+}
+
 /* Boot-time auto-select: the /rosters/ GitHub file for the current month is the
    authoritative source, so whenever a stored roster covers today and differs from
    the cached local roster, load the stored one. Swaps/notes are stored separately
@@ -339,8 +455,24 @@ export async function autoSelectRoster() {
     let storeCurrent = null;
     try { storeCurrent = await findCurrentMonthRoster(); } catch (e) { /* store unreachable */ }
 
-    /* Can't reach the store or nothing stored → keep what we have. */
-    if (!storeCurrent) return { loaded: false, reason: 'no-store' };
+    /* Can't reach the store: fall back to the locally-cached copy when one covers today
+       (offline mode between syncs). Otherwise keep whatever is already loaded. */
+    if (!storeCurrent) {
+      const currentName = rosterFileName(local);
+      const c = currentName && getLocalRosterCache().files[currentName];
+      if (c && coversDate({ startDate: c.startDate, days: c.days })) {
+        const cachedHash = JSON.stringify({ meta: { month: c.month, startDate: c.startDate }, days: c.days });
+        const localHash = JSON.stringify({ meta: { month: local.month, startDate: local.startDate }, days: getRoster() });
+        if (cachedHash !== localHash) {
+          const meta = { month: c.month, startDate: c.startDate };
+          saveRoster(meta, c.days);
+          await attachPreviousMonthData(meta);
+          if (window.__recomputeAndRender) window.__recomputeAndRender();
+          return { loaded: true, name: currentName, meta, days: c.days, cached: true };
+        }
+      }
+      return { loaded: false, reason: 'no-store' };
+    }
 
     /* The month's file is authoritative: adopt it whenever it differs from the
        cached local copy (a user-generated same-month roster no longer wins). */
@@ -379,5 +511,9 @@ if (typeof window !== 'undefined') {
     current: () => findCurrentMonthRoster(),
     autoSelect: () => autoSelectRoster(),
     clearCaches: () => { contentCache.clear(); listCache = { at: 0, items: [] }; },
+    localCache: () => getLocalRosterCache(),
+    checkAndCache: () => checkAndCacheRosters(),
+    cacheLocal: (data) => cacheRosterLocally(data),
+    removeLocal: (name) => removeLocalRoster(name),
   };
 }
