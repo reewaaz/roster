@@ -32,6 +32,6 @@
     {"date": "06-28", "day": "Wed", "title": "", "ward": "Nischal", "nicu": "Kshitiz", "picu": "Devaki", "er": "Aayoush", "second": "Dilip", "opd": "Prerana, Sinda, Shikha, Mrinal, Subas", "nagarHospital": "Pritha"},
     {"date": "06-29", "day": "Thu", "title": "", "ward": "Salina", "nicu": "Subas", "picu": "Prerana", "er": "Srijana", "second": "Pusp Raj", "opd": "Pritha, Samichhya, Saurav Singh, Sinda, Aayoush", "nagarHospital": ""},
     {"date": "06-30", "day": "Fri", "title": "", "ward": "Deepmala", "nicu": "Shikha", "picu": "Mrinal", "er": "Pritha", "second": "Saurav Singh", "opd": "Kabita, Kshitiz, Devaki, Srijana, Nischal", "nagarHospital": ""},
-    {"date": "06-31", "day": "Sat", "title": "Saturday OFF / Maha-Saptami", "ward": "Pritha", "nicu": "Madan", "picu": "Kabita", "er": "", "second": "Saurav Stha", "opd": "", "nagarHospital": ""}
+    {"date": "06-31", "day": "Sat", "title": "Maha-Saptami", "ward": "Pritha", "nicu": "Madan", "picu": "Kabita", "er": "", "second": "Saurav Stha", "opd": "", "nagarHospital": ""}
   ]
 }
